@@ -1,9 +1,10 @@
 #!/bin/bash
 
-cd $(pwd)
-docker build -t=test .
+# Stop payara
+docker stop payara
 
-docker create -ti --name dummy test bash
-docker cp dummy:/tmp/target ./
-docker rm -f dummy
+# Build with maven
+docker run --rm -it --name mavenbuild -v maven-repo:/root/.m2 -v $(pwd):/usr/src/mymaven -w /usr/src/mymaven maven mvn clean install
 
+# Start Payara
+docker run --rm --name payara -p 8080:8080 -p 4848:4848 -v $(pwd)/target:/opt/payara/deployments -d payara/server-full
