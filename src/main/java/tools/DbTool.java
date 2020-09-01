@@ -26,7 +26,7 @@ public final class DbTool {
 
     private static Map<String, String> getProperties() {
         Map<String, String> result = new HashMap<>();
-        try (InputStream input = new FileInputStream("/home/eirik/Documents/github/is20X/src/config.properties")) {
+        try (InputStream input = new FileInputStream("/opt/payara/config.properties")) {
             Properties prop = new Properties();
             prop.load(input);
             result.put("username", prop.getProperty("username"));
@@ -56,7 +56,8 @@ public final class DbTool {
         Connection toReturn = null;
         Map<String, String> result = getProperties();
             if (result.isEmpty()) {
-                result.put("URL", "jdbc:mariadb://172.17.0.1:3306");
+                /** Fallback if file is not found: **/
+                result.put("URL", "jdbc:mariadb://localhost:3306");
                 result.put("username", "trym");
                 result.put("password", "Passord123");
             }
