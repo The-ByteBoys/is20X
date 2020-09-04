@@ -13,6 +13,10 @@ public class UserModel {
         this.password = password;
     }
 
+    public UserModel(){
+
+    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -46,4 +50,10 @@ public class UserModel {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    @Override
+    public String toString(){
+        return "{\n  \"firstname\": \""+this.firstName+"\",\n  \"lastname\": \""+this.lastName+"\",\n  \"username\": \""+this.userName+"\"\n}";
+    }
+
 }

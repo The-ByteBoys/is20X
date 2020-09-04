@@ -23,15 +23,18 @@ public abstract class AbstractAppServlet extends HttpServlet {
     protected abstract void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException;
 
-    protected void writeResponse(HttpServletRequest request,
-        HttpServletResponse response,
-        String title)
-        throws IOException {
+    protected void writeResponse(HttpServletRequest request, HttpServletResponse response, String title) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             out.format(HTML_PAGE_START, title);
             writeBody(request, out);
             out.format(HTML_PAGE_END);
+        }
+    }
+    protected void writeResponseJson(HttpServletRequest request, HttpServletResponse response, String title) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            writeBody(request, out);
         }
     }
 
