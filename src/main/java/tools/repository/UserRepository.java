@@ -15,7 +15,7 @@ public class UserRepository {
         Connection db = null;
         PreparedStatement insertNewUser = null;
         try {
-            db = DbTool.getINSTANCE().dbLoggIn(p);
+            db = DbTool.getINSTANCE().dbLoggIn();
             String query = "INSERT INTO `user` (User_firstName, User_lastName,User_Email, User_password ) values (?,?,?,?)";
 
             insertNewUser = db.prepareStatement(query);
@@ -43,7 +43,7 @@ public class UserRepository {
 
         String toReturn = null;
         try {
-            db = DbTool.getINSTANCE().dbLoggIn(p);
+            db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
             String query = "SELECT * FROM otra.user where User_Email = ?";
             prepareStatement =  db.prepareStatement(query);
@@ -67,7 +67,7 @@ public class UserRepository {
 
         UserModel toReturn = new UserModel();
         try {
-            db = DbTool.getINSTANCE().dbLoggIn(p);
+            db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
             String query = "SELECT * FROM roro.users WHERE email = ?";
             prepareStatement = db.prepareStatement(query);

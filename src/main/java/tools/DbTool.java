@@ -52,15 +52,10 @@ public final class DbTool {
      * @return connection to db
      * @throws SQLException if the connection fails
      */
-    public Connection dbLoggIn(PrintWriter out) throws SQLException {
+    public Connection dbLoggIn() throws SQLException {
         Connection toReturn = null;
         Map<String, String> result = getProperties();
-            if (result.isEmpty()) {
-                /** Fallback if file is not found: **/
-                result.put("URL", "jdbc:mariadb://localhost:3306");
-                result.put("username", "trym");
-                result.put("password", "Passord123");
-            }
+
         try {
             toReturn = (connection != null)
                 ? connection
@@ -71,7 +66,8 @@ public final class DbTool {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            out.println("SQL Exception " + e);
+            throw e;
+            // out.println("SQL Exception " + e);
         }
         return toReturn;
     }

@@ -14,14 +14,14 @@ import tools.DbTool;
 
 public class Athletes {
 
-    public static List<AthleteModel> getAthletes(PrintWriter p) {
+    public static List<AthleteModel> getAthletes() throws SQLException {
         Connection db = null;
         PreparedStatement prepareStatement = null;
 
-        List<AthleteModel> toReturn = new ArrayList();
+        List<AthleteModel> toReturn = new ArrayList<>();
 
         try {
-            db = DbTool.getINSTANCE().dbLoggIn(p);
+            db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
             String query = "SELECT * FROM roro.athletes";
             prepareStatement =  db.prepareStatement(query);
@@ -35,18 +35,19 @@ public class Athletes {
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+            throw throwables;
         }
 
         return toReturn;
     }
 
-    public static UserModel getUser(String username, PrintWriter p){
+    public static UserModel getUser(String username){
         Connection db = null;
         PreparedStatement prepareStatement = null;
 
         UserModel toReturn = new UserModel();
         try {
-            db = DbTool.getINSTANCE().dbLoggIn(p);
+            db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
             String query = "SELECT * FROM roro.users WHERE email = ?";
             prepareStatement = db.prepareStatement(query);

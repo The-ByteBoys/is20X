@@ -2,6 +2,7 @@ package servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,9 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import models.AthleteModel;
-import models.UserModel;
+// import models.UserModel;
 import tools.repository.Athletes;
-import tools.repository.UserRepository;
+// import tools.repository.UserRepository;
 
 @WebServlet(name= "Api", urlPatterns = {"/api/*"})
 public class Api extends AbstractAppServlet {
@@ -25,36 +26,52 @@ public class Api extends AbstractAppServlet {
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
-        // out.print(  );
         
-        Boolean oneIsPrinted = false;
+        String baseURI = "/roingwebapp/api";
 
-        /** %C3%B8 = Ø */
-        if( req.getRequestURI().substring( ("/roingwebapp/api").length() ).equals("/ut%C3%B8vere") ){
+        // out.print(req.getRequestURI().substring(baseURI.length()));
+        
+        /** %C3%B8 = ø */
+        if( req.getRequestURI().substring(baseURI.length()).matches("/ut(.*)ver($|/)(.*)") ){ // True for "api/utover/" and "api/ut%C3%B8ver/" but not "api/utovere/" etc.
             out.print("{ \"data\": [");
-            List<AthleteModel> atheles = Athletes.getAthletes(out);
-            for( AthleteModel a : atheles ){
-            // while(atheles.hasNext()){
-                if(oneIsPrinted){
-                    out.print(",");
-                }
-                out.print( a.toString() );
 
-                oneIsPrinted = true;
+            String[] uriparts = req.getRequestURI().split("/");
+            String lastPart = uriparts[ uriparts.length-1 ];
+
+            out.print( "\""+lastPart+"\"" );
+            // List<AthleteModel> atheles = Athletes.getAthletes(out);
+            // for( AthleteModel a : atheles ){
+            // while(atheles.'hasNext()){
+                // if(oneIsPrinted){
+                    // out.print(",");
+                // }
+                // out.print( a.toString() );
+
+                // oneIsPrinted = true;
                 // out.print( "}" );
-            }
+            // }
             out.print("]}");
+        } else if( req.getRequestURI().substring( baseURI.length() ).matches("/ut(?:%C3%B8|o)vere($|/)") ){
+
+            try {
+                List<AthleteModel> atheles = Athletes.getAthletes();
+                ArrayList<String> output = new ArrayList<>();
+                
+                for( AthleteModel a : atheles ){
+                    output.add( "\n"+a.toString() );
+                }
+
+                out.print("{ \"data\": [" + String.join(",", output) + "]}");
+            }
+            catch( SQLException e ){
+                out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"SQL Exception: "+e.toString().replace("\"", "\\\"")+"\" } }" );
+            }
+
+        } else if( req.getRequestURI().matches(baseURI+"($|/)") ){
+            out.print( "{ \"data\": { \"links\": [{ \"rel\": \"list\", \"uri\": \""+req.getRequestURL()+"/ut%C3%B8vere/\" }] } }" );
         } else {
-            out.print( "{ \"data\": { \"links\": [{ \"rel\": \"list\", \"uri\": \"api/utøvere/\" }] } }" );
+            out.print( "{ \"status\": { \"error\": \"Failed\" } }" );
         }
-
-        // String username = req.getParameter("uname");
-        // String username = "admin@roro";
-        // String nameFromDb = UserRepository.getUserName(username,out);
-
-        // UserModel user = UserRepository.getUser(username, out);
-
-        // out.print( user.toString() );
     }
 
     /**
@@ -88,9 +105,9 @@ public class Api extends AbstractAppServlet {
     /**
      * Returns a short description of the servlet.
      *
-    //  */
+     */
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 }
