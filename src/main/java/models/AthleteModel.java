@@ -1,10 +1,10 @@
 package models;
 
-public class AthleteModel {
-    private Integer id;
-    private String name;
-    private Integer birth;
-    private Integer club;
+public class AthleteModel extends AbstractModel {
+    protected Integer id;
+    protected String name;
+    protected Integer birth;
+    protected Integer club;
 
     public AthleteModel(Integer id, String name, Integer birth, Integer club) {
         this.id = id;
@@ -36,10 +36,4 @@ public class AthleteModel {
     public void setBirth(int birth) {
         this.birth = birth;
     }
-
-    @Override
-    public String toString(){
-        return "{\n  \"id\": \""+this.id+"\",\n  \"name\": \""+this.name+"\",\n  \"birth\": \""+this.birth+"\",\n  \"club\": \""+this.club+"\"\n}";
-    }
-
 }
