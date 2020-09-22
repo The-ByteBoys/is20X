@@ -9,12 +9,17 @@ import org.apache.poi.ss.usermodel.Row;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Iterator;
+import java.util.Scanner;
 
 
 public class ReadExcel {
     public static void main(String[] args) {
         try {
-            FileInputStream file = new FileInputStream(new File("Resultater_uke_11_20 samlet.xlsx"));
+            Scanner s = new Scanner(System.in);
+
+            System.out.println("Give me the absolute path to an Excel sheet");
+            String path = s.nextLine();
+            FileInputStream file = new FileInputStream(new File(path));
 
             //Create workbook instance holding reference to .xlsx file
             XSSFWorkbook workbook = new XSSFWorkbook(file);
@@ -23,10 +28,7 @@ public class ReadExcel {
             XSSFSheet sheet = workbook.getSheetAt(1);
 
             //Iterate through each rows one by one
-            Iterator<Row> rowIterator = sheet.iterator();
-            while (rowIterator.hasNext()) {
-
-                Row row = rowIterator.next();
+            for (Row row : sheet) {
                 //For each row, iterate through all the columns
                 Iterator<Cell> cellIterator = row.cellIterator();
 
