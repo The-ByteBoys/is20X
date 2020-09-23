@@ -4,9 +4,9 @@ public class AthleteModel extends AbstractModel {
     protected Integer id;
     protected String name;
     protected Integer birth;
-    protected Integer club;
+    protected String club;
 
-    public AthleteModel(Integer id, String name, Integer birth, Integer club) {
+    public AthleteModel(Integer id, String name, Integer birth, String club) {
         this.id = id;
         this.name = name;
         this.birth = birth;

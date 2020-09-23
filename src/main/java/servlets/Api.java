@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import models.AthleteModel;
 // import models.UserModel;
 import tools.repository.Athletes;
+import tools.CustomException;
 // import tools.repository.UserRepository;
 
 @WebServlet(name= "Api", urlPatterns = {"/api/*"})
@@ -33,24 +34,28 @@ public class Api extends AbstractAppServlet {
         
         /** %C3%B8 = ø */
         if( req.getRequestURI().substring(baseURI.length()).matches("/ut(.*)ver($|/)(.*)") ){ // True for "api/utover/" and "api/ut%C3%B8ver/" but not "api/utovere/" etc.
-            out.print("{ \"data\": [");
 
             String[] uriparts = req.getRequestURI().split("/");
             String lastPart = uriparts[ uriparts.length-1 ];
 
-            out.print( "\""+lastPart+"\"" );
-            // List<AthleteModel> atheles = Athletes.getAthletes(out);
-            // for( AthleteModel a : atheles ){
-            // while(atheles.'hasNext()){
-                // if(oneIsPrinted){
-                    // out.print(",");
-                // }
-                // out.print( a.toString() );
+            lastPart = lastPart.replace("%20", " ");
 
-                // oneIsPrinted = true;
-                // out.print( "}" );
-            // }
-            out.print("]}");
+            try{
+                AthleteModel athlete = Athletes.getAthlete( lastPart );
+
+                if(athlete != null){
+                    out.print("{ \"data\": [");
+                    out.print( athlete.toString() );
+                    out.print("]}");
+                }
+                else {
+                    out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Athlete not found!\" } }" );
+                }
+            }
+            catch( SQLException e ){
+                out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Exception: "+e.toString().replace("\"", "\\\"")+"\" } }" );
+            }
+            
         } else if( req.getRequestURI().substring( baseURI.length() ).matches("/ut(?:%C3%B8|o)vere($|/)") ){
 
             try {
