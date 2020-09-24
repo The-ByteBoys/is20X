@@ -2,11 +2,25 @@ package models;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import enums.*;
 
 public abstract class AbstractModel {
-    
+
+    protected HashMap<Athlete, Object> field;
+
+    public AbstractModel(){
+        field = new HashMap<>();
+    }
+
+    public Object get(Athlete getField){
+        return this.field.get(getField);
+    }
+
     public String toString(){
         ArrayList<String> returns = new ArrayList<>();
+        /** OLD METHOD * /
         for (Field f : this.getClass().getDeclaredFields()) {
             String val = "";
 
@@ -18,6 +32,10 @@ public abstract class AbstractModel {
             }
 
             returns.add("\""+f.getName()+"\": \""+val+"\"");
+        }
+        */
+        for(Athlete f : this.field.keySet()){
+            returns.add("\""+f.toString().toLowerCase()+"\": \""+this.field.get(f)+"\"");
         }
         return "{\n"+String.join(",", returns)+"\n}";
     }

@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import models.AthleteModel;
 // import models.UserModel;
 import tools.repository.Athletes;
-import tools.CustomException;
+// import tools.CustomException;
 // import tools.repository.UserRepository;
 
 @WebServlet(name= "Api", urlPatterns = {"/api/*"})

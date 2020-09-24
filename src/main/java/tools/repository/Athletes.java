@@ -1,6 +1,6 @@
 package tools.repository;
 
-import java.io.PrintWriter;
+// import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import enums.Athlete;
 import models.AthleteModel;
 // import models.UserModel;
 import tools.DbTool;
@@ -24,12 +25,12 @@ public class Athletes {
         try {
             db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
-            String query = "SELECT a.id, a.name, a.birth, c.name FROM athletes a INNER JOIN clubs c ON a.club = c.id";
+            String query = "SELECT a.athlete_id, a.name, a.birth, c.name FROM athlete a INNER JOIN club c ON a.club = c.club_id";
             prepareStatement =  db.prepareStatement(query);
             rs = prepareStatement.executeQuery();
 
             while (rs.next()) {
-                AthleteModel athlete = new AthleteModel(rs.getInt("a.id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
+                AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
                 toReturn.add(athlete);
             }
             rs.close();
@@ -64,22 +65,43 @@ public class Athletes {
         try {
             db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
-            String query = "SELECT a.id, a.name, a.birth, c.name FROM athletes a INNER JOIN clubs c ON a.club = c.id WHERE "+queryWhere;
+            String query = "SELECT a.athlete_id, a.name, a.birth, c.name FROM athlete a INNER JOIN club c ON a.club = c.club_id WHERE "+queryWhere;
             prepareStatement = db.prepareStatement(query);
             rs = prepareStatement.executeQuery();
             while(rs.next()){
-                athlete = new AthleteModel(rs.getInt("a.id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
+                athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
             }
 
             db.close();
 
-        } catch(SQLException throwables){
-            throwables.printStackTrace();
-            throw throwables;
+        } catch(SQLException e){
+            e.printStackTrace();
+            throw e;
         }
 
         return athlete;
 
+    }
+
+    public static void addAthlete(AthleteModel newAthlete, int clubID) throws SQLException {
+        Connection db = null;
+        PreparedStatement prepareStatement = null;
+
+        try {
+            db = DbTool.getINSTANCE().dbLoggIn();
+            ResultSet rs = null;
+            String query = "INSERT INTO athlete (name, birth, club) VALUES(?,?,?)";
+            prepareStatement = db.prepareStatement(query);
+            prepareStatement.setString(1,newAthlete.get(Athlete.NAME).toString());
+            prepareStatement.setObject(2,newAthlete.get(Athlete.BIRTH));
+            prepareStatement.setInt(3,clubID);
+            rs = prepareStatement.executeQuery();
+            db.close();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            throw e;
+        }
     }
 
 }
