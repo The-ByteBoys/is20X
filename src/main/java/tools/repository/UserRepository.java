@@ -11,55 +11,82 @@ import tools.DbTool;
 
 public class UserRepository {
 
-public static void addUser(UserModel user, PrintWriter p) {
-    Connection db = null;
-    PreparedStatement insertNewUser = null;
-    try {
-        db = DbTool.getINSTANCE().dbLoggIn(p);
-        String query = "INSERT INTO `user` (User_firstName, User_lastName,User_Email, User_password ) values (?,?,?,?)";
-
-        insertNewUser = db.prepareStatement(query);
-        insertNewUser.setString(1,user.getFirstName());
-        insertNewUser.setString(2,user.getLastName());
-        insertNewUser.setString(3,user.getUserName());
-        insertNewUser.setString(4,user.getPassword());
-        insertNewUser.execute();
-
-
-
-    } catch (SQLException throwables) {
-        throwables.printStackTrace();
-    } finally {
+    public static void addUser(UserModel user, PrintWriter p) {
+        Connection db = null;
+        PreparedStatement insertNewUser = null;
         try {
-            db.close();
+            db = DbTool.getINSTANCE().dbLoggIn(p);
+            String query = "INSERT INTO `user` (User_firstName, User_lastName,User_Email, User_password ) values (?,?,?,?)";
+
+            insertNewUser = db.prepareStatement(query);
+            insertNewUser.setString(1,user.getFirstName());
+            insertNewUser.setString(2,user.getLastName());
+            insertNewUser.setString(3,user.getUserName());
+            insertNewUser.setString(4,user.getPassword());
+            insertNewUser.execute();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            try {
+                db.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+
+    }
+
+    public static String getUserName(String username, PrintWriter p) {
+        Connection db = null;
+        PreparedStatement prepareStatement = null;
+
+        String toReturn = null;
+        try {
+            db = DbTool.getINSTANCE().dbLoggIn(p);
+            ResultSet rs = null;
+            String query = "SELECT * FROM otra.user where User_Email = ?";
+            prepareStatement =  db.prepareStatement(query);
+            prepareStatement.setString(1, username);
+            rs = prepareStatement.executeQuery();
+            while (rs.next()) {
+                toReturn = rs.getString("User_Email");
+            }
+            rs.close();
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+
+        return toReturn;
     }
 
-}
+    public static UserModel getUser(String username, PrintWriter p){
+        Connection db = null;
+        PreparedStatement prepareStatement = null;
 
+        UserModel toReturn = new UserModel();
+        try {
+            db = DbTool.getINSTANCE().dbLoggIn(p);
+            ResultSet rs = null;
+            String query = "SELECT * FROM roro.users WHERE email = ?";
+            prepareStatement = db.prepareStatement(query);
+            prepareStatement.setString(1, username);
+            rs = prepareStatement.executeQuery();
+            while(rs.next()){
+            
+                toReturn.setFirstName(rs.getString("fname"));
+                toReturn.setLastName(rs.getString("lname"));
+                toReturn.setUserName(rs.getString("email"));
+                toReturn.setPassword("secret");
+                // toReturn.setLastName();
+            }
 
-public static String getUserName(String username, PrintWriter p) {
-    Connection db = null;
-    PreparedStatement prepareStatement = null;
-
-    String toReturn = null;
-     try {
-        db = DbTool.getINSTANCE().dbLoggIn(p);
-        ResultSet rs = null;
-        String query = "SELECT * FROM otra.user where User_Email = ?";
-        prepareStatement =  db.prepareStatement(query);
-        prepareStatement.setString(1, username);
-        rs = prepareStatement.executeQuery();
-        while (rs.next()) {
-            toReturn = rs.getString("User_Email");
+            db.close();
+        } catch(SQLException throwables){
+            throwables.printStackTrace();
         }
-        rs.close();
+        return toReturn;
+    }
 
-     } catch (SQLException throwables) {
-         throwables.printStackTrace();
-     }
-     return toReturn;
-}
 }
