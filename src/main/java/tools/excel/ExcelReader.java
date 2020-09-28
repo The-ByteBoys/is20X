@@ -66,7 +66,7 @@ public class ExcelReader {
      * @return HashMap a hashMap that holds all the values assign to a key.
      */
     public  HashMap<String, Object> getRowValues(int rowNumber) {
-        Row row = sheet.getRow(rowNumber + 3);
+        Row row = sheet.getRow(rowNumber + 3); //+3 to ignore the 3 first rows.
         Iterator<Cell> cell = row.cellIterator(); // For jumping to the next cell.
         HashMap<String, Object> rowValues = new HashMap<>(); //Holds the key as a string, and the value as a object. Can be converted to string and Integer later.
         ArrayList<String> keys = keyGenerator(); // An ArrayList with the keys witch are getting mapped with the values;
