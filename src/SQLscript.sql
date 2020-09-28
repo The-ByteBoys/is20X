@@ -1,4 +1,7 @@
+DROP DATABASE IF EXISTS roro;
 CREATE DATABASE roro;
+
+USE roro;
 
 CREATE TABLE roro.user (
     user_id INT auto_increment,
@@ -8,8 +11,6 @@ CREATE TABLE roro.user (
     pass varchar(255),
     CONSTRAINT user_PK PRIMARY KEY (user_id)
 );
-
-INSERT INTO roro.user VALUES (null, "Admin", "Admin", "admin@roro", "Passord123");
 
 CREATE TABLE roro.club (
     club_id INT auto_increment, 
@@ -21,9 +22,10 @@ CREATE TABLE roro.club (
 
 CREATE TABLE roro.athlete (
     athlete_id INT auto_increment, 
-    name varchar(100) NOT NULL, 
+    name varchar(255) NOT NULL, 
     birth smallint(4), 
     club INT,
+    sex varchar(50),
     CONSTRAINT athlete_PK PRIMARY KEY (athlete_id), 
     CONSTRAINT club_FK FOREIGN KEY (club) REFERENCES roro.club(club_id)
 );
@@ -50,7 +52,7 @@ CREATE TABLE roro.result (
 
 CREATE TABLE roro.class (
 	class_id INT auto_increment,
-	description varchar(50) NOT NULL,
+	name varchar(50) NOT NULL,
 	CONSTRAINT class_PK PRIMARY KEY (class_id)
 );
 
@@ -64,8 +66,9 @@ CREATE TABLE roro.classPeriod (
 	CONSTRAINT periodClass_FK FOREIGN KEY (class) REFERENCES roro.class(class_id)
 );
 
+INSERT INTO roro.user VALUES (null, "Admin", "Admin", "admin@roro", "Passord123");
 INSERT INTO roro.club VALUES (1, "Azerbajan Roklubb", 1);
-INSERT INTO roro.athlete VALUES (1, "Jon Angvik", 1982, 1);
+INSERT INTO roro.athlete VALUES (1, "Jon Angvik", 1982, 1, "Apache Helicopter");
 INSERT INTO roro.class VALUES (1, "Master 1");
 INSERT INTO roro.classPeriod VALUES (1, 1, 1, null);
 INSERT INTO roro.exercise VALUES (1, "Hopp", "Utøveren hopper!", "stk");
