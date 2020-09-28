@@ -35,7 +35,9 @@ public abstract class AbstractModel {
         }
         */
         for(Athlete f : this.field.keySet()){
-            returns.add("\""+f.toString().toLowerCase()+"\": \""+this.field.get(f)+"\"");
+            if(!this.field.get(f).equals("")){
+                returns.add("\""+f.toString().toLowerCase()+"\": \""+this.field.get(f)+"\"");
+            }
         }
         return "{\n"+String.join(",", returns)+"\n}";
     }

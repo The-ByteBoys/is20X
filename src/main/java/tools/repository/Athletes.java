@@ -33,6 +33,7 @@ public class Athletes {
                 AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
                 toReturn.add(athlete);
             }
+            
             rs.close();
 
         } catch (SQLException throwables) {
@@ -56,7 +57,7 @@ public class Athletes {
         // Check if input is a number, else assume its a name
         try{
             int newNeedle = Integer.parseInt(needle);
-            queryWhere = "a.id = "+newNeedle;
+            queryWhere = "a.athlete_id = "+newNeedle;
         }
         catch( Exception e){
             queryWhere = "a.name = '"+needle+"'";
@@ -72,15 +73,23 @@ public class Athletes {
                 athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
             }
 
+            if(athlete != null){
+                String query2 = "SELECT c.name FROM (roro.classPeriod p INNER JOIN roro.class c ON p.class = c.class_id ) INNER JOIN roro.athlete a ON p.athlete = a.athlete_id WHERE "+queryWhere;
+                prepareStatement = db.prepareStatement(query2);
+                rs = prepareStatement.executeQuery();
+                while(rs.next()){
+                    athlete.setAthleteClass( rs.getString("c.name") );
+                }
+            }
+
             db.close();
 
-        } catch(SQLException e){
+        } catch(SQLException | NullPointerException e){
             e.printStackTrace();
             throw e;
         }
 
         return athlete;
-
     }
 
     public static void addAthlete(AthleteModel newAthlete, int clubID) throws SQLException {

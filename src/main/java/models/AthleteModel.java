@@ -10,5 +10,10 @@ public class AthleteModel extends AbstractModel {
         field.put(Athlete.NAME, name);
         field.put(Athlete.BIRTH, birth);
         field.put(Athlete.CLUB, club);
+        field.put(Athlete.CLASS, "");
+    }
+
+    public void setAthleteClass(String newClass){
+        field.put(Athlete.CLASS, newClass);
     }
 }
