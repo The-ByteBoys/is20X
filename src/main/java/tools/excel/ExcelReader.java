@@ -46,8 +46,6 @@ public class ExcelReader {
             }
         }
 
-
-
         // First it gets the workbook by its index in the "workbooks list", then gets a sheet in that workbook.
         // The global sheet field now holds on it.
         if ( workbookIndex < 0 || workbookIndex > workbooks.size()) {
@@ -56,6 +54,10 @@ public class ExcelReader {
             throw new IllegalArgumentException("This sheet do not exist. Choose a number between 0 included to 7 included");
         }
         sheet = workbooks.get(workbookIndex).getSheetAt(sheetIndex);
+    }
+
+    public void chooseDocument() {
+
     }
 
 
