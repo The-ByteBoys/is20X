@@ -20,46 +20,31 @@ public class ExcelReader {
     XSSFSheet sheet;
     ArrayList<File> excelDocuments;
     ArrayList<XSSFWorkbook> workbooks;
+    XSSFWorkbook wb;
 
     //empty constructor
     public ExcelReader() {}
 
+
     /**
-     *  chooseDocument() is used to create a list that holds all the excel documents. And for setting the sheet from
-     *  a workbook witch you want to read from.
-     * @param workbookIndex the index of a workbook
-     * @param sheetIndex    the index of a sheet of a workbook
+     * This chooseDocument() takes a path the path of an excelDocument, construct a File object from it, and then sets the wb field to hold a new XSSFWorkbook based on that file.
+     * @param path path to an excelFile
+     * @throws IOException If the path leads to nowhere
+     * @throws InvalidFormatException If the file is not of the type xlsx.
      */
-    public void chooseDocument(int workbookIndex, int sheetIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
-        File excelDirectory = new File("src/main/java/tools/excel/excelDocuments");
-        excelDocuments = new ArrayList<>(Arrays.asList(Objects.requireNonNull(excelDirectory.listFiles())));
-        workbooks = new ArrayList<>();
-
-        //A for loop that adds all the files in the excelDocuments/ directory to a arrayList.
-        for (File file : excelDocuments) {
-            try {
-                XSSFWorkbook workbook = new XSSFWorkbook(file);
-                workbooks.add(workbook);
-            } catch (IOException | InvalidFormatException e) {
-                e.printStackTrace();
-                // the /excelDocuments directory should only have xlsx files!
-            }
-        }
-
-        // First it gets the workbook by its index in the "workbooks list", then gets a sheet in that workbook.
-        // The global sheet field now holds on it.
-        if ( workbookIndex < 0 || workbookIndex > workbooks.size()) {
-            throw new IndexOutOfBoundsException("This workbook do not exist. Choose a number between 0 included to " + (workbooks.size() - 1) + " included");
-        } else if (sheetIndex < 0 || sheetIndex > 7) {
-            throw new IllegalArgumentException("This sheet do not exist. Choose a number between 0 included to 7 included");
-        }
-        sheet = workbooks.get(workbookIndex).getSheetAt(sheetIndex);
+    public void chooseDocument(String path) throws IOException, InvalidFormatException {
+        File file  = new File(path);
+        wb = new XSSFWorkbook(file);
     }
 
-    public void chooseDocument() {
-
+    /**
+     * getSheet() sets sheet to be a sheet in the wb file
+     * @param sheetIndex index of the sheet. 0 - 7
+     * @throws NullPointerException if wb is not set.
+     */
+    public void getSheet(int sheetIndex)throws NullPointerException, IllegalArgumentException{
+        sheet = wb.getSheetAt(sheetIndex);
     }
-
 
 
     /**
