@@ -18,8 +18,6 @@ import java.util.*;
 public class ExcelReader {
 
     XSSFSheet sheet;
-    ArrayList<File> excelDocuments;
-    ArrayList<XSSFWorkbook> workbooks;
     XSSFWorkbook wb;
 
     //empty constructor
