@@ -5,10 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
-
-    <h1>Roing Webapp</h1>
-    <p><a href="api/">API</a></p>
-    <p><a href="RequestUserNameFromDb/">get user</a></p>
-
+<h1>Roing webapp</h1>
+<p><a href='api'>API</a></p>
 </body>
 </html>

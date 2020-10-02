@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build with maven
-docker run --rm -it --name mavenbuild -v maven-repo:/root/.m2 -v $(pwd):/usr/src/mymaven -w /usr/src/mymaven maven mvn clean install
+docker run --rm -it --name mavenbuild -v maven-repo:/root/.m2 -v $(pwd):/usr/src/mymaven -w /usr/src/mymaven maven:3.6-adoptopenjdk-8 mvn clean install
 
 # Copy .war to payara:
 docker cp target/roingwebapp.war payara:/opt/payara/deployments
@@ -15,5 +15,5 @@ echo ""
 echo "Link: http://localhost:8080/roingwebapp/"
 echo ""
 
-read -n 1 -s -r -p "Press any key to continue...
-"
+read -n 1 -s -r -p "Press any key to continue..."
+echo ""
