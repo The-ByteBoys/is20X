@@ -8,6 +8,7 @@ import java.sql.SQLException;
 
 import models.UserModel;
 import tools.DbTool;
+import enums.*;
 
 public class UserRepository {
 
@@ -16,13 +17,13 @@ public class UserRepository {
         PreparedStatement insertNewUser = null;
         try {
             db = DbTool.getINSTANCE().dbLoggIn();
-            String query = "INSERT INTO `user` (User_firstName, User_lastName,User_Email, User_password ) values (?,?,?,?)";
+            String query = "INSERT INTO `user` (fName, lName, email, password) values (?,?,?,?)";
 
             insertNewUser = db.prepareStatement(query);
-            insertNewUser.setString(1,user.getFirstName());
-            insertNewUser.setString(2,user.getLastName());
-            insertNewUser.setString(3,user.getUserName());
-            insertNewUser.setString(4,user.getPassword());
+            insertNewUser.setObject(1,user.get(User.FNAME));
+            insertNewUser.setObject(2,user.get(User.LNAME));
+            insertNewUser.setObject(3,user.get(User.EMAIL));
+            insertNewUser.setObject(4,user.get(User.PASSWORD));
             insertNewUser.execute();
 
         } catch (SQLException throwables) {
@@ -45,7 +46,7 @@ public class UserRepository {
         try {
             db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
-            String query = "SELECT * FROM otra.user where User_Email = ?";
+            String query = "SELECT * FROM roro.user where User_Email = ?";
             prepareStatement =  db.prepareStatement(query);
             prepareStatement.setString(1, username);
             rs = prepareStatement.executeQuery();
@@ -61,25 +62,20 @@ public class UserRepository {
         return toReturn;
     }
 
-    public static UserModel getUser(String username, PrintWriter p){
+    public static UserModel getUser(String username){
         Connection db = null;
         PreparedStatement prepareStatement = null;
 
-        UserModel toReturn = new UserModel();
+        UserModel toReturn = null;
         try {
             db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
-            String query = "SELECT * FROM roro.users WHERE email = ?";
+            String query = "SELECT fname, lname, email FROM roro.users WHERE email = ?";
             prepareStatement = db.prepareStatement(query);
             prepareStatement.setString(1, username);
             rs = prepareStatement.executeQuery();
             while(rs.next()){
-            
-                toReturn.setFirstName(rs.getString("fname"));
-                toReturn.setLastName(rs.getString("lname"));
-                toReturn.setUserName(rs.getString("email"));
-                toReturn.setPassword("secret");
-                // toReturn.setLastName();
+                toReturn = new UserModel(rs.getString("fname"), rs.getString("lname"), rs.getString("email"), "secret");
             }
 
             db.close();

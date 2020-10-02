@@ -1,6 +1,25 @@
 package models;
 
-public class UserModel {
+import enums.*;
+
+public class UserModel extends AbstractModel {
+    public UserModel(String fname, String lname, String email, String password){
+        super();
+
+        // field.put(User.ID, id);
+        field.put(User.FNAME, fname);
+        field.put(User.LNAME, lname);
+        // field.put(User.ATHLETEID, );
+        field.put(User.EMAIL, email);
+        field.put(User.PASSWORD, password);
+    }
+
+    public void setUserAthlete(Integer id){
+        field.put(User.ATHLETEID, id);
+    }
+}
+
+/*public class UserModel {
     private String firstName;
     private String lastName;
     private String userName;
@@ -57,3 +76,4 @@ public class UserModel {
     }
 
 }
+*/

@@ -4,17 +4,17 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import enums.*;
+// import enums.*;
 
 public abstract class AbstractModel {
 
-    protected HashMap<Athlete, Object> field;
+    protected HashMap<Enum, Object> field;
 
     public AbstractModel(){
         field = new HashMap<>();
     }
 
-    public Object get(Athlete getField){
+    public Object get(Enum getField){
         return this.field.get(getField);
     }
 
@@ -34,7 +34,7 @@ public abstract class AbstractModel {
             returns.add("\""+f.getName()+"\": \""+val+"\"");
         }
         */
-        for(Athlete f : this.field.keySet()){
+        for(Enum f : this.field.keySet()){
             if(!this.field.get(f).equals("")){
                 returns.add("\""+f.toString().toLowerCase()+"\": \""+this.field.get(f)+"\"");
             }
