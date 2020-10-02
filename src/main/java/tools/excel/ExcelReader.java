@@ -40,8 +40,12 @@ public class ExcelReader {
      * @param sheetIndex index of the sheet. 0 - 7
      * @throws NullPointerException if wb is not set.
      */
-    public void getSheet(int sheetIndex)throws NullPointerException, IllegalArgumentException{
+    public void getSheet(int sheetIndex) throws NullPointerException, IllegalArgumentException {
         sheet = wb.getSheetAt(sheetIndex);
+    }
+
+    public void closeWb() throws IOException {
+        wb.close();
     }
 
 

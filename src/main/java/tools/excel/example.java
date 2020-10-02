@@ -19,6 +19,8 @@ public class example {
             System.out.println(set.getKey() + " = " + set.getValue());
         }
 
+        er.closeWb();
+
     }
 
 }
