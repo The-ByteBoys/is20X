@@ -17,25 +17,19 @@ import tools.DbTool;
 public class Athletes {
 
     public static List<AthleteModel> getAthletes() throws SQLException {
-        Connection db = null;
-        PreparedStatement prepareStatement = null;
-
         List<AthleteModel> toReturn = new ArrayList<>();
 
         try {
-            db = DbTool.getINSTANCE().dbLoggIn();
-            ResultSet rs = null;
             String query = "SELECT a.athlete_id, a.name, a.birth, c.name FROM athlete a INNER JOIN club c ON a.club = c.club_id";
-            prepareStatement =  db.prepareStatement(query);
-            rs = prepareStatement.executeQuery();
+
+            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while (rs.next()) {
                 AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
                 toReturn.add(athlete);
             }
-            
-            rs.close();
 
+            rs.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             throw throwables;
@@ -43,10 +37,6 @@ public class Athletes {
 
         return toReturn;
     }
-
-    // public static void main(String[] args) {
-        // System.out.println("Hello world");
-    // }
 
     public static AthleteModel getAthlete(String needle) throws SQLException {
         Connection db = null;
