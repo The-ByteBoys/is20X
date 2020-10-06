@@ -21,15 +21,10 @@ public class UserDAO {
 
         ResultSet result = statement.executeQuery();
 
-        UserModel UserModel = null;
-
-        if (result.next()) {
-            UserModel = new UserModel(?,?,?,?);
-            UserModel.UserModel(result.getString("fullname"));
-        }
+        UserDAO UserDAO = null;
 
         connection.close();
 
-        return UserModel;
+        return (User) null;
     }
 }
