@@ -4,7 +4,7 @@ import models.UserModel;
 import javax.xml.registry.infomodel.User;
 import java.sql.*;
 
-public class UserDAO {
+public class userDAO {
 
     public User checkLogin(String username, String password) throws SQLException,
             ClassNotFoundException {
@@ -21,7 +21,7 @@ public class UserDAO {
 
         ResultSet result = statement.executeQuery();
 
-        UserDAO UserDAO = null;
+        userDAO UserDAO = null;
 
         connection.close();
 

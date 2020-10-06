@@ -1,6 +1,6 @@
 package servlets;
 
-import tools.UserDAO;
+import tools.userDAO;
 import tools.repository.UserRepository;
 
 import java.io.*;
@@ -38,7 +38,7 @@ public class LogginServlet extends AbstractAppServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        UserDAO userDao = new UserDAO();
+        userDAO userDao = new userDAO();
 
         try {
             User user = userDao.checkLogin(username, password);
