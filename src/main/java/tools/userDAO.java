@@ -1,6 +1,5 @@
 package tools;
 import models.UserModel;
-
 import javax.xml.registry.infomodel.User;
 import java.sql.*;
 
@@ -21,10 +20,15 @@ public class userDAO {
 
         ResultSet result = statement.executeQuery();
 
-        userDAO UserDAO = null;
+        UserModel userModel = null;
+        if (result.next()) {
+            userModel = new UserModel();
+            userModel.setFirstName(result.getString("firstname"));
+            userModel.setUserName(username);
+        }
 
         connection.close();
 
-        return (User) null;
+        return (userModel) null;
     }
 }
