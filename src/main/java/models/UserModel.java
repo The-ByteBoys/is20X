@@ -14,6 +14,8 @@ public class UserModel extends AbstractModel {
         field.put(User.PASSWORD, password);
     }
 
+    public UserModel() { }
+
     public void setUserAthlete(Integer id){
         field.put(User.ATHLETEID, id);
     }
