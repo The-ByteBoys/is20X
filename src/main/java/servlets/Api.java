@@ -2,16 +2,22 @@ package servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import models.UserModel;
-import tools.repository.UserRepository;
+import models.*;
+import tools.repository.Athletes;
+import tools.repository.Clubs;
+// import tools.CustomException;
+// import tools.repository.UserRepository;
 
-@WebServlet(name= "Api", urlPatterns = {"/api"})
+@WebServlet(name= "Api", urlPatterns = {"/api/*"})
 public class Api extends AbstractAppServlet {
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -21,13 +27,96 @@ public class Api extends AbstractAppServlet {
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
-        // String username = req.getParameter("uname");
-        String username = "admin@roro";
-        // String nameFromDb = UserRepository.getUserName(username,out);
+        
+        String baseURI = "/roingwebapp/api";
 
-        UserModel user = UserRepository.getUser(username, out);
+        // out.print(req.getRequestURI().substring(baseURI.length()));
+        
+        if( req.getRequestURI().substring(baseURI.length()).matches("/klubb($|/)(.*)") ){
 
-        out.print( user.toString() );
+            String[] uriparts = req.getRequestURI().split("/");
+            String lastPart = uriparts[ uriparts.length-1 ];
+
+            lastPart = lastPart.replace("%20", " ");
+
+            try{
+                ClubModel club = Clubs.getClub( lastPart );
+
+                if(club != null){
+                    out.print("{ \"data\": [");
+                    out.print( club.toString() );
+                    out.print("]}");
+                }
+                else {
+                    out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Club not found!\" } }" );
+                }
+            }
+            catch( SQLException e ){
+                out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Exception: "+e.toString().replace("\"", "\\\"")+"\" } }" );
+            }
+            
+        } else if( req.getRequestURI().substring(baseURI.length()).matches("/klubber($|/)") ){
+
+            try {
+                List<ClubModel> clubs = Clubs.getClubs();
+                ArrayList<String> output = new ArrayList<>();
+                
+                for( ClubModel c : clubs ){
+                    output.add( "\n"+c.toString() );
+                }
+
+                out.print("{ \"data\": [" + String.join(",", output) + "]}");
+            }
+            catch( SQLException e ){
+                e.printStackTrace();
+                out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"SQL Exception: "+e.toString().replace("\"", "\\\"")+"\" } }" );
+            }
+            
+        } else if( req.getRequestURI().substring(baseURI.length()).matches("/ut(.*)ver($|/)(.*)") ){ // True for "api/utover/" and "api/ut%C3%B8ver/" but not "api/utovere/" etc.
+            /** %C3%B8 = ø */
+
+            String[] uriparts = req.getRequestURI().split("/");
+            String lastPart = uriparts[ uriparts.length-1 ];
+
+            lastPart = lastPart.replace("%20", " ");
+
+            try{
+                AthleteModel athlete = Athletes.getAthlete( lastPart );
+
+                if(athlete != null){
+                    out.print("{ \"data\": [");
+                    out.print( athlete.toString() );
+                    out.print("]}");
+                }
+                else {
+                    out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Athlete not found!\" } }" );
+                }
+            }
+            catch( SQLException e ){
+                out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Exception: "+e.toString().replace("\"", "\\\"")+"\" } }" );
+            }
+            
+        } else if( req.getRequestURI().substring( baseURI.length() ).matches("/ut(?:%C3%B8|o)vere($|/)") ){
+
+            try {
+                List<AthleteModel> atheles = Athletes.getAthletes();
+                ArrayList<String> output = new ArrayList<>();
+                
+                for( AthleteModel a : atheles ){
+                    output.add( "\n"+a.toString() );
+                }
+
+                out.print("{ \"data\": [" + String.join(",", output) + "]}");
+            }
+            catch( SQLException e ){
+                out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"SQL Exception: "+e.toString().replace("\"", "\\\"")+"\" } }" );
+            }
+
+        } else if( req.getRequestURI().matches(baseURI+"($|/)") ){
+            out.print( "{ \"data\": { \"links\": [{ \"rel\": \"list utøvere\", \"uri\": \""+req.getRequestURL()+"/ut%C3%B8vere/\" }, { \"rel\": \"list klubber\", \"uri\": \""+req.getRequestURL()+"/klubber/\" }] } }" );
+        } else {
+            out.print( "{ \"status\": { \"error\": \"Failed\" } }" );
+        }
     }
 
     /**
@@ -61,9 +150,9 @@ public class Api extends AbstractAppServlet {
     /**
      * Returns a short description of the servlet.
      *
-    //  */
+     */
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 }

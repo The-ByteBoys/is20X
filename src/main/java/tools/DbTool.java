@@ -3,9 +3,11 @@ package tools;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
+// import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,12 +40,13 @@ public final class DbTool {
         return result;
 
     }
-   public static void main(String[] args) {
-        Map<String, String> map = getProperties();
-        for(String s: map.keySet()) {
-            System.out.println(map.get("URL"));
-        }
-   }
+
+//    public static void main(String[] args) {
+//         Map<String, String> map = getProperties();
+//         for(String s: map.keySet()) {
+//             System.out.println(map.get("URL"));
+//         }
+//    }
 
     /**
      * Establishes a connection with a mariaDB or returns an existing one.
@@ -52,15 +55,10 @@ public final class DbTool {
      * @return connection to db
      * @throws SQLException if the connection fails
      */
-    public Connection dbLoggIn(PrintWriter out) throws SQLException {
+    public Connection dbLoggIn() throws SQLException {
         Connection toReturn = null;
         Map<String, String> result = getProperties();
-            if (result.isEmpty()) {
-                /** Fallback if file is not found: **/
-                result.put("URL", "jdbc:mariadb://localhost:3306");
-                result.put("username", "trym");
-                result.put("password", "Passord123");
-            }
+
         try {
             toReturn = (connection != null)
                 ? connection
@@ -71,9 +69,32 @@ public final class DbTool {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            out.println("SQL Exception " + e);
+            throw e;
+            // out.println("SQL Exception " + e);
         }
         return toReturn;
     }
-}
 
+
+    /**
+     * Executes 'query' and returns the ResultSet of the request.
+     * 
+     * @param query
+     * @return ResultSet from query
+     * @throws SQLException
+     */
+    public ResultSet selectQuery(String query) throws SQLException {
+        Connection db = null;
+        PreparedStatement statement = null;
+
+        db = this.dbLoggIn();
+
+        ResultSet rs = null;
+        statement = db.prepareStatement(query);
+        rs = statement.executeQuery();
+
+        db.close();
+        
+        return rs;
+    }
+}
