@@ -15,18 +15,15 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class AbstractAppServlet extends HttpServlet {
 
     public static final String HTML_PAGE_START
-        = "<html>\n<head>\n"
+        = "<!DOCTYPE html>\n<html>\n<head>\n  "
         + "<title>%s</title>\n</head>\n<body>\n";
     public static final String HTML_PAGE_END
-        = "</body>\n</html>";
+        = "</body>\n</html>\n";
 
     protected abstract void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException;
 
-    protected void writeResponse(HttpServletRequest request,
-        HttpServletResponse response,
-        String title)
-        throws IOException {
+    protected void writeResponse(HttpServletRequest request, HttpServletResponse response, String title) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             out.format(HTML_PAGE_START, title);
@@ -34,11 +31,16 @@ public abstract class AbstractAppServlet extends HttpServlet {
             out.format(HTML_PAGE_END);
         }
     }
+    protected void writeResponseJson(HttpServletRequest request, HttpServletResponse response, String title) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            writeBody(request, out);
+        }
+    }
 
     protected abstract void writeBody(HttpServletRequest req,
         PrintWriter out);
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -75,6 +77,6 @@ public abstract class AbstractAppServlet extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 
 }

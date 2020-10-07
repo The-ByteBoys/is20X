@@ -1,3 +1,7 @@
 database/*
 .idea/
 target/
+.vscode/
+lib/
+RoingWebapp.iml
+src/main/java/tools/excel/excelDocuments/
