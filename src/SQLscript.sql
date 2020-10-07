@@ -14,7 +14,7 @@ CREATE TABLE roro.user (
 
 CREATE TABLE roro.club (
     club_id INT auto_increment, 
-    name varchar(100) NOT NULL, 
+    name varchar(100) UNIQUE NOT NULL, 
     owner INT,
     CONSTRAINT club_PK PRIMARY KEY (club_id),
     CONSTRAINT owner_FK FOREIGN KEY (owner) REFERENCES roro.user(user_id)
@@ -22,7 +22,7 @@ CREATE TABLE roro.club (
 
 CREATE TABLE roro.athlete (
     athlete_id INT auto_increment, 
-    name varchar(255) NOT NULL, 
+    name varchar(255) UNIQUE NOT NULL, 
     birth smallint(4), 
     club INT,
     sex varchar(50),
@@ -67,6 +67,10 @@ CREATE TABLE roro.classPeriod (
 );
 
 INSERT INTO roro.user VALUES (null, "Admin", "Admin", "admin@roro", "Passord123");
+
+INSERT INTO roro.club VALUES (0, "No club", 1);
+UPDATE roro.club SET club_id = 0 WHERE name = "No club";
+
 INSERT INTO roro.club VALUES (1, "Azerbajan Roklubb", 1);
 INSERT INTO roro.athlete VALUES (1, "Jon Angvik", 1982, 1, "Apache Helicopter");
 INSERT INTO roro.class VALUES (1, "Master 1");

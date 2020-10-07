@@ -92,8 +92,9 @@ public final class DbTool {
         ResultSet rs = null;
         statement = db.prepareStatement(query);
         rs = statement.executeQuery();
+
+        db.close();
         
         return rs;
     }
 }
-

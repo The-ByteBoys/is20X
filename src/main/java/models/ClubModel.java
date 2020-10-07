@@ -1,17 +1,25 @@
 package models;
 
 import enums.*;
-import java.util.HashMap;
 
 public class ClubModel extends AbstractModel {
-    protected HashMap<Club, Object> field;
 
-    public ClubModel(Integer id, String name){
+    /**
+     * 
+     * @param id
+     * @param name
+     */
+    public ClubModel(int id, String name){
         super();
 
         field.put(Club.ID, id);
         field.put(Club.NAME, name);
     }
+
+    /**
+     * Empty constructor to manually add all fields
+     */
+    // public ClubModel(){ }
 
     public void setOwner(String newOwner){
         field.put(Club.OWNER, newOwner);

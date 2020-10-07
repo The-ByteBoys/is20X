@@ -20,12 +20,12 @@ public class Athletes {
         List<AthleteModel> toReturn = new ArrayList<>();
 
         try {
-            String query = "SELECT a.athlete_id, a.name, a.birth, c.name FROM athlete a INNER JOIN club c ON a.club = c.club_id";
+            String query = "SELECT a.name, a.birth, c.name, a.sex FROM athlete a INNER JOIN club c ON a.club = c.club_id";
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while (rs.next()) {
-                AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
+                AthleteModel athlete = new AthleteModel(rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"), rs.getString("a.sex"));
                 toReturn.add(athlete);
             }
 
@@ -54,25 +54,25 @@ public class Athletes {
         }
 
         try {
-            db = DbTool.getINSTANCE().dbLoggIn();
-            ResultSet rs = null;
-            String query = "SELECT a.athlete_id, a.name, a.birth, c.name FROM athlete a INNER JOIN club c ON a.club = c.club_id WHERE "+queryWhere;
-            prepareStatement = db.prepareStatement(query);
-            rs = prepareStatement.executeQuery();
+            String query = "SELECT a.name, a.birth, c.name, a.sex FROM athlete a INNER JOIN club c ON a.club = c.club_id WHERE "+queryWhere;
+
+            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
+
             while(rs.next()){
-                athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"));
+                athlete = new AthleteModel(rs.getString("a.name"), rs.getInt("a.birth"), rs.getString("c.name"), rs.getString("a.sex"));
             }
+
+            rs.close();
 
             if(athlete != null){
                 String query2 = "SELECT c.name FROM (roro.classPeriod p INNER JOIN roro.class c ON p.class = c.class_id ) INNER JOIN roro.athlete a ON p.athlete = a.athlete_id WHERE "+queryWhere;
-                prepareStatement = db.prepareStatement(query2);
-                rs = prepareStatement.executeQuery();
+                rs = DbTool.getINSTANCE().selectQuery(query2);
+
                 while(rs.next()){
                     athlete.setAthleteClass( rs.getString("c.name") );
                 }
+                rs.close();
             }
-
-            db.close();
 
         } catch(SQLException | NullPointerException e){
             e.printStackTrace();
@@ -82,24 +82,44 @@ public class Athletes {
         return athlete;
     }
 
+    public static void addAthlete(AthleteModel newAthlete) throws SQLException {
+        addAthlete(newAthlete, 0);
+    }
+
     public static void addAthlete(AthleteModel newAthlete, int clubID) throws SQLException {
         Connection db = null;
         PreparedStatement prepareStatement = null;
-
+        
         try {
             db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
-            String query = "INSERT INTO athlete (name, birth, club) VALUES(?,?,?)";
+            String query = "INSERT INTO athlete (name, birth, club, sex) VALUES(?,?,?,?)";
             prepareStatement = db.prepareStatement(query);
             prepareStatement.setString(1,newAthlete.get(Athlete.NAME).toString());
-            prepareStatement.setObject(2,newAthlete.get(Athlete.BIRTH));
+            
+            if((int) newAthlete.get(Athlete.BIRTH) > 0){
+                prepareStatement.setInt(2, (int) newAthlete.get(Athlete.BIRTH));
+            }
+            else {
+                prepareStatement.setObject(2, null);
+            }
+            
             prepareStatement.setInt(3,clubID);
+            prepareStatement.setString(4,newAthlete.get(Athlete.SEX).toString());
+
             rs = prepareStatement.executeQuery();
+
+            rs.close();
             db.close();
         }
         catch(SQLException e){
             e.printStackTrace();
             throw e;
+        }
+        finally {
+            if(db != null){
+                db.close();
+            }
         }
     }
 

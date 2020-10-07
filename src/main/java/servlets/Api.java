@@ -11,9 +11,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import models.AthleteModel;
-// import models.UserModel;
+import models.*;
 import tools.repository.Athletes;
+import tools.repository.Clubs;
 // import tools.CustomException;
 // import tools.repository.UserRepository;
 
@@ -32,8 +32,48 @@ public class Api extends AbstractAppServlet {
 
         // out.print(req.getRequestURI().substring(baseURI.length()));
         
-        /** %C3%B8 = ø */
-        if( req.getRequestURI().substring(baseURI.length()).matches("/ut(.*)ver($|/)(.*)") ){ // True for "api/utover/" and "api/ut%C3%B8ver/" but not "api/utovere/" etc.
+        if( req.getRequestURI().substring(baseURI.length()).matches("/klubb($|/)(.*)") ){
+
+            String[] uriparts = req.getRequestURI().split("/");
+            String lastPart = uriparts[ uriparts.length-1 ];
+
+            lastPart = lastPart.replace("%20", " ");
+
+            try{
+                ClubModel club = Clubs.getClub( lastPart );
+
+                if(club != null){
+                    out.print("{ \"data\": [");
+                    out.print( club.toString() );
+                    out.print("]}");
+                }
+                else {
+                    out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Club not found!\" } }" );
+                }
+            }
+            catch( SQLException e ){
+                out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Exception: "+e.toString().replace("\"", "\\\"")+"\" } }" );
+            }
+            
+        } else if( req.getRequestURI().substring(baseURI.length()).matches("/klubber($|/)") ){
+
+            try {
+                List<ClubModel> clubs = Clubs.getClubs();
+                ArrayList<String> output = new ArrayList<>();
+                
+                for( ClubModel c : clubs ){
+                    output.add( "\n"+c.toString() );
+                }
+
+                out.print("{ \"data\": [" + String.join(",", output) + "]}");
+            }
+            catch( SQLException e ){
+                e.printStackTrace();
+                out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"SQL Exception: "+e.toString().replace("\"", "\\\"")+"\" } }" );
+            }
+            
+        } else if( req.getRequestURI().substring(baseURI.length()).matches("/ut(.*)ver($|/)(.*)") ){ // True for "api/utover/" and "api/ut%C3%B8ver/" but not "api/utovere/" etc.
+            /** %C3%B8 = ø */
 
             String[] uriparts = req.getRequestURI().split("/");
             String lastPart = uriparts[ uriparts.length-1 ];
@@ -73,7 +113,7 @@ public class Api extends AbstractAppServlet {
             }
 
         } else if( req.getRequestURI().matches(baseURI+"($|/)") ){
-            out.print( "{ \"data\": { \"links\": [{ \"rel\": \"list\", \"uri\": \""+req.getRequestURL()+"/ut%C3%B8vere/\" }] } }" );
+            out.print( "{ \"data\": { \"links\": [{ \"rel\": \"list utøvere\", \"uri\": \""+req.getRequestURL()+"/ut%C3%B8vere/\" }, { \"rel\": \"list klubber\", \"uri\": \""+req.getRequestURL()+"/klubber/\" }] } }" );
         } else {
             out.print( "{ \"status\": { \"error\": \"Failed\" } }" );
         }
