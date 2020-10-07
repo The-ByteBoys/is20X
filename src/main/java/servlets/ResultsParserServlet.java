@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.sql.SQLException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -29,10 +31,49 @@ public class ResultsParserServlet extends AbstractAppServlet {
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
 
-        /** Insert first document, first 'page', into database */
-        ExcelReader er = new ExcelReader();
-        er.chooseDocument(0,0);
 
+        Integer numNewClubs = 0;
+        Integer numNewAthletes = 0;
+
+        out.print("<h1>Importing excel data</h1>");
+
+        String file;
+        int sheet;
+        String sex;
+        Boolean dryrun = true;
+
+        try {
+            file = req.getParameter("file");
+            sheet = Integer.parseInt(req.getParameter("sheet"));
+            sex = req.getParameter("sex");
+            dryrun = req.getParameter("dryrun")!=null?true:false;
+            // if(req.getParameter("dryrun") == null){
+                // dryrun = false;
+            // }
+        } catch(Exception e){
+            out.print("Please use a numeric sheet-number: "+e);
+            e.printStackTrace();
+            return;
+        }
+        
+        if(file == null || sheet < 0 || sex == null){
+            out.print("Please provide all arguments: file, sheet, sex. <br>\nE.G: "+req.getRequestURL()+"?file=2020-11.xlsx&sheet=0&sex=mann");
+            return;
+        }
+
+
+        /** Insert first document, first 'page', into database */
+        ExcelReader er = null;
+        try {
+            er = new ExcelReader();
+            er.chooseDocument("/opt/payara/excel/"+file);
+            er.getSheet(sheet);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            out.print("Failed to read document. <br>\n"+e);
+            return;
+        }
 
         ArrayList<String> clubs = new ArrayList<>();
         try {
@@ -49,18 +90,29 @@ public class ResultsParserServlet extends AbstractAppServlet {
         /** LOOP going over rows in the excel document */
         int row = 0;
         Object firstCell = "first";
-        while (!firstCell.equals("")) {
+        while(!firstCell.equals("")){
             HashMap<String, Object> mylist = er.getRowValues(row);
             firstCell = mylist.get("navn");
+
             if(firstCell == null){
                 break;
             }
-            String newName = mylist.get("navn").toString();
-            String newClub = mylist.get("klubb").toString();
+
+            // TRIM to get rid of spaces at the end or beginning of cells:
+            String newName = mylist.get("navn").toString().trim();
+            String newClub = mylist.get("klubb").toString().trim();
 
             Integer newBirth = 0;
             if(mylist.get("født") != null){
-                newBirth = (int) ((double) mylist.get("født"));
+                try {
+                    newBirth = (int) ((double) mylist.get("født"));
+                }
+                catch(Exception e){
+                    // e.printStackTrace();
+                    out.print("<p>Failed to add: "+newName+"<br>"+mylist.toString()+"<br><pre>"+e+"</pre></p>");
+                    row++;
+                    continue;
+                }
             }
 
 
@@ -70,11 +122,14 @@ public class ResultsParserServlet extends AbstractAppServlet {
             // ADD CLUB if it doesn't exist
             if(!clubs.contains(newClub)){
                 out.print(" - Adding club...");
-                try {
-                    Clubs.addClub(newClub);
-                }
-                catch(SQLException e){
-                    // Club is most likely already added
+                if(!dryrun){
+                    try {
+                        Clubs.addClub(newClub);
+                        numNewClubs++;
+                    }
+                    catch(SQLException e){
+                        // Club is most likely already added
+                    }
                 }
             }
             clubs.add(newClub);
@@ -83,19 +138,32 @@ public class ResultsParserServlet extends AbstractAppServlet {
 
 
             // ADD ATHLETE
-            try {
-                ClubModel club = Clubs.getClub(newClub);
+            if(!dryrun){
+                try {
+                    ClubModel club = Clubs.getClub(newClub);
 
-                AthleteModel newAthlete = new AthleteModel(newName, newBirth, null, "mann");
-                Athletes.addAthlete(newAthlete, (int) club.get(Club.ID));
-            }
-            catch(SQLException e){
-                out.print("<b>Athlete most likely already exists.</b>");
+                    AthleteModel newAthlete = new AthleteModel(newName, newBirth, null, sex);
+                    Athletes.addAthlete(newAthlete, (int) club.get(Club.ID));
+
+                    numNewAthletes++;
+                }
+                catch(SQLException e){
+                    out.print("<b>Athlete most likely already exists.</b>");
+                }
             }
 
             out.println("<hr>");
             row++;
         }
+
+        try {
+            er.closeWb();
+        }
+        catch(IOException e){
+            //fuck off
+        }
+
+        out.print("<h3>Added "+numNewClubs+" new clubs and "+numNewAthletes+" new athletes!");
     }
 
     /**
