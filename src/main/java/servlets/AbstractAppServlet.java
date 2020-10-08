@@ -15,10 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class AbstractAppServlet extends HttpServlet {
 
     public static final String HTML_PAGE_START
-        = "<html>\n<head>\n"
+        = "<!DOCTYPE html>\n<html>\n<head>\n  "
         + "<title>%s</title>\n</head>\n<body>\n";
     public static final String HTML_PAGE_END
-        = "</body>\n</html>";
+        = "</body>\n</html>\n";
 
     protected abstract void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException;
@@ -41,7 +41,6 @@ public abstract class AbstractAppServlet extends HttpServlet {
     protected abstract void writeBody(HttpServletRequest req,
         PrintWriter out);
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -78,6 +77,6 @@ public abstract class AbstractAppServlet extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 
 }
