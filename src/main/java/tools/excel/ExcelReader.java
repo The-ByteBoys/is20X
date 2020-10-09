@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 
@@ -44,9 +45,16 @@ public class ExcelReader {
         sheet = wb.getSheetAt(sheetIndex);
     }
 
-    public void closeWb() throws IOException {
-        wb.close();
-    }
+
+    public void closeWb() {
+        try {
+            wb.close();
+        } catch (IOException e) {
+            PrintWriter pw = new PrintWriter(System.out);
+            pw.println("There is no workbook to close!");
+            e.printStackTrace();
+        }
+   
 
 
     /**
