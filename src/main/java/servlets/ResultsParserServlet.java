@@ -198,12 +198,7 @@ public class ResultsParserServlet extends AbstractAppServlet {
 
         out.print("</tbody>\n"+"</table>");
 
-        try {
-            er.closeWb();
-        }
-        catch(IOException e){
-            //fuck off
-        }
+        er.closeWb();
 
         out.print("<h3>Added "+numNewClubs+" new clubs and "+numNewAthletes+" new athletes!");
     }
