@@ -1,5 +1,8 @@
 package servlets;
 
+import enums.User;
+import models.UserModel;
+import tools.PasswordEncrypt;
 import tools.repository.UserRepository;
 
 import javax.servlet.ServletException;
@@ -12,33 +15,71 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
-@WebServlet(name = "RequestUserFromDB", urlPatterns = {"/userregistration"})
-public class RegisterUser extends UserRepository {
+@WebServlet(name = "RegisterUser", urlPatterns = {"/userregistration"})
+public class RegisterUser extends AbstractAppServlet {
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+    @Override
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        writeResponse(request, response, "Register User");
+    }
 
-response.setContentType("text/html");
-PrintWriter out = response.getWriter();
+    @Override
+    protected void writeBody(HttpServletRequest req, PrintWriter out) {
 
-String n=request.getParameter("userName");
-String p=request.getParameter("userPass");
+//        req.setContentType("text/html");
+//        PrintWriter out = response.getWriter();
 
-try{
-Class.forName("oracle.jdbc.driver.OracleDriver");
-    Connection con= DriverManager.getConnection(
-            "jdbc:oracle:thin:@localhost:1521:xe","system","oracle");
+        out.print("<h1>Registering user...</h1>");
 
-    PreparedStatement ps=con.prepareStatement(
-            "insert into registeruser values(?,?)");
+        String fname=req.getParameter("userFname");
+        String lname=req.getParameter("userLname");
+        String email=req.getParameter("userEmail");
+        String pass=req.getParameter("userPass");
 
-ps.setString(1,n);
-ps.setString(2,p);
+        UserModel newUser = new UserModel();
 
-int i=ps.executeUpdate();
-    if(i>0)
-    out.print("You are successfully registered...");
+        newUser.set(User.FNAME, fname);
+        newUser.set(User.LNAME, lname);
+        newUser.set(User.EMAIL, email);
+        newUser.set(User.PASSWORD, pass);
 
-}catch (Exception e2) {System.out.println(e2);}
-    out.close(); }
+        try {
+            int newID = PasswordEncrypt.opprettBruker(newUser);
+            out.print("User added with id: "+newID);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            out.print("Exception! "+e);
+        }
+
+
+        /*try{
+            //Class.forName("oracle.jdbc.driver.OracleDriver");
+            //    Connection con= DriverManager.getConnection(
+            //            "jdbc:oracle:thin:@localhost:1521:xe","system","oracle");
+
+            //    PreparedStatement ps=con.prepareStatement(
+            //            "insert into registeruser values(?,?)");
+
+            ps.setString(1,n);
+            ps.setString(2,p);
+
+            int i=ps.executeUpdate();
+            if(i>0)
+                out.print("You are successfully registered...");
+
+        }catch (Exception e2) {System.out.println(e2);}
+
+        out.close();*/
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }
 }
+
