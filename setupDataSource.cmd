@@ -8,12 +8,12 @@ SET passord=Passord123
 SET databaseNavn=roro
 
 :: Setup database connection
-docker exec -it payara asadmin --user=admin --passwordFile /opt/payara/passwordFile create-jdbc-connection-pool --datasourceclassname org.mariadb.jdbc.MySQLDataSource --restype javax.sql.XADataSource --property serverName=%host%\:portNumber=%port%\:user=%bruker%\:password=%passord%\:databaseName=%databaseNavn% mariapool
+docker exec -it payara asadmin --user=admin --passwordFile /opt/payara/passwordFile create-jdbc-connection-pool --datasourceclassname org.mariadb.jdbc.MySQLDataSource --restype javax.sql.XADataSource --property serverName=%host%:portNumber=%port%:user=%bruker%:password=%passord%:databaseName=%databaseNavn% mariapool
 docker exec -it payara asadmin --user=admin --passwordFile /opt/payara/passwordFile ping-connection-pool mariapool
 docker exec -it payara asadmin --user=admin --passwordFile /opt/payara/passwordFile create-jdbc-resource --connectionpoolid mariapool roingdb
 
 echo.
-echo "- If above is without errors, it succeeded successfully!"
+echo "If above is without errors, it succeeded successfully!"
 echo.
 
 pause
