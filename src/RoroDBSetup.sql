@@ -1,0 +1,122 @@
+DROP DATABASE IF EXISTS RORO;
+CREATE DATABASE RORO;
+
+USE RORO;
+
+
+CREATE TABLE RORO.ATHLETE (
+    athlete_id INT AUTO_INCREMENT,
+    firstName VARCHAR(250) NOT NULL,
+    lastName VARCHAR(250) NOT NULL,
+    birth DATE NOT NULL,
+    sex ENUM('F', 'M', 'O') NOT NULL,
+
+    CONSTRAINT ATHLETE_PK PRIMARY KEY (athlete_id)
+);
+
+
+CREATE TABLE RORO.USER (
+    user_id INT AUTO_INCREMENT,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password varchar(250) NOT NULL,
+
+    CONSTRAINT USER_PK PRIMARY KEY (user_id)
+);
+
+
+CREATE TABLE RORO.CLUB_USER (
+    user INT NOT NULL,
+    athlete INT NOT NULL,
+
+    CONSTRAINT CLUB_USER_user_FK FOREIGN KEY (user) REFERENCES RORO.USER(user_id),
+    CONSTRAINT CLUB_USER_club_athlete_FK FOREIGN KEY (athlete) REFERENCES RORO.ATHLETE(athlete_id)
+);
+
+
+CREATE TABLE RORO.CLUB (
+    club_id INT AUTO_INCREMENT,
+    name VARCHAR(250) NOT NULL UNIQUE,
+
+    CONSTRAINT CLUB_PK PRIMARY KEY (club_id)
+);
+
+
+CREATE TABLE CLUB_REG (
+    athlete INT NOT NULL,
+    club INT NOT NULL,
+
+    CONSTRAINT CLUB_REG_athlete_FK FOREIGN KEY (athlete) REFERENCES RORO.ATHLETE(athlete_id),
+    CONSTRAINT CLUB_REG_club_FK FOREIGN KEY (club) REFERENCES RORO.CLUB(club_id)
+);
+
+
+CREATE TABLE RORO.EXERCISE (
+    exercise_id INT AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(250) NOT NULL,
+    unit VARCHAR(10),
+
+    CONSTRAINT EXERCISE_PK PRIMARY KEY (exercise_id)
+);
+
+
+CREATE TABLE RORO.CLUB_EXERCISE (
+    exercise INT NOT NULL,
+    club INT NOT NULL,
+
+    CONSTRAINT CLUB_EXERCISE_exercise_FK FOREIGN KEY (exercise) REFERENCES RORO.EXERCISE(exercise_id),
+    CONSTRAINT CLUB_EXERCISE_club_FK FOREIGN KEY (club) REFERENCES RORO.CLUB(club_id)
+);
+
+
+CREATE TABLE RORO.TEST_CLASS (
+    testClass_id INT AUTO_INCREMENT,
+    name varchar(10) NOT NULL ,
+
+    CONSTRAINT TEST_CLASS_PK PRIMARY KEY (testClass_id)
+);
+
+
+CREATE TABLE RORO.CLASS (
+    class_id INT AUTO_INCREMENT,
+    class_sex ENUM('F', 'M', 'O') NOT NULL,
+    age_From INT(2) NOT NULL,
+    testClass INT NOT NULL,
+
+    CONSTRAINT CLASS_PK PRIMARY KEY (class_id),
+    CONSTRAINT CLASS_testClass_FK FOREIGN KEY (testClass) REFERENCES RORO.TEST_CLASS(testClass_id)
+);
+
+
+CREATE TABLE RORO.CLASS_PERIOD (
+    period_id INT AUTO_INCREMENT,
+    start DATE NOT NULL,
+    athlete INT NOT NULL ,
+    class INT NOT NULL ,
+
+    CONSTRAINT CLASS_PERIOD_PK PRIMARY KEY (period_id),
+    CONSTRAINT CLASS_PERIOD_athlete_FK FOREIGN KEY (athlete) REFERENCES RORO.ATHLETE(athlete_id)
+);
+
+CREATE TABLE RORO.TEST_SET (
+    exercise INT NOT NULL,
+    testClass INT NOT NULL,
+
+    CONSTRAINT TEST_SET_exercise_FK FOREIGN KEY (exercise) REFERENCES RORO.EXERCISE(exercise_id),
+    CONSTRAINT TEST_SET_testClass_FK FOREIGN KEY (testClass) REFERENCES RORO.TEST_CLASS(testClass_id)
+);
+
+
+CREATE TABLE RORO.RESULT (
+    athlete INT NOT NULL,
+    exercise INT NOT NULL,
+    result DECIMAL(5,3),
+    date_time DATETIME NOT NULL,
+    result_Type ENUM('IP', 'NP', 'CT') NOT NULL,
+    /* result_Type can be IP = IS PUBLISHED, NP = NOT PUBLISHED and CT = CLUB TEST */
+
+    CONSTRAINT RESULT_athlete_FK FOREIGN KEY (athlete) REFERENCES RORO.ATHLETE(athlete_id),
+    CONSTRAINT RESULT_exercise_FK FOREIGN KEY (exercise) REFERENCES RORO.EXERCISE(exercise_id)
+)
+
+
