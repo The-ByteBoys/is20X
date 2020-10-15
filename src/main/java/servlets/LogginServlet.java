@@ -26,11 +26,7 @@ public class LogginServlet extends AbstractAppServlet {
 
     }
 
-    private static final long serialVersionUID = 1L;
-
-    public LogginServlet() {
-        super();
-    }
+    //private static final long serialVersionUID = 1L;
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

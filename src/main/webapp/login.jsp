@@ -6,7 +6,7 @@
 </head>
 <body>
 <div style="text-align: center">
-    <h1>Admin Login</h1>
+    <h1>User Login</h1>
     <form action="login" method="post">
         <label for="username">Username:</label>
         <input name="email" size="30" />

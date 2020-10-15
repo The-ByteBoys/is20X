@@ -37,15 +37,18 @@ public class UserAuth {
                 userModel.set(User.LNAME, rs.getString("lname"));
             }
 
-            PrintWriter out = response.getWriter();
-            Cookie ck = new Cookie("auth", username);
-            ck.setMaxAge(600);
+            rs.close();
+            db.close();
+
+            if(userModel != null){
+                // successfull login
+                PrintWriter out = response.getWriter();
+                Cookie ck = new Cookie("auth", username);
+                ck.setMaxAge(600);
 
                 response.addCookie(ck);
                 response.sendRedirect("home.jsp");
-
-            rs.close();
-            db.close();
+            }
         }
         catch(SQLException | IOException e){
             throw e;
