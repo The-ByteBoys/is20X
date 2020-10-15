@@ -25,7 +25,7 @@ public class PasswordEncrypt {
 
     private static String PASSWORD_SECRET = "FrityrstektSnitzel";
 
-    private static String getKrypterPassord(String passord) {
+    public static String getKrypterPassord(String passord) {
         return DigestUtils.md5Hex(passord + PASSWORD_SECRET).toUpperCase();
     }
 

@@ -24,27 +24,6 @@ public class LogginServlet extends AbstractAppServlet {
         //String nameFromDb = UserRepository.getUserName(username, out);
         //out.format("<h1> Here is your request: %s</h1", nameFromDb);
 
-        String username = req.getParameter("email");
-        String password = req.getParameter("password");
-
-        UserModel user = null;
-
-        out.print("<h1>Login!</h1>");
-
-        try {
-            user = UserAuth.checkLogin(username, password);
-            out.print(user.toString());
-            out.print("<br>Login complete!");
-        }
-        catch( SQLException e){
-            e.printStackTrace();
-            out.print("Exception: "+e);
-        }
-
-        if(user == null){
-            out.print("Login failed");
-        }
-
     }
 
     private static final long serialVersionUID = 1L;
@@ -53,31 +32,26 @@ public class LogginServlet extends AbstractAppServlet {
         super();
     }
 
-    /*
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String username = request.getParameter("email");
+        String password = request.getParameter("password");
+        response.setContentType("text/html;charset=UTF-8");
+        UserModel user = null;
 
-
-        /* userDAO userDao = new userDAO();
-
-        try {
-            User user = userDao.checkLogin(username, password);
-            String destPage = "login.jsp";
-
-            if (user != null) {
-                HttpSession session = request.getSession();
-                session.setAttribute("user", user);
-                destPage = "home.jsp";
-            } else {
-                String message = "Invalid username/password";
-                request.setAttribute("message", message);
+        try (PrintWriter out = response.getWriter()) {
+            try {
+                user = UserAuth.checkLogin(username, password, response);
+                if (user == null) {
+                    out.print("Login failed");
+                } else {
+                    out.print("Login successfull");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                out.print("Exception: " + e);
             }
-
-            RequestDispatcher dispatcher = request.getRequestDispatcher(destPage);
-            dispatcher.forward(request, response);
-
-        } catch (SQLException | ClassNotFoundException ex) {
-            throw new ServletException(ex);
         }
-    }*/
+    }
 }
