@@ -45,20 +45,19 @@ public class Clubs {
         // Check if input is a number, else assume its a name
         try{
             int newNeedle = Integer.parseInt(needle);
-            queryWhere = "club_id = "+newNeedle;
+            queryWhere = "c.club_id = "+newNeedle;
         }
         catch( Exception e){
-            queryWhere = "name = '"+needle+"'";
+            queryWhere = "c.name = '"+needle+"'";
         }
 
         try {
-            String query = "SELECT c.club_id, c.name, CONCAT(u.fName, ' ', u.lName) owner FROM club c INNER JOIN user u ON c.owner = u.user_id WHERE "+queryWhere;
+            String query = "SELECT c.club_id, c.name FROM club c WHERE "+queryWhere;
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while(rs.next()){
                 club = new ClubModel(rs.getInt("club_id"), rs.getString("name"));
-                club.set(Club.OWNER, rs.getString("owner"));
             }
 
             rs.close();
@@ -71,29 +70,21 @@ public class Clubs {
     }
 
     public static void addClub(String newClubName) throws SQLException {
-        Connection db = null;
+
         PreparedStatement prepareStatement = null;
-        
-        try {
-            db = DbTool.getINSTANCE().dbLoggIn();
+        try (Connection db = DbTool.getINSTANCE().dbLoggIn()) {
             ResultSet rs = null;
-            String query = "INSERT INTO club (name, owner) VALUES(?,?)";
+            String query = "INSERT INTO club (name) VALUES(?)";
+
             prepareStatement = db.prepareStatement(query);
             prepareStatement.setString(1, newClubName);
-            prepareStatement.setObject(2, 1); // CURRENTLY LOGGED IN USER
 
             rs = prepareStatement.executeQuery();
 
             rs.close();
-        }
-        catch(SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
             throw e;
-        }
-        finally {
-            if(db != null){
-                db.close();
-            }
         }
     }
 

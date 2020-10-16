@@ -19,9 +19,5 @@ public class ClubModel extends AbstractModel {
     /**
      * Empty constructor to manually add all fields
      */
-    // public ClubModel(){ }
-
-    public void setOwner(String newOwner){
-        field.put(Club.OWNER, newOwner);
-    }
+    public ClubModel(){ }
 }
