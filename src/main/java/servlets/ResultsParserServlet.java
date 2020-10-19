@@ -6,8 +6,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-//import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-//import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -56,11 +54,9 @@ public class ResultsParserServlet extends AbstractAppServlet {
         
         if(file == null || sheet < 0 || sex == null){
             out.print("Doing a dry-run! To insert into database please provide all arguments: file, sheet, sex. <br>\nE.G: "+req.getRequestURL()+"?file=2020-11.xlsx&sheet=0&sex=mann");
-//            return;
         }
 
 
-        /* Insert first document, first 'page', into database */
         ExcelReader er;
         try {
             er = new ExcelReader();
@@ -69,13 +65,14 @@ public class ResultsParserServlet extends AbstractAppServlet {
         }
         catch (Exception e){
             e.printStackTrace();
-            out.print("Failed to read document. <br>\n"+e);
+            out.print("Failed to read document: <br>\n"+e);
             return;
         }
 
         ArrayList<String> clubs = new ArrayList<>();
+        List<ClubModel> clubModels;
         try {
-            List<ClubModel> clubModels = Clubs.getClubs();
+            clubModels = Clubs.getClubs();
             for(ClubModel c : clubModels){
                 clubs.add( c.get(Club.NAME).toString() );
             }
@@ -89,7 +86,8 @@ public class ResultsParserServlet extends AbstractAppServlet {
                 "<table>\n" +
                 "    <thead>\n" +
                 "        <tr>\n" +
-                "            <th>Navn</th>\n" +
+                "            <th>Fornavn</th>\n" +
+                "            <th>Etternavn</th>\n" +
                 "            <th>Klubb</th>\n" +
                 "            <th>Født</th>\n" +
                 "            <th>5000w</th>\n" +
@@ -107,18 +105,24 @@ public class ResultsParserServlet extends AbstractAppServlet {
 
         /* LOOP going over rows in the excel document */
         int row = 0;
-        Object firstCell = "first";
-        while(!firstCell.equals("")){
-            HashMap<String, Object> mylist = er.getRowValues(row);
-            firstCell = mylist.get("navn");
 
-            // Stop the loop if the first cell is empty
-            if(firstCell == null){
+        while(true){
+            HashMap<String, Object> mylist = er.getRowValues(row);
+
+            // Stop the loop if the name-cell is empty
+            if(mylist.get("navn") == null){
                 break;
             }
 
-            // TRIM to get rid of spaces at the end or beginning of cells:
-            String newName = mylist.get("navn").toString().trim();
+            // Get the name-field from dataset and put each name in a String[]. TRIM to get rid of spaces at the end or beginning of cells
+            String[] newNames = mylist.get("navn").toString().trim().split(" ");
+
+            // Last name is the last name in string
+            String newLastName = newNames[ newNames.length-1 ];
+
+            // First name is the rest of the name, except the last name
+            String newFirstName = String.join(" ", newNames).replace(" "+newLastName, "");
+
 
             String[] newClubs = mylist.get("klubb").toString().trim().split("\\s*/\\s*");
 
@@ -129,7 +133,7 @@ public class ResultsParserServlet extends AbstractAppServlet {
                 }
                 catch(Exception e){
                     // e.printStackTrace();
-                    out.print("<p>Failed to add: "+newName+"<br>"+mylist.toString()+"<br><pre>"+e+"</pre></p>");
+                    out.print("<p>Failed to add: "+newFirstName+" "+newLastName+"<br>"+mylist.toString()+"<br><pre>"+e+"</pre></p>");
                     row++;
                     // Continue to not stop execution of the other rows
                     continue;
@@ -137,7 +141,8 @@ public class ResultsParserServlet extends AbstractAppServlet {
             }
 
             out.print("<tr>\n" +
-                    "    <td>"+newName+"</td>\n" +
+                    "    <td>"+newFirstName+"</td>\n" +
+                    "    <td>"+newLastName+"</td>\n" +
                     "    <td>"+String.join(", ", newClubs)+"</td>\n" +
                     "    <td>"+newBirth+"</td>\n" +
                     "    <td>"+mylist.get("5000Watt")+"</td>\n" +
@@ -157,7 +162,7 @@ public class ResultsParserServlet extends AbstractAppServlet {
                             Clubs.addClub(c);
                             numNewClubs++;
                         }
-                        catch(SQLException e){
+                        catch(Exception e){
                             // Club is most likely already added
                         }
                     }
@@ -168,30 +173,47 @@ public class ResultsParserServlet extends AbstractAppServlet {
 //            out.print("<br>");
 
 
-            // ADD ATHLETE
+            /* ADD ATHLETE */
             if(!dryrun){
-                // MUST REFACTOR
-                /*
                 try {
 
-                    List<ClubModel> aClubs = new ArrayList<>();
+                    if(sex.equals("m") || sex.equals("f") || sex.equals("o")) {
 
-                    for(String c: newClubs) {
-                        aClubs.add(Clubs.getClub(c));
+                        AthleteModel newAthlete = new AthleteModel(null, newFirstName, newLastName, newBirth, sex);
+                        int newAthleteId = Athletes.addAthlete(newAthlete);
+                        numNewAthletes++;
+
+                        /* ADD ATHLETE TO CLUB(S) */
+                        if(newAthleteId > 0){
+
+                            for(String c: newClubs) {
+                                ClubModel dbClub = Clubs.getClub(c);
+
+                                if(dbClub != null){
+                                    Athletes.addAthleteToClub(newAthleteId, (int) dbClub.get(Club.ID));
+                                }
+                                else {
+                                    out.print("Failed to add athlete ("+newFirstName+" "+newLastName+") to club ("+c+")!<br>\n");
+                                }
+                            }
+                        }
+
                     }
-
-                    AthleteModel newAthlete = new AthleteModel(newName, newBirth, null, sex);
-                    Athletes.addAthlete(newAthlete, (int) club.get(Club.ID));
-
-                    numNewAthletes++;
+                    else {
+                        out.print("Please set a sex that is either 'm', 'f' or 'o'");
+                        break;
+                    }
                 }
-                catch(SQLException e){
-                    out.print("<b>Athlete most likely already exists.</b>");
-                }*/
+                catch(Exception e){
+                    out.print("<b onclick='this.nextElementSibling.style.display = \"initial\";'>Athlete probably already added.</b><span style='display: none'><br>"+e+"</span>\n");
+                }
 
             }
 
-//            out.println("<hr>");
+            /* ADD DATA */
+
+
+
             row++;
             out.print("</td>\n"+"</tr>");
         }

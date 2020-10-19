@@ -9,14 +9,16 @@ public class AthleteModel extends AbstractModel {
 
     /**
      * 
+     * @param athlete_id The ID of the user. May be null!
      * @param fname First name of the athlete
      * @param lname Last name of the athlete
      * @param birth Birth year of the athlete
      * @param sex Sex of the athlete (F/M/O)
      */
-    public AthleteModel(String fname, String lname, Integer birth, String sex){
+    public AthleteModel(Integer athlete_id, String fname, String lname, Integer birth, String sex){
         super();
 
+        field.put(Athlete.ID, athlete_id);
         field.put(Athlete.FNAME, fname);
         field.put(Athlete.LNAME, lname);
         field.put(Athlete.BIRTH, birth);

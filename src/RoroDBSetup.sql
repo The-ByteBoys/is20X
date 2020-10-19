@@ -8,7 +8,7 @@ CREATE TABLE athlete (
     athlete_id INT AUTO_INCREMENT,
     firstName VARCHAR(250) NOT NULL,
     lastName VARCHAR(250) NOT NULL,
-    birth DATE NOT NULL,
+    birth smallint(4) NOT NULL,
     sex ENUM('F', 'M', 'O') NOT NULL,
 
     CONSTRAINT athlete_PK PRIMARY KEY (athlete_id)

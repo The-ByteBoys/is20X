@@ -5,11 +5,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import enums.Athlete;
+import enums.User;
 import models.AthleteModel;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import tools.DbTool;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 public class Athletes {
 
@@ -26,7 +36,7 @@ public class Athletes {
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while (rs.next()) {
-                AthleteModel athlete = new AthleteModel(rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getInt("a.birth"), rs.getString("a.sex"));
+                AthleteModel athlete = new AthleteModel(null, rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getInt("a.birth"), rs.getString("a.sex"));
                 toReturn.add(athlete);
             }
 
@@ -51,16 +61,16 @@ public class Athletes {
             queryWhere = "a.athlete_id = "+newNeedle;
         }
         catch( Exception e){
-            queryWhere = "a.name = '"+needle+"'";
+            queryWhere = "CONCAT(a.firstName, ' ', a.lastName) = '"+needle+"'";
         }
 
         try {
-            String query = "SELECT a.firstName, a.lastName, a.birth, a.sex FROM athlete a WHERE "+queryWhere;
+            String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex FROM athlete a WHERE "+queryWhere;
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while(rs.next()){
-                athlete = new AthleteModel(rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getInt("a.birth"), rs.getString("a.sex"));
+                athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getInt("a.birth"), rs.getString("a.sex"));
             }
 
             rs.close();
@@ -83,35 +93,37 @@ public class Athletes {
         return athlete;
     }
 
-    public static void addAthlete(AthleteModel newAthlete) throws SQLException {
-        Connection db = null;
-        PreparedStatement prepareStatement = null;
-        
-        try {
-            db = DbTool.getINSTANCE().dbLoggIn();
-            ResultSet rs = null;
-            String query = "INSERT INTO athlete (firstName, lastName, birth, sex) VALUES(?,?,?,?)";
-            prepareStatement = db.prepareStatement(query);
+    public static Integer addAthlete(AthleteModel newAthlete) throws NamingException, SQLException {
+        AthleteModel checkIfExistsAthlete = getAthlete(newAthlete.get(Athlete.FNAME)+" "+newAthlete.get(Athlete.LNAME));
 
-            prepareStatement.setString(1, newAthlete.get(Athlete.FNAME).toString());
-            prepareStatement.setString(2, newAthlete.get(Athlete.LNAME).toString());
-            prepareStatement.setObject(3, ((int) newAthlete.get(Athlete.BIRTH) > 0)?newAthlete.get(Athlete.BIRTH):null);
-            prepareStatement.setString(4,newAthlete.get(Athlete.SEX).toString());
+        if(checkIfExistsAthlete == null) {
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("firstName", newAthlete.get(Athlete.FNAME));
+            parameters.put("lastName", newAthlete.get(Athlete.LNAME));
+            parameters.put("birth", newAthlete.get(Athlete.BIRTH));
+            parameters.put("sex", newAthlete.get(Athlete.SEX));
 
-            rs = prepareStatement.executeQuery();
+            Context ctx = new InitialContext();
+            JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
 
-            rs.close();
-            db.close();
+            SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("athlete").usingGeneratedKeyColumns("athlete_id");
+            return insert.executeAndReturnKey(parameters).intValue();
         }
-        catch(SQLException e){
-            e.printStackTrace();
-            throw e;
+        else {
+            return (int) checkIfExistsAthlete.get(Athlete.ID);
         }
-        finally {
-            if(db != null){
-                db.close();
-            }
-        }
+    }
+
+    public static void addAthleteToClub(int AthleteID, int clubID) throws NamingException {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("athlete", AthleteID);
+        parameters.put("club", clubID);
+
+        Context ctx = new InitialContext();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
+
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("club_reg");
+        insert.execute(parameters);
     }
 
 }

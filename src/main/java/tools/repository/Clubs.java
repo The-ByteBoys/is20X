@@ -6,12 +6,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import enums.*;
 import models.ClubModel;
 // import models.UserModel;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import tools.DbTool;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 // import tools.CustomException;
 
 public class Clubs {
@@ -69,23 +78,23 @@ public class Clubs {
         return club;
     }
 
-    public static void addClub(String newClubName) throws SQLException {
+    public static int addClub(String newClubName) throws SQLException, NamingException {
 
-        PreparedStatement prepareStatement = null;
-        try (Connection db = DbTool.getINSTANCE().dbLoggIn()) {
-            ResultSet rs = null;
-            String query = "INSERT INTO club (name) VALUES(?)";
-
-            prepareStatement = db.prepareStatement(query);
-            prepareStatement.setString(1, newClubName);
-
-            rs = prepareStatement.executeQuery();
-
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
+        // Check if the club already exists
+        ClubModel checkClubExist = getClub(newClubName);
+        if(checkClubExist != null){
+            return (int) checkClubExist.get(Club.ID);
         }
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("name", newClubName);
+
+        Context ctx = new InitialContext();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
+
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("club").usingGeneratedKeyColumns("club_id");
+        return insert.executeAndReturnKey(parameters).intValue();
+
     }
 
 }
