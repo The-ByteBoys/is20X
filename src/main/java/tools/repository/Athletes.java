@@ -21,6 +21,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+/**
+ * @author Eirik Svagård
+ */
 public class Athletes {
 
     private Athletes() {
@@ -93,6 +96,14 @@ public class Athletes {
         return athlete;
     }
 
+    /**
+     * Method to add athletes to the datasource. Returns the ID if athlete already exist.
+     *
+     * @param newAthlete
+     * @return athlete ID
+     * @throws NamingException
+     * @throws SQLException
+     */
     public static Integer addAthlete(AthleteModel newAthlete) throws NamingException, SQLException {
         AthleteModel checkIfExistsAthlete = getAthlete(newAthlete.get(Athlete.FNAME)+" "+newAthlete.get(Athlete.LNAME));
 
@@ -114,6 +125,13 @@ public class Athletes {
         }
     }
 
+    /**
+     * Add a clubID to an AthleteID for the DataSource
+     *
+     * @param AthleteID
+     * @param clubID
+     * @throws NamingException
+     */
     public static void addAthleteToClub(int AthleteID, int clubID) throws NamingException {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("athlete", AthleteID);

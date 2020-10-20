@@ -17,6 +17,10 @@ import models.*;
 import tools.repository.*;
 import tools.excel.ExcelReader;
 
+/**
+ *
+ * @author Eirik Svagård
+ */
 @WebServlet(name= "ResultsParserServlet", urlPatterns = {"/parseresults"})
 public class ResultsParserServlet extends AbstractAppServlet {
     @Override
