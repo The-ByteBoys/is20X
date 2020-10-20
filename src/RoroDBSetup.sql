@@ -8,10 +8,11 @@ CREATE TABLE athlete (
     athlete_id INT AUTO_INCREMENT,
     firstName VARCHAR(250) NOT NULL,
     lastName VARCHAR(250) NOT NULL,
-    birth DATE NOT NULL,
+    birth smallint(4) NOT NULL,
     sex ENUM('F', 'M', 'O') NOT NULL,
 
-    CONSTRAINT athlete_PK PRIMARY KEY (athlete_id)
+    CONSTRAINT athlete_PK PRIMARY KEY (athlete_id),
+    CONSTRAINT athlete_UN UNIQUE KEY (firstName, lastName, birth)
 );
 
 
@@ -53,9 +54,10 @@ CREATE TABLE club_reg (
 
 CREATE TABLE exercise (
     exercise_id INT AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL,
     description VARCHAR(250) NOT NULL,
-    unit VARCHAR(10),
+    unit ENUM('WATT', 'SEC', 'KG', 'PERCENT', 'REPS', 'METER'),
+    exerciseType ENUM('ALLEX', 'CLUBEX'),
 
     CONSTRAINT EXERCISE_PK PRIMARY KEY (exercise_id)
 );
@@ -120,6 +122,44 @@ CREATE TABLE result (
     CONSTRAINT result_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT result_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id)
 );
+
+
+INSERT INTO athlete (firstName, lastName, birth, sex)
+    VALUES ('Johannes', 'Birkeland', 2000, 'M');
+
+INSERT INTO user (email, password, userType)
+    VALUES
+        ('johannesbirkeland@gmail.com', 'pwd123', 'ATHLETE'),
+        ('admin@example.com', 'pwd123', 'ADMIN');
+
+INSERT INTO club_user (user, athlete) VALUES (1, 1);
+
+INSERT INTO club (name) VALUES ('BRK');
+
+INSERT INTO club_reg (athlete, club) VALUES (1, 1);
+
+INSERT INTO exercise (name, description, unit, exerciseType)
+    VALUES
+        ('5000', 'i watt', 'WATT', 'ALLEX'),
+        ('5000', 'i tid', 'SEC', 'ALLEX'),
+        ('100Sek', 'lengde på 100 sek', 'METER', 'CLUBEX');
+
+INSERT INTO club_exercise (exercise, club) VALUES (3, 1);
+
+/*INSERT INTO class_period*/
+
+INSERT INTO test_set (exercise, testClass)
+    VALUES
+        (1, 1),
+        (2, 1),
+        (1, 2),
+        (2, 2);
+
+
+INSERT INTO result (athlete, exercise, result, date_time, result_Type)
+    VALUES
+        (1, 2, 400, '2020-08-15 15:41:33', 'NP');
+
 
 INSERT INTO test_class (name)
     VALUES
