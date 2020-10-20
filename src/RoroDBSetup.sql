@@ -19,6 +19,7 @@ CREATE TABLE user (
     user_id INT AUTO_INCREMENT,
     email VARCHAR(100) NOT NULL UNIQUE,
     password varchar(250) NOT NULL,
+    userType enum('ADMIN', 'ATHLETE', 'COACH') NOT NULL,
 
     CONSTRAINT user_PK PRIMARY KEY (user_id)
 );
@@ -29,7 +30,7 @@ CREATE TABLE club_user (
     athlete INT NOT NULL,
 
     CONSTRAINT club_user_user_FK FOREIGN KEY (user) REFERENCES user(user_id),
-    CONSTRAINT club_user_club_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id)
+    CONSTRAINT club_user_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id)
 );
 
 
@@ -65,7 +66,8 @@ CREATE TABLE club_exercise (
     club INT NOT NULL,
 
     CONSTRAINT club_exercise_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
-    CONSTRAINT club_exercise_club_FK FOREIGN KEY (club) REFERENCES club(club_id)
+    CONSTRAINT club_exercise_club_FK FOREIGN KEY (club) REFERENCES club(club_id),
+    CONSTRAINT club_exercise_PK PRIMARY KEY (club, exercise)
 );
 
 
@@ -117,6 +119,25 @@ CREATE TABLE result (
 
     CONSTRAINT result_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT result_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id)
-)
+);
+
+INSERT INTO test_class (name)
+    VALUES
+        ('Senior'),
+        ('A'),
+        ('B'),
+        ('C');
+
+
+INSERT INTO class (class_sex, age_From, testClass)
+    VALUES
+        ('M', 19, 1),
+        ('F', 19, 1),
+        ('M', 17, 2),
+        ('F', 17, 2),
+        ('M', 15, 3),
+        ('F', 15, 3),
+        ('M', 13, 4),
+        ('F', 13, 4);
 
 
