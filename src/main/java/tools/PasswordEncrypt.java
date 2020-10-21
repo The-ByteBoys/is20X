@@ -11,7 +11,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +18,15 @@ public class PasswordEncrypt {
 
     public static String lagToken() {
         SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[20];
+        byte[] bytes = new byte[10];
         random.nextBytes(bytes);
-        return Arrays.toString(bytes);
+        StringBuilder returnToken = new StringBuilder();
+
+        for(byte bit : bytes){
+            returnToken.append( String.format("%x", bit));
+        }
+
+        return returnToken.toString();
     }
 
     private static String PASSWORD_SECRET = "FrityrstektSnitzel";
@@ -35,7 +40,7 @@ public class PasswordEncrypt {
         String passord = getKrypterPassord(bruker.get(User.PASSWORD).toString());
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("email", bruker.get(User.EMAIL));
-        parameters.put("pass", passord);
+        parameters.put("password", passord);
         parameters.put("userType", bruker.get(User.TYPE));
 
         Context ctx = new InitialContext();

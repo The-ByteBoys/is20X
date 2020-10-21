@@ -10,10 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserAuth {
-    public static boolean checkLogin(String username, String password) throws SQLException {
+    public static String checkLogin(String username, String password) throws SQLException {
         Connection db = null;
         PreparedStatement statement = null;
-        boolean returnBool = false;
+        String toReturn = null;
 
         db = DbTool.getINSTANCE().dbLoggIn();
 
@@ -26,14 +26,16 @@ public class UserAuth {
 
         while(rs.next()){
             if(rs.getString("email").equals(username)) {
-                returnBool = true;
+                toReturn = PasswordEncrypt.lagToken();
+
+                // TODO: Legg token inn i databasen
             }
         }
 
         rs.close();
         db.close();
 
-        return returnBool;
+        return toReturn;
     }
 
     public static boolean verifyLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
