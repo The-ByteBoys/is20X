@@ -139,12 +139,21 @@ public class ParseExcelServlet extends AbstractAppServlet {
             er.getSheet(i);
 
             sheetName = er.getSheetName(i);
+            if(
+                    !sheetName.toLowerCase().contains("senior") &&
+                    !sheetName.toLowerCase().contains("jun") &&
+                    !sheetName.toLowerCase().contains("gutter") &&
+                    !sheetName.toLowerCase().contains("jenter")
+            ){
+                out.print("<p>Sheet '"+sheetName+"' might be without content</p><hr>\n");
+                continue;
+            }
             out.print("<h3 onclick='document.getElementById(\"table"+i+"\").style.display = \"block\";'>Sheet: "+sheetName+"</h3>");
             out.print("<div id='table"+i+"'>");
 
             htmlTable = new HtmlTableUtil("Fornavn", "Etternavn", "Fødselsår", "Klubb");
 
-            htmlTable.addEditCell("Edit");
+//            htmlTable.addEditCell("Edit");
 
             rowNum = 0;
             while(true) {
@@ -180,32 +189,53 @@ public class ParseExcelServlet extends AbstractAppServlet {
 
                 ArrayList<String> currentKeys = er.keyGenerator();
                 for (String key : currentKeys) {
-                    if(!key.equals("navn") && !key.equals("født") && !key.equals("klubb") && !key.equals("rank") && !key.equals("score")){
+                    if(!key.equals("navn") && !key.equals("født") && !key.equals("klubb") && !key.equals("rank") && !key.equals("score") && !key.equals("3000Total")){
                         if(rowNum == 0){
                             htmlTable.addHeader(beautifyTableHeader(key));
                         }
                         if(mylist.get(key) != null){
 //                            if(key.matches("(.)Tid")){
 //                            if(key.equals("5000Watt") || key.equals("3000Watt") || key.equals("2000Watt")){
-                            if(key.equals("5000Tid") || key.equals("3000Tid") || key.equals("2000Tid")){
+                            if(key.equals("5000Tid") || key.equals("2000Tid")){
                                 /**
                                  * 391 = 2.80 / x³
                                  *
                                  * x = Math.pow(2.80 / 391, 3)
                                  */
-                                int distance = Integer.parseInt(key.replace("Tid", ""));
+                                try {
 
-                                double pace = Math.pow(2.80 / (double) mylist.get(key.replace("Tid", "Watt")), 1.0/3.0);
-                                double time = pace*distance;
-                                double totalMinutes = time/60;
-                                int minutes = (int) Math.floor(totalMinutes);
-                                double secounds = ((totalMinutes-minutes)*60);
+                                    int distance = Integer.parseInt(key.replace("Tid", ""));
+
+                                    double pace = Math.pow(2.80 / Double.parseDouble(mylist.get(key.replace("Tid", "Watt")).toString()), 1.0/3.0);
+                                    double time = pace*distance;
+                                    double totalMinutes = time/60;
+                                    int minutes = (int) Math.floor(totalMinutes);
+                                    double secounds = ((totalMinutes-minutes)*60);
 //
-                                DecimalFormat df = new DecimalFormat("00.##");
-                                String timeString = minutes+":"+df.format(secounds);
+                                    DecimalFormat df = new DecimalFormat("00.##");
+                                    String timeString = minutes+":"+df.format(secounds);
 
 //                                newRow.add(insertFormElement(key, mylist.get(key).toString())+"<br>"+);
-                                newRow.add(insertFormElement(key, timeString, "", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
+                                    newRow.add(insertFormElement(key, timeString, "", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
+                                }
+                                catch (ClassCastException e){
+                                    newRow.add(insertFormElement(key, "math failed", "failed", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
+                                }
+                            }
+                            else if(key.equals("3000Tid") && mylist.get("3000Total") != null){
+                                try {
+                                    double totalSecs = Double.parseDouble(mylist.get("3000Total").toString());
+                                    double totalMinutes = totalSecs/60;
+                                    int minutes = (int) Math.floor(totalMinutes);
+                                    double secounds = ((totalMinutes-minutes)*60);
+//
+                                    DecimalFormat df = new DecimalFormat("00.##");
+                                    String timeString = minutes+":"+df.format(secounds);
+                                    newRow.add(insertFormElement(key, timeString, "", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
+                                }
+                                catch (NumberFormatException e){
+                                    newRow.add(insertFormElement(key, "math failed", "failed", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
+                                }
                             }
                             /*else if(key.equals("5000Tid") || key.equals("3000Tid") || key.equals("2000Tid")){
 
@@ -254,17 +284,18 @@ public class ParseExcelServlet extends AbstractAppServlet {
                     "<option value='F'>Kvinner</option> " +
                     "<option value='O'>Andre</option> " +
                     "</select>");
-            out.print("<input type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 50px;' />");
+            out.print("<label>År: <input type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 50px;' /></label>");
             out.print("<select name='week'>\n" +
+                    "    <option>Velg uke</option>\n" +
                     "    <option>2</option>\n" +
                     "    <option>11</option>\n" +
                     "    <option>44</option>\n" +
                     "</select>");
             out.print("<input type='submit' value='Submit all' onclick='document.getElementById(\"table"+i+"\").style.display = \"none\";'>");
             out.print("</form>");
-            out.print("<p>* - Tids-feltene er kalkulert ut fra watt-feltet.</p></div><hr>");
+            out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
+            out.print("<p>** 3000 Tid er regnet ut fra 3000 Total i excel.</p></div><hr>");
         }
-
     }
 
     public String insertFormElement(String fieldName, String value){
@@ -298,7 +329,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
             case "3000Total":
                 return "3000 Total";
             case "3000Tid":
-                return "3000 Tid*";
+                return "3000 Tid**";
             case "2000Watt":
                 return "2000 Watt";
             case "2000Tid":

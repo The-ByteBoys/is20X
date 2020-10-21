@@ -1,5 +1,6 @@
 package servlets;
 
+import com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2RTFDTM;
 import enums.*;
 import models.*;
 import tools.repository.*;
@@ -34,7 +35,7 @@ public class PostExcelServlet extends AbstractAppServlet {
             req.setCharacterEncoding("UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-            out.print("I don't know what happened.. "+e);
+            out.print("I don't know what happened.. " + e);
             return;
         }
 
@@ -44,6 +45,12 @@ public class PostExcelServlet extends AbstractAppServlet {
         String[] clubs = req.getParameterValues("clubs");
 
         Map<String, String[]> parameters = req.getParameterMap();
+        String[] extraParameters = parameters.keySet().toArray(new String[0]);
+
+//        out.print(extraParameters.toString());
+//        return;
+//    }
+//    public void never(HttpServletRequest req, PrintWriter out, String[] lastNames, String[] firstNames, String[] births, String[] clubs, String[] extraParameters){
 
         String sex = req.getParameter("sex");
         String year = req.getParameter("year");
@@ -96,38 +103,40 @@ public class PostExcelServlet extends AbstractAppServlet {
 
             // CLUBS
             String[] newClubs = clubs[i].trim().split("\\s*/\\s*");
-            for (String c : newClubs){
-                c = c.trim();
-                try {
-                    int newClubId = Clubs.addClub(c);
-                    Athletes.addAthleteToClub(newAthleteId, newClubId);
-                    out.print(" - added to club \""+c+"\"");
-                }
-                catch(Exception e){
-                    e.printStackTrace();
-                    out.print(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add athlete to club</b><span style='display: none'><br>"+e+"</span>\n");
-                }
-            }
+            out.print( addToClubs(newAthleteId, newClubs));
+
+
+            // CLASS
+            // TODO: insert athlete class
+            // start = birth[i]
+            // insert into class_period (start, athlete, class) VALUES(
 
 
             // Results?
-            parameters.forEach((key, value) -> {
-                if(key != "fname" && key != "lname" && key != "birth" && key != "clubs"){
+//            parameters.forEach((key, value) -> {
+            for(String param : extraParameters) {
+                if (param != "fname" && param != "lname" && param != "birth" && param != "clubs") {
                     // key = 5000Watt, 5000Tid, 2000Watt, 2000Tid, 60Watt, liggeroProsent, liggeroKg, osv..
-                    // TODO: get exercise id
-
-                    // Format testTime
-                    Calendar cal = Calendar.getInstance();
-                    cal.setWeekDate(Integer.parseInt(year), Integer.parseInt(week), Calendar.MONDAY);
-
-                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String testTime = sdf.format(cal.getTimeInMillis());
+                    // TODO: get exercise based on key
+                    if (param.equals("5000Watt")) {
+                        int exerciseId = Exercises.getExerciseId("5000", "watt");
 
 
-                    // Insert to database
-                    // insert into result (athlete, exercise, result, date_time, result_type) VALUES (newAthleteId, exerciseId, result, testTime, "IP");
+                        // Format testTime
+                        Calendar cal = Calendar.getInstance();
+                        cal.setWeekDate(Integer.parseInt(year), Integer.parseInt(week), Calendar.MONDAY);
+
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String testTime = sdf.format(cal.getTimeInMillis());
+
+
+                        // Insert to database
+                        // insert into result (athlete, exercise, result, date_time, result_type) VALUES (newAthleteId, exerciseId, result, testTime, "IP");
+//                        out.print("insert into result (athlete, exercise, result, date_time, result_type) VALUES (" + newAthleteId + ", " + exerciseId + ", " + parameters[param][i] + ", " + testTime + ", \"IP\");");
+                    }
                 }
-            });
+//            });
+            }
 
             out.print("<br>\n");
         }
@@ -136,6 +145,23 @@ public class PostExcelServlet extends AbstractAppServlet {
     private int addAthlete(String fName, String lName, int birth, String sex) throws SQLException, NamingException {
         AthleteModel newAthlete = new AthleteModel(null, fName, lName, birth, sex);
         return Athletes.addAthlete(newAthlete);
+    }
+
+    private String addToClubs(int AthleteId, String[] newClubs){
+        StringBuilder toReturn = new StringBuilder();
+        for (String c : newClubs){
+            c = c.trim();
+            try {
+                int newClubId = Clubs.addClub(c);
+                Athletes.addAthleteToClub(AthleteId, newClubId);
+                toReturn.append(" - added to club \"").append(c).append("\"");
+            }
+            catch(Exception e){
+                e.printStackTrace();
+                toReturn.append(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add athlete to club</b><span style='display: none'><br>").append(e).append("</span>\n");
+            }
+        }
+        return toReturn.toString();
     }
 
     /**
