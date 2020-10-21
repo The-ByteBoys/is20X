@@ -13,6 +13,7 @@ CREATE TABLE athlete (
 
     CONSTRAINT athlete_PK PRIMARY KEY (athlete_id),
     CONSTRAINT athlete_UN UNIQUE KEY (firstName, lastName, birth)
+
 );
 
 
@@ -76,7 +77,7 @@ CREATE TABLE club_exercise (
 
 CREATE TABLE test_class (
     testClass_id INT AUTO_INCREMENT,
-    name varchar(10) NOT NULL ,
+    name varchar(10) NOT NULL,
 
     CONSTRAINT test_class_PK PRIMARY KEY (testClass_id)
 );
@@ -198,5 +199,6 @@ INSERT INTO class (class_sex, age_From, testClass)
         ('F', 15, 3),
         ('M', 13, 4),
         ('F', 13, 4);
+
 
 
