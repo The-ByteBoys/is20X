@@ -117,7 +117,7 @@ CREATE TABLE test_set (
 CREATE TABLE result (
     athlete INT NOT NULL,
     exercise INT NOT NULL,
-    result DECIMAL(5,3),
+    result DECIMAL(8,3),
     date_time DATETIME NOT NULL,
     result_Type ENUM('IP', 'NP', 'CT') NOT NULL,
     /* result_Type can be IP = IS PUBLISHED, NP = NOT PUBLISHED and CT = CLUB TEST */
@@ -167,18 +167,6 @@ INSERT INTO class_period (start, athlete, class)
     VALUES
         ('2019-11-19', 1, 1);
 
-INSERT INTO test_set (testClass, exercise)
-    VALUES
-        (1, 1), (1, 2), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
-        (2, 1), (2, 2), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 13), (2, 12),
-        (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 14), (3, 13), (3, 12),
-        (4, 4), (4, 7), (4, 14), (4, 13), (4, 12);
-
-
-
-INSERT INTO result (athlete, exercise, result, date_time, result_Type)
-    VALUES
-        (1, 2, 400, '2020-08-15 15:41:33', 'NP');
 
 
 INSERT INTO test_class (name)
@@ -201,4 +189,14 @@ INSERT INTO class (class_sex, age_From, testClass)
         ('F', 13, 4);
 
 
+INSERT INTO test_set (testClass, exercise)
+    VALUES
+        (1, 1), (1, 2), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
+        (2, 1), (2, 2), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 13), (2, 12),
+        (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 14), (3, 13), (3, 12),
+        (4, 4), (4, 7), (4, 14), (4, 13), (4, 12);
 
+
+INSERT INTO result (athlete, exercise, result, date_time, result_Type)
+    VALUES
+    (1, 1, 700.999, '2020-08-15 15:41:33', 'NP');
