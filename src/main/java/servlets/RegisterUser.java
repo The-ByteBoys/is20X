@@ -31,17 +31,16 @@ public class RegisterUser extends AbstractAppServlet {
 
         out.print("<h1>Registering user...</h1>");
 
-        String fname=req.getParameter("userFname");
-        String lname=req.getParameter("userLname");
+//        String fname=req.getParameter("userFname");
+//        String lname=req.getParameter("userLname");
         String email=req.getParameter("userEmail");
         String pass=req.getParameter("userPass");
+        String type=req.getParameter("userType");
 
         UserModel newUser = new UserModel();
-
-        newUser.set(User.FNAME, fname);
-        newUser.set(User.LNAME, lname);
         newUser.set(User.EMAIL, email);
         newUser.set(User.PASSWORD, pass);
+        newUser.set(User.TYPE, type);
 
         try {
             int newID = PasswordEncrypt.opprettBruker(newUser);

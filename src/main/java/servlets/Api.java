@@ -17,6 +17,10 @@ import tools.repository.Clubs;
 // import tools.CustomException;
 // import tools.repository.UserRepository;
 
+/**
+ *
+ * @author Eirik Svagård
+ */
 @WebServlet(name= "Api", urlPatterns = {"/api/*"})
 public class Api extends AbstractAppServlet {
     @Override
