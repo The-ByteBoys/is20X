@@ -36,6 +36,8 @@ public class ParseExcelServlet extends AbstractAppServlet {
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
 
+        out.print("<script src='https://code.jquery.com/jquery-3.5.1.min.js'></script>");
+
         // Create a factory for disk-based file items
         DiskFileItemFactory factory = new DiskFileItemFactory();
 
@@ -262,7 +264,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                                 newRow.add(insertFormElement(key, timeString, "", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
                             }*/
                             else {
-                                newRow.add(insertFormElement(key, mylist.get(key).toString()));
+                                newRow.add(insertFormElement(key, mylist.get(key).toString(), "", "pattern=\"[0-9]+(\\.[0-9]*)?\""));
                             }
                         }
                         else {
@@ -276,7 +278,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                 rowNum++;
             }
 
-            out.print("<form method='post' action='postExcel' target='_blank'>");
+            out.print("<form method='post' id='tableForm"+i+"' action='postExcel' target='_blank'>");
             out.print(htmlTable);
             out.print("<select name=\"sex\"> " +
                     "<option value='-'>Velg kjønn</option> " +
@@ -291,7 +293,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                     "    <option>11</option>\n" +
                     "    <option>44</option>\n" +
                     "</select>");
-            out.print("<input type='submit' value='Submit all' onclick='document.getElementById(\"table"+i+"\").style.display = \"none\";'>");
+            out.print("<input type='submit' value='Submit all' onclick='if($(\"#tableForm"+i+" input:invalid\").length == 0){ $(\"#table"+i+"\").hide(); }'>");
             out.print("</form>");
             out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
             out.print("<p>** 3000 Tid er regnet ut fra 3000 Total i excel.</p></div><hr>");
