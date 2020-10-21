@@ -8,11 +8,13 @@
 <div style="text-align: center">
     <h1>User Login</h1>
     <form action="login" method="post">
-        <label for="username">Username:</label>
-        <input name="email" size="30" />
+        <label>Username:
+            <input name="email" size="30" />
+        </label>
         <br><br>
-        <label for="password">Password:</label>
-        <input type="password" name="password" size="30" />
+        <label>Password:
+            <input type="password" name="password" size="30" />
+        </label>
         <br><br>
         <button type="submit">Login</button>
     </form>
