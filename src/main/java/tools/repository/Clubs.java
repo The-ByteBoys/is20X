@@ -6,12 +6,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import enums.*;
 import models.ClubModel;
 // import models.UserModel;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import tools.DbTool;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 // import tools.CustomException;
 
 public class Clubs {
@@ -45,20 +54,19 @@ public class Clubs {
         // Check if input is a number, else assume its a name
         try{
             int newNeedle = Integer.parseInt(needle);
-            queryWhere = "club_id = "+newNeedle;
+            queryWhere = "c.club_id = "+newNeedle;
         }
         catch( Exception e){
-            queryWhere = "name = '"+needle+"'";
+            queryWhere = "c.name = '"+needle+"'";
         }
 
         try {
-            String query = "SELECT c.club_id, c.name, CONCAT(u.fName, ' ', u.lName) owner FROM club c INNER JOIN user u ON c.owner = u.user_id WHERE "+queryWhere;
+            String query = "SELECT c.club_id, c.name FROM club c WHERE "+queryWhere;
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while(rs.next()){
                 club = new ClubModel(rs.getInt("club_id"), rs.getString("name"));
-                club.set(Club.OWNER, rs.getString("owner"));
             }
 
             rs.close();
@@ -70,31 +78,23 @@ public class Clubs {
         return club;
     }
 
-    public static void addClub(String newClubName) throws SQLException {
-        Connection db = null;
-        PreparedStatement prepareStatement = null;
-        
-        try {
-            db = DbTool.getINSTANCE().dbLoggIn();
-            ResultSet rs = null;
-            String query = "INSERT INTO club (name, owner) VALUES(?,?)";
-            prepareStatement = db.prepareStatement(query);
-            prepareStatement.setString(1, newClubName);
-            prepareStatement.setObject(2, 1); // CURRENTLY LOGGED IN USER
+    public static int addClub(String newClubName) throws SQLException, NamingException {
 
-            rs = prepareStatement.executeQuery();
+        // Check if the club already exists
+        ClubModel checkClubExist = getClub(newClubName);
+        if(checkClubExist != null){
+            return (int) checkClubExist.get(Club.ID);
+        }
 
-            rs.close();
-        }
-        catch(SQLException e){
-            e.printStackTrace();
-            throw e;
-        }
-        finally {
-            if(db != null){
-                db.close();
-            }
-        }
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("name", newClubName);
+
+        Context ctx = new InitialContext();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
+
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("club").usingGeneratedKeyColumns("club_id");
+        return insert.executeAndReturnKey(parameters).intValue();
+
     }
 
 }

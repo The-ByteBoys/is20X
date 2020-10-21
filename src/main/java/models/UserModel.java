@@ -3,14 +3,12 @@ package models;
 import enums.*;
 
 public class UserModel extends AbstractModel {
-    public UserModel(String fname, String lname, String email, String password){
+    public UserModel(int id, String email, String type, String password){
         super();
 
-        // field.put(User.ID, id);
-        field.put(User.FNAME, fname);
-        field.put(User.LNAME, lname);
-        // field.put(User.ATHLETEID, );
+        field.put(User.ID, id);
         field.put(User.EMAIL, email);
+        field.put(User.TYPE, type);
         field.put(User.PASSWORD, password);
     }
 

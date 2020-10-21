@@ -1,59 +1,39 @@
 package tools;
 
-import enums.*;
-import models.*;
-
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserAuth {
-    public static UserModel checkLogin(String username, String password, HttpServletResponse response) throws SQLException, IOException {
+    public static boolean checkLogin(String username, String password) throws SQLException {
+        Connection db = null;
+        PreparedStatement statement = null;
+        boolean returnBool = false;
 
-        UserModel userModel = null;
-        try {
-            Connection db = null;
-            PreparedStatement statement = null;
+        db = DbTool.getINSTANCE().dbLoggIn();
 
-            db = DbTool.getINSTANCE().dbLoggIn();
+        ResultSet rs = null;
 
-            ResultSet rs = null;
+        statement = db.prepareStatement("SELECT * FROM user WHERE email = ? AND password = ?");
+        statement.setString(1, username);
+        statement.setString(2, PasswordEncrypt.getKrypterPassord(password));
+        rs = statement.executeQuery();
 
-            statement = db.prepareStatement("SELECT * FROM user WHERE email = ? AND pass = ?");
-            statement.setString(1, username);
-            statement.setString(2, PasswordEncrypt.getKrypterPassord(password));
-            rs = statement.executeQuery();
-
-            if (rs.next()) {
-                userModel = new UserModel();
-                userModel.set(User.FNAME, rs.getString("fname"));
-                userModel.set(User.LNAME, rs.getString("lname"));
-            }
-
-            rs.close();
-            db.close();
-
-            if(userModel != null){
-                // successfull login
-                PrintWriter out = response.getWriter();
-                Cookie ck = new Cookie("auth", username);
-                ck.setMaxAge(600);
-
-                response.addCookie(ck);
-                response.sendRedirect("home.jsp");
+        while(rs.next()){
+            if(rs.getString("email").equals(username)) {
+                returnBool = true;
             }
         }
-        catch(SQLException | IOException e){
-            throw e;
-        }
-        return userModel;
+
+        rs.close();
+        db.close();
+
+        return returnBool;
     }
 
     public static boolean verifyLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {

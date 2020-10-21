@@ -10,10 +10,15 @@
 <h2>Register</h2>
 <p>
     <form method="POST" action="userregistration">
-        <input name="userFname" type="text" placeholder="Firstname">
-        <input name="userLname" type="text" placeholder="Lastname">
+<%--        <input name="userFname" type="text" placeholder="Firstname">--%>
+<%--        <input name="userLname" type="text" placeholder="Lastname">--%>
         <input name="userEmail" type="email" placeholder="Email">
         <input name="userPass" type="password" placeholder="Password">
+        <select name="userType">
+            <option value="ATHLETE">Athlete</option>
+            <option value="COACH">Coach</option>
+            <option value="ADMIN">Admin</option>
+        </select>
         <input name="submit" type="submit" value="Register">
     </form>
 </p>
