@@ -56,12 +56,14 @@ public class ParseExcelServlet extends AbstractAppServlet {
         } catch (FileUploadException e) {
 //            e.printStackTrace();
 
-            out.print("<form method=\"POST\" enctype=\"multipart/form-data\" action=\"parseExcel\">\n" +
-                    "    File to upload: <input type=\"file\" name=\"upfile\"><br/>\n" +
-                    "    Notes about the file: <input type=\"text\" name=\"note\"><br/>\n" +
-                    "    <br/>\n" +
-                    "    <input type=\"submit\" value=\"Press\"> to upload the file!\n" +
-                    "</form>");
+            out.print("<div style='text-align: center; margin-top: 15vh;'>\n" +
+                    "<form method=\"POST\" enctype=\"multipart/form-data\" action=\"parseExcel\">\n" +
+                    "    <h3><b>Upload an .xlsx file to start parsing</b></h3>\n" +
+                    "    <p><label>.xlsx to upload: <input type=\"file\" name=\"upfile\" accept=\"application/*\" /></label></p>\n" +
+                    "    " +
+                    "<p><label><input type=\"submit\" value=\"Press\"> to upload the file!</label></p>\n" +
+                    "</form>\n" +
+                    "</div>");
             return;
         }
 
@@ -92,18 +94,16 @@ public class ParseExcelServlet extends AbstractAppServlet {
     }
 
     private void processUploadedFile(FileItem item, PrintWriter out){
-        out.print("File: "+item.getName()+"<br>\n");
-        out.print("Content-type "+item.getContentType()+"<br>\n");
 
-        // CHECKS
         if(item.getName().contains(".xlsx")){
-            out.println("File is a xlsx document!<br>");
-
             try {
+                // Initiate download location
                 File uploadedFile = new File("/opt/payara/excel/tempfile");
 
+                // Delete file if it exists
                 if(uploadedFile.exists()){ uploadedFile.delete(); }
 
+                // Write to the file
                 item.write(uploadedFile);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -115,6 +115,16 @@ public class ParseExcelServlet extends AbstractAppServlet {
                 ExcelReader er = new ExcelReader();
                 er.chooseDocument("/opt/payara/excel/tempfile");
 
+                out.print("<h1>Reading from file: "+item.getName()+"</h1>\n" +
+                        "<p>\n" +
+                        "    <label>År: <input onchange='$(\".yearPicker\").val( this.val() );' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 50px;' /></label>\n" +
+                        "    <select onchange='$(\".weekPicker\").val( this.val() );' name='week'>\n" +
+                        "        <option>Velg uke</option>\n" +
+                        "        <option>2</option>\n" +
+                        "        <option>11</option>\n" +
+                        "        <option>44</option>\n" +
+                        "    </select>\n" +
+                        "</p>");
                 parseExcel(er, out);
 
                 er.closeWb();
@@ -122,6 +132,9 @@ public class ParseExcelServlet extends AbstractAppServlet {
                 e.printStackTrace();
             }
 
+        }
+        else {
+            out.print("Unexpected filetype. Expected xlsx");
         }
 
     }
@@ -150,7 +163,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                 out.print("<p>Sheet '"+sheetName+"' might be without content</p><hr>\n");
                 continue;
             }
-            out.print("<h3 onclick='document.getElementById(\"table"+i+"\").style.display = \"block\";'>Sheet: "+sheetName+"</h3>");
+            out.print("<h3>Ark: "+sheetName+" [<span style='font-weight: normal; text-decoration: underline;' onclick='$(\"#table"+i+"\").slideToggle(200);'>Toggle view</span>]</h3>");
             out.print("<div id='table"+i+"'>");
 
             htmlTable = new HtmlTableUtil("Fornavn", "Etternavn", "Fødselsår", "Klubb");
@@ -184,7 +197,13 @@ public class ParseExcelServlet extends AbstractAppServlet {
                     } catch (Exception ignored) {
                     }
                 }
-                newRow.add(insertFormElement("birth", String.valueOf(newBirth)));
+                if(sheetName.toLowerCase().contains("senior")){
+                    newRow.add(insertFormElement("birth", String.valueOf(newBirth)));
+                }
+                else {
+                    newRow.add(insertFormElement("birth", String.valueOf(newBirth), "", "pattern=\"[0-9]{4}\""));
+                }
+
 
                 String newClubs = mylist.get("klubb").toString().trim();
                 newRow.add(insertFormElement("clubs", newClubs));
@@ -280,20 +299,20 @@ public class ParseExcelServlet extends AbstractAppServlet {
 
             out.print("<form method='post' id='tableForm"+i+"' action='postExcel' target='_blank'>");
             out.print(htmlTable);
-            out.print("<select name=\"sex\"> " +
+            out.print("<select class='sexPicker' name=\"sex\"> " +
                     "<option value='-'>Velg kjønn</option> " +
                     "<option value='M'>Menn</option> " +
                     "<option value='F'>Kvinner</option> " +
                     "<option value='O'>Andre</option> " +
                     "</select>");
-            out.print("<label>År: <input type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 50px;' /></label>");
-            out.print("<select name='week'>\n" +
+            out.print("<label>År: <input class='yearPicker' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 50px;' /></label>");
+            out.print("<select class='weekPicker' name='week'>\n" +
                     "    <option>Velg uke</option>\n" +
                     "    <option>2</option>\n" +
                     "    <option>11</option>\n" +
                     "    <option>44</option>\n" +
                     "</select>");
-            out.print("<input type='submit' value='Submit all' onclick='if($(\"#tableForm"+i+" input:invalid\").length == 0){ $(\"#table"+i+"\").hide(); }'>");
+            out.print("<input type='submit' value='Submit all' onclick='if($(\"#tableForm"+i+" input:invalid\").length == 0){ $(\"#table"+i+"\").slideUp(); }'>");
             out.print("</form>");
             out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
             out.print("<p>** 3000 Tid er regnet ut fra 3000 Total i excel.</p></div><hr>");
