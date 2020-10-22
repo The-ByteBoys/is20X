@@ -6,9 +6,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.sql.SQLException;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,36 +17,39 @@ import models.*;
 import tools.repository.*;
 import tools.excel.ExcelReader;
 
+/**
+ *
+ * @author Eirik Svagård
+ */
 @WebServlet(name= "ResultsParserServlet", urlPatterns = {"/parseresults"})
 public class ResultsParserServlet extends AbstractAppServlet {
     @Override
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         writeResponse(request, response, "Parse Excel Files");
     }
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
 
-
-        Integer numNewClubs = 0;
-        Integer numNewAthletes = 0;
+        int numNewClubs = 0;
+        int numNewAthletes = 0;
 
         out.print("<h1>Importing excel data</h1>");
 
         String file;
         int sheet;
         String sex;
-        Boolean dryrun = true;
+        boolean dryrun = true;
 
         try {
             file = req.getParameter("file");
             sheet = Integer.parseInt(req.getParameter("sheet"));
             sex = req.getParameter("sex");
-            dryrun = req.getParameter("dryrun")!=null?true:false;
-            // if(req.getParameter("dryrun") == null){
-                // dryrun = false;
-            // }
+
+            // set dryrun = false if none of the above statements are not null, and dryrun == null
+            if(file != null && sheet >= 0 && sex != null){
+                dryrun = req.getParameter("dryrun") != null;
+            }
         } catch(Exception e){
             out.print("Please use a numeric sheet-number: "+e);
             e.printStackTrace();
@@ -57,13 +57,11 @@ public class ResultsParserServlet extends AbstractAppServlet {
         }
         
         if(file == null || sheet < 0 || sex == null){
-            out.print("Please provide all arguments: file, sheet, sex. <br>\nE.G: "+req.getRequestURL()+"?file=2020-11.xlsx&sheet=0&sex=mann");
-            return;
+            out.print("Doing a dry-run! To insert into database please provide all arguments: file, sheet, sex. <br>\nE.G: "+req.getRequestURL()+"?file=2020-11.xlsx&sheet=0&sex=mann");
         }
 
 
-        /** Insert first document, first 'page', into database */
-        ExcelReader er = null;
+        ExcelReader er;
         try {
             er = new ExcelReader();
             er.chooseDocument("/opt/payara/excel/"+file);
@@ -71,13 +69,14 @@ public class ResultsParserServlet extends AbstractAppServlet {
         }
         catch (Exception e){
             e.printStackTrace();
-            out.print("Failed to read document. <br>\n"+e);
+            out.print("Failed to read document: <br>\n"+e);
             return;
         }
 
         ArrayList<String> clubs = new ArrayList<>();
+        List<ClubModel> clubModels;
         try {
-            List<ClubModel> clubModels = Clubs.getClubs();
+            clubModels = Clubs.getClubs();
             for(ClubModel c : clubModels){
                 clubs.add( c.get(Club.NAME).toString() );
             }
@@ -87,81 +86,145 @@ public class ResultsParserServlet extends AbstractAppServlet {
             out.print("Failed to load clubs from database! Exception: "+e+"<br>\n");
         }
 
-        /** LOOP going over rows in the excel document */
-        int row = 0;
-        Object firstCell = "first";
-        while(!firstCell.equals("")){
-            HashMap<String, Object> mylist = er.getRowValues(row);
-            firstCell = mylist.get("navn");
+        out.print("<p><b>Import from <i>"+file+"</i></b></p>\n" +
+                "<table>\n" +
+                "    <thead>\n" +
+                "        <tr>\n" +
+                "            <th>Fornavn</th>\n" +
+                "            <th>Etternavn</th>\n" +
+                "            <th>Klubb</th>\n" +
+                "            <th>Født</th>\n" +
+                "            <th>5000w</th>\n" +
+                "            <th>2000w</th>\n" +
+                "            <th>60\"</th>\n" +
+                "            <th>ligg.ro</th>\n" +
+                "            <th>knebøy</th>\n" +
+                "        " +
+                "</tr>\n" +
+                "    " +
+                "</thead>\n" +
+                "    <tbody>\n" +
+                "    ");
 
-            if(firstCell == null){
+
+        /* LOOP going over rows in the excel document */
+        int row = 0;
+
+        while(true){
+            HashMap<String, Object> mylist = er.getRowValues(row);
+
+            // Stop the loop if the name-cell is empty
+            if(mylist.get("navn") == null){
                 break;
             }
 
-            // TRIM to get rid of spaces at the end or beginning of cells:
-            String newName = mylist.get("navn").toString().trim();
-            String newClub = mylist.get("klubb").toString().trim();
+            // Get the name-field from dataset and put each name in a String[]. TRIM to get rid of spaces at the end or beginning of cells
+            String[] newNames = mylist.get("navn").toString().trim().split(" ");
 
-            Integer newBirth = 0;
+            // Last name is the last name in string
+            String newLastName = newNames[ newNames.length-1 ];
+
+            // First name is the rest of the name, except the last name
+            String newFirstName = String.join(" ", newNames).replace(" "+newLastName, "");
+
+
+            String[] newClubs = mylist.get("klubb").toString().trim().split("\\s*/\\s*");
+
+            int newBirth = 0;
             if(mylist.get("født") != null){
                 try {
                     newBirth = (int) ((double) mylist.get("født"));
                 }
                 catch(Exception e){
                     // e.printStackTrace();
-                    out.print("<p>Failed to add: "+newName+"<br>"+mylist.toString()+"<br><pre>"+e+"</pre></p>");
+                    out.print("<p>Failed to add: "+newFirstName+" "+newLastName+"<br>"+mylist.toString()+"<br><pre>"+e+"</pre></p>");
                     row++;
+                    // Continue to not stop execution of the other rows
                     continue;
                 }
             }
 
-
-            out.print(newName+", "+newClub+", "+(newBirth > 0?"født: "+newBirth:""));
+            out.print("<tr>\n" +
+                    "    <td>"+newFirstName+"</td>\n" +
+                    "    <td>"+newLastName+"</td>\n" +
+                    "    <td>"+String.join(", ", newClubs)+"</td>\n" +
+                    "    <td>"+newBirth+"</td>\n" +
+                    "    <td>"+mylist.get("5000Watt")+"</td>\n" +
+                    "    <td>"+mylist.get("2000Watt")+"</td>\n" +
+                    "    <td>"+mylist.get("60Watt")+"</td>\n" +
+                    "    <td>"+mylist.get("liggroKg")+"</td>\n" +
+                    "    <td>"+mylist.get("knebKg")+"</td>\n" +
+                    "    <td>");
 
 
             // ADD CLUB if it doesn't exist
-            if(!clubs.contains(newClub)){
-                out.print(" - Adding club...");
-                if(!dryrun){
-                    try {
-                        Clubs.addClub(newClub);
-                        numNewClubs++;
-                    }
-                    catch(SQLException e){
-                        // Club is most likely already added
+            for (String c: newClubs){
+                if(!clubs.contains(c)){
+                    out.print("New club");
+                    if(!dryrun){
+                        try {
+                            Clubs.addClub(c);
+                            numNewClubs++;
+                        }
+                        catch(Exception e){
+                            // Club is most likely already added
+                        }
                     }
                 }
+                clubs.add(c);
             }
-            clubs.add(newClub);
 
-            out.print("<br>");
+//            out.print("<br>");
 
 
-            // ADD ATHLETE
+            /* ADD ATHLETE */
             if(!dryrun){
                 try {
-                    ClubModel club = Clubs.getClub(newClub);
 
-                    AthleteModel newAthlete = new AthleteModel(newName, newBirth, null, sex);
-                    Athletes.addAthlete(newAthlete, (int) club.get(Club.ID));
+                    if(sex.equals("m") || sex.equals("f") || sex.equals("o")) {
 
-                    numNewAthletes++;
+                        AthleteModel newAthlete = new AthleteModel(null, newFirstName, newLastName, newBirth, sex);
+                        int newAthleteId = Athletes.addAthlete(newAthlete);
+                        numNewAthletes++;
+
+                        /* ADD ATHLETE TO CLUB(S) */
+                        if(newAthleteId > 0){
+
+                            for(String c: newClubs) {
+                                ClubModel dbClub = Clubs.getClub(c);
+
+                                if(dbClub != null){
+                                    Athletes.addAthleteToClub(newAthleteId, (int) dbClub.get(Club.ID));
+                                }
+                                else {
+                                    out.print("Failed to add athlete ("+newFirstName+" "+newLastName+") to club ("+c+")!<br>\n");
+                                }
+                            }
+                        }
+
+                    }
+                    else {
+                        out.print("Please set a sex that is either 'm', 'f' or 'o'");
+                        break;
+                    }
                 }
-                catch(SQLException e){
-                    out.print("<b>Athlete most likely already exists.</b>");
+                catch(Exception e){
+                    out.print("<b onclick='this.nextElementSibling.style.display = \"initial\";'>Athlete probably already added.</b><span style='display: none'><br>"+e+"</span>\n");
                 }
+
             }
 
-            out.println("<hr>");
+            /* ADD DATA */
+
+
+
             row++;
+            out.print("</td>\n"+"</tr>");
         }
 
-        try {
-            er.closeWb();
-        }
-        catch(IOException e){
-            //fuck off
-        }
+        out.print("</tbody>\n"+"</table>");
+
+        er.closeWb();
 
         out.print("<h3>Added "+numNewClubs+" new clubs and "+numNewAthletes+" new athletes!");
     }

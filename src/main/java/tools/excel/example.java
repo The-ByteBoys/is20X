@@ -2,7 +2,6 @@ package tools.excel;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,9 +12,9 @@ public class example {
         ExcelReader er = new ExcelReader();
         er.chooseDocument("src/main/java/tools/excel/excelDocuments/2016_11.xlsx");
         er.getSheet(1);
-        HashMap<String, Object> mylist = er.getRowValues(4);
+        HashMap<String, Object> myList = er.getRowValues(5);
 
-        for (Map.Entry<String, Object> set : mylist.entrySet()) {
+        for (Map.Entry<String, Object> set : myList.entrySet()) {
             System.out.println(set.getKey() + " = " + set.getValue());
         }
 

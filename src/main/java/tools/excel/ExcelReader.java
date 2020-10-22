@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 
@@ -44,9 +45,25 @@ public class ExcelReader {
         sheet = wb.getSheetAt(sheetIndex);
     }
 
-    public void closeWb() throws IOException {
-        wb.close();
+    public int getNumberOfSheets(){
+        return wb.getNumberOfSheets();
     }
+
+    public String getSheetName(int sheetIndex){
+        return wb.getSheetName(sheetIndex);
+    }
+
+
+    public void closeWb() {
+        try {
+            wb.close();
+        } catch (IOException e) {
+            PrintWriter pw = new PrintWriter(System.out);
+            pw.println("There is no workbook to close!");
+            e.printStackTrace();
+        }
+    }
+   
 
 
     /**
@@ -54,7 +71,7 @@ public class ExcelReader {
      * @param rowNumber the number of the row.
      * @return HashMap a hashMap that holds all the values assign to a key.
      */
-    public  HashMap<String, Object> getRowValues(int rowNumber) {
+    public HashMap<String, Object> getRowValues(int rowNumber) {
         Row row = sheet.getRow(rowNumber + 3); //+3 to ignore the 3 first rows.
         Iterator<Cell> cell = row.cellIterator(); // For jumping to the next cell.
         HashMap<String, Object> rowValues = new HashMap<>(); //Holds the key as a string, and the value as a object. Can be converted to string and Integer later.
@@ -90,7 +107,7 @@ public class ExcelReader {
      * And because of that you need to auto generate different keys for the different classes.
      * @return ArrayList the ArrayList you will use in getRowValues().
      */
-    private  ArrayList<String> keyGenerator(){
+    public ArrayList<String> keyGenerator(){
         Row row = sheet.getRow(0);
         String athleteClass = row.getCell(0).getStringCellValue(); //The first cell (AI) of the sheet contains the athlete class.
         String yearBclass = row.getCell(4).getStringCellValue(); //The b classes have some differences in the 2020 reports. So we need this field.

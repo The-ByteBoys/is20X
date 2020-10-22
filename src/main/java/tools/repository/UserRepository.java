@@ -12,7 +12,7 @@ import enums.*;
 
 public class UserRepository {
 
-    public static void addUser(UserModel user, PrintWriter p) {
+    /*public static void addUser(UserModel user, PrintWriter p) {
         Connection db = null;
         PreparedStatement insertNewUser = null;
         try {
@@ -36,7 +36,7 @@ public class UserRepository {
             }
         }
 
-    }
+    }*/
 
     public static String getUserName(String username, PrintWriter p) {
         Connection db = null;
@@ -46,7 +46,7 @@ public class UserRepository {
         try {
             db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
-            String query = "SELECT * FROM roro.user where User_Email = ?";
+            String query = "SELECT * FROM roro.user where email = ?";
             prepareStatement =  db.prepareStatement(query);
             prepareStatement.setString(1, username);
             rs = prepareStatement.executeQuery();
@@ -62,7 +62,7 @@ public class UserRepository {
         return toReturn;
     }
 
-    public static UserModel getUser(String username){
+    /*public static UserModel getUser(String username){
         Connection db = null;
         PreparedStatement prepareStatement = null;
 
@@ -70,7 +70,7 @@ public class UserRepository {
         try {
             db = DbTool.getINSTANCE().dbLoggIn();
             ResultSet rs = null;
-            String query = "SELECT fname, lname, email FROM roro.users WHERE email = ?";
+            String query = "SELECT email FROM roro.user WHERE email = ?";
             prepareStatement = db.prepareStatement(query);
             prepareStatement.setString(1, username);
             rs = prepareStatement.executeQuery();
@@ -83,6 +83,6 @@ public class UserRepository {
             throwables.printStackTrace();
         }
         return toReturn;
-    }
+    }*/
 
 }
