@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel = "stylesheet" type = "text/css" href="css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <meta charset="utf-8">
     <title>Roforbundet</title>
 </head>
 <body>
+<div id="nav-placeholder">
+
+</div>
+
+<script>
+    $(function(){
+        $("#nav-placeholder").load("nav.html");
+    });
+</script>
 <div style="text-align: center">
     <h1>User Login</h1>
     <form action="login" method="post">
