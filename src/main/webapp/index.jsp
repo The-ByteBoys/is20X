@@ -5,8 +5,10 @@
     <title>Roing Webapp</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel = "stylesheet" type = "text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css"/>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+
 </head>
 <body style="text-align: center;">
 
@@ -14,15 +16,24 @@
 
 </div>
 
+<script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
 <script>
     $(function(){
         $("#nav-placeholder").load("nav.html");
     });
+    const themeConfig = new ThemeConfig();
+    themeConfig.initTheme();
 </script>
+
+<div style="position: absolute;top: 5px;right: 5px;margin: 10px;height: 30px;">
+    <script> const darkSwitch = writeDarkSwitch(themeConfig);</script>
+</div>
+
+
 
 
 <h1>Roing webapp</h1>
-<table class="table table-bordered">
+<table class="table table-striped table-bordered">
     <thead>
     <tr>
         <th scope="col">Rank</th>

@@ -5,6 +5,7 @@
     <link rel = "stylesheet" type = "text/css" href="css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
     <title>Start Page</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
@@ -17,6 +18,8 @@
     $(function(){
         $("#nav-placeholder").load("nav.html");
     });
+    const themeConfig = new ThemeConfig();
+    themeConfig.initTheme();
 </script>
 <h1>Roing webapp</h1>
 <h2>Register</h2>
@@ -34,5 +37,8 @@
         <input name="submit" type="submit" value="Register">
     </form>
 </p>
+<div style="position: absolute;top: 5px;right: 5px;margin: 10px;height: 30px;">
+    <script> const darkSwitch = writeDarkSwitch(themeConfig);</script>
+</div>
 </body>
 </html>
