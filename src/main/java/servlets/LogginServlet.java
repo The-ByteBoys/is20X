@@ -29,9 +29,11 @@ public class LogginServlet extends AbstractAppServlet {
 
         try {
             PrintWriter out = response.getWriter();
-            if(UserAuth.checkLogin(username, password)){
+            String token = UserAuth.checkLogin(username, password);
+
+            if(token != null){
                 /* SUCCESSFUL LOGIN */
-                Cookie ck = new Cookie("auth", PasswordEncrypt.lagToken());
+                Cookie ck = new Cookie("auth", token);
                 ck.setMaxAge(600);
 
                 response.addCookie(ck);
