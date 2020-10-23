@@ -170,7 +170,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                         }
                         catch (Exception e){
                             // e.printStackTrace();
-                            out.print(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Didn't understand input field (key: "+key+"): "+values[i]+"</b><span style='display: none'><br>"+e+"</span>\n");
+                            out.print(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Didn't understand input field (key: "+key+"): "+values[i]+"</b><span style='display: none'><br>"+e+"<br></span>\n");
                         }
                     }
 
@@ -181,7 +181,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                         Results.addResult(newResult);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        out.print(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add result for exercise: "+key+"</b><span style='display: none'><br>"+e+"</span>\n");
+                        out.print(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add result for exercise: "+key+"</b><span style='display: none'><br>"+e+"<br></span>\n");
                     }
                 }
             }
@@ -207,7 +207,7 @@ public class PostExcelServlet extends AbstractAppServlet {
             }
             catch(Exception e){
                 e.printStackTrace();
-                toReturn.append(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add athlete to club</b><span style='display: none'><br>").append(e).append("</span>\n");
+                toReturn.append(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add athlete to club</b><span style='display: none'><br>").append(e).append("<br></span>\n");
             }
         }
         return toReturn.toString();

@@ -38,6 +38,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
 
         out.print(htmlConstants.getHtmlHead("Upload File"));
+        out.print("<div class=\"container-fluid\" style=\"text-align: left;\">");
 
         // Create a factory for disk-based file items
         DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -92,6 +93,8 @@ public class ParseExcelServlet extends AbstractAppServlet {
                 processUploadedFile(item, out);
             }
         }
+
+        out.print("</div>");
     }
 
     private void processUploadedFile(FileItem item, PrintWriter out){
@@ -116,7 +119,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                 ExcelReader er = new ExcelReader();
                 er.chooseDocument("/opt/payara/excel/tempfile");
 
-                out.print("<h1>Reading from file: "+item.getName()+"</h1>\n" +
+                out.print("<h2>Reading from file: "+item.getName()+"</h2>\n" +
                         "<p>\n" +
                         "    <label>År: <input onchange='$(\".yearPicker\").val( this.value );' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px;' /></label>\n" +
                         "    <select onchange='$(\".weekPicker\").val( this.value );' name='week'>\n" +
@@ -288,7 +291,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                             }
                         }
                         else {
-                            newRow.add(insertFormElement(key, ""));
+                            newRow.add(insertFormElement(key, "", "", "pattern=\"[0-9]+(\\.[0-9]*)?\""));
                         }
                     }
 
@@ -299,6 +302,8 @@ public class ParseExcelServlet extends AbstractAppServlet {
             }
 
             out.print("<form method='post' id='tableForm"+i+"' action='postExcel' target='_blank'>");
+            out.print("<div class=\"\">");
+
             out.print(htmlTable);
             out.print("<select class='sexPicker' name=\"sex\"> " +
                     "<option value='-'>Velg kjønn</option> " +
@@ -314,6 +319,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                     "    <option>44</option>\n" +
                     "</select>");
             out.print("<input type='submit' value='Submit all' onclick='if($(\"#tableForm"+i+" input:invalid\").length == 0){ $(\"#table"+i+"\").slideUp(); }'>");
+            out.print("</div>");
             out.print("</form>");
             out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
             out.print("<p>** 3000 Tid er regnet ut fra 3000 Total i excel.</p></div><hr>");
@@ -329,15 +335,16 @@ public class ParseExcelServlet extends AbstractAppServlet {
     }
 
     public String insertFormElement(String fieldName, String value, String cssClass, String extra){
-        String toReturn = "<input type='text' name='"+fieldName+"' value='"+value+"'";
+        String toReturn = "<input type='text' name='"+fieldName+"' value='"+value+"' class='form-control";
         if(!cssClass.isEmpty()){
-            toReturn += " class='"+cssClass+"'";
+            toReturn += "  "+cssClass+"";
         }
+        toReturn += "'";
         if(!extra.isEmpty()){
             toReturn += " "+extra;
         }
 
-        toReturn += "/>";
+        toReturn += " />";
 
         return toReturn;
     }

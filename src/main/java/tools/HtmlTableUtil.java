@@ -69,7 +69,7 @@ public class HtmlTableUtil {
     @Override
     public String toString(){
         StringBuilder toReturn = new StringBuilder();
-        toReturn.append("<table>");
+        toReturn.append("<table class='table table-striped table-bordered'>");
         toReturn.append("<thead><tr><th>");
         toReturn.append(String.join("</th><th>",tableHeader));
         toReturn.append("</th></tr></thead>");
