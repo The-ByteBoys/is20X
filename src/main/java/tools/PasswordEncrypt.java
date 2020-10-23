@@ -18,15 +18,9 @@ public class PasswordEncrypt {
 
     public static String lagToken() {
         SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[10];
+        byte[] bytes = new byte[20];
         random.nextBytes(bytes);
-        StringBuilder returnToken = new StringBuilder();
-
-        for(byte bit : bytes){
-            returnToken.append( String.format("%x", bit));
-        }
-
-        return returnToken.toString();
+        return bytes.toString();
     }
 
     private static String PASSWORD_SECRET = "FrityrstektSnitzel";
