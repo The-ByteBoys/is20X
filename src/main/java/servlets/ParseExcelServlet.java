@@ -7,6 +7,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import tools.HtmlTableUtil;
 import tools.excel.ExcelReader;
+import tools.html.htmlConstants;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,7 +37,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
 
-        out.print("<script src='https://code.jquery.com/jquery-3.5.1.min.js'></script>");
+        out.print(htmlConstants.getHtmlHead("Upload File"));
 
         // Create a factory for disk-based file items
         DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -117,8 +118,8 @@ public class ParseExcelServlet extends AbstractAppServlet {
 
                 out.print("<h1>Reading from file: "+item.getName()+"</h1>\n" +
                         "<p>\n" +
-                        "    <label>År: <input onchange='$(\".yearPicker\").val( this.val() );' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 50px;' /></label>\n" +
-                        "    <select onchange='$(\".weekPicker\").val( this.val() );' name='week'>\n" +
+                        "    <label>År: <input onchange='$(\".yearPicker\").val( this.value );' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px;' /></label>\n" +
+                        "    <select onchange='$(\".weekPicker\").val( this.value );' name='week'>\n" +
                         "        <option>Velg uke</option>\n" +
                         "        <option>2</option>\n" +
                         "        <option>11</option>\n" +
@@ -305,7 +306,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                     "<option value='F'>Kvinner</option> " +
                     "<option value='O'>Andre</option> " +
                     "</select>");
-            out.print("<label>År: <input class='yearPicker' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 50px;' /></label>");
+            out.print("<label>År: <input class='yearPicker' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px;' /></label>");
             out.print("<select class='weekPicker' name='week'>\n" +
                     "    <option>Velg uke</option>\n" +
                     "    <option>2</option>\n" +
