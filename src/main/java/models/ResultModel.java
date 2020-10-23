@@ -3,13 +3,14 @@ package models;
 import enums.Result;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * @author Eirik Svagård
  */
 public class ResultModel extends AbstractModel {
 
-    public ResultModel(int athleteid, int exerciseid, double result, Date dateTime, String resultType){
+    public ResultModel(int athleteid, int exerciseid, double result, Timestamp dateTime, String resultType){
         super();
 
         field.put(Result.ATHLETEID, athleteid);
