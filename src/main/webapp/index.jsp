@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -13,6 +14,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
+    <!-- MDBootstrap Datatables  -->
+    <link href="css/addons/datatables.min.css" rel="stylesheet">
 </head>
 <body style="text-align: center;">
 
@@ -20,7 +23,7 @@
 <script src="js/menu.js"></script>
 
 <h1>Roing webapp</h1>
-<table class="table table-striped table-bordered table-hover">
+<table id="exTable" class="table table-striped table-bordered table-hover">
     <thead>
         <tr>
             <th scope="col">Rank</th>
@@ -74,6 +77,14 @@
         </tr>
     </tbody>
 </table>
+<!-- MDBootstrap Datatables  -->
+<script type="text/javascript" src="js/addons/datatables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#exTable').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>
 
 </body>
 </html>
