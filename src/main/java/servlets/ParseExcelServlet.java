@@ -61,7 +61,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
             out.print("<div style='text-align: center; margin-top: 15vh;'>\n" +
                     "<form method=\"POST\" enctype=\"multipart/form-data\" action=\"parseExcel\">\n" +
                     "    <h3><b>Upload an .xlsx file to start parsing</b></h3>\n" +
-                    "    <p><label>.xlsx to upload: <input type=\"file\" name=\"upfile\" accept=\"application/*\" /></label></p>\n" +
+                    "    <p><label>.xlsx to upload: <input type=\"file\" name=\"upfile\" accept=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\" /></label></p>\n" +
                     "    " +
                     "<p><label><input type=\"submit\" value=\"Press\"> to upload the file!</label></p>\n" +
                     "</form>\n" +
@@ -167,8 +167,8 @@ public class ParseExcelServlet extends AbstractAppServlet {
                 out.print("<p>Sheet '"+sheetName+"' might be without content</p><hr>\n");
                 continue;
             }
-            out.print("<h3>Ark: "+sheetName+" [<span style='font-weight: normal; text-decoration: underline;' onclick='$(\"#table"+i+"\").slideToggle(200);'>Toggle view</span>]</h3>");
-            out.print("<div id='table"+i+"'>");
+            out.print("<h3>Ark: "+sheetName+" [<span style='font-weight: normal; text-decoration: underline;' onclick='$(\"#table"+(i+1)+"\").slideToggle(200);'>Toggle view</span>]</h3>");
+            out.print("<div id='table"+(i+1)+"'>");
 
             htmlTable = new HtmlTableUtil("Fornavn", "Etternavn", "Fødselsår", "Klubb");
 
@@ -220,16 +220,16 @@ public class ParseExcelServlet extends AbstractAppServlet {
                         }
                         if(mylist.get(key) != null){
 //                            if(key.matches("(.)Tid")){
-//                            if(key.equals("5000Watt") || key.equals("3000Watt") || key.equals("2000Watt")){
-                            if(key.equals("5000Tid") || key.equals("2000Tid")){
+                            /*if(key.equals("5000Watt") || key.equals("2000Watt")){
+//                            if(key.equals("5000Tid") || key.equals("2000Tid")){
                                 /**
                                  * 391 = 2.80 / x³
                                  *
                                  * x = Math.pow(2.80 / 391, 3)
-                                 */
+                                 * /
                                 try {
 
-                                    int distance = Integer.parseInt(key.replace("Tid", ""));
+                                    int distance = Integer.parseInt(key.replace("Watt", ""));
 
                                     double pace = Math.pow(2.80 / Double.parseDouble(mylist.get(key.replace("Tid", "Watt")).toString()), 1.0/3.0);
                                     double time = pace*distance;
@@ -247,7 +247,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                                     newRow.add(insertFormElement(key, "math failed", "failed", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
                                 }
                             }
-                            else if(key.equals("3000Tid") && mylist.get("3000Total") != null){
+                            else */if(key.equals("3000Tid") && mylist.get("3000Total") != null){
                                 try {
                                     double totalSecs = Double.parseDouble(mylist.get("3000Total").toString());
                                     double totalMinutes = totalSecs/60;
@@ -262,7 +262,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                                     newRow.add(insertFormElement(key, "math failed", "failed", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
                                 }
                             }
-                            /*else if(key.equals("5000Tid") || key.equals("3000Tid") || key.equals("2000Tid")){
+                            else if(key.equals("5000Tid") || key.equals("2000Tid")){
 
 
                                 String timeString = mylist.get(key).toString().trim();
@@ -284,8 +284,9 @@ public class ParseExcelServlet extends AbstractAppServlet {
                                     DecimalFormat df = new DecimalFormat("##.##");
                                     timeString = (int) Math.floor(newMinutes)+":"+df.format(newSeconds);
                                 }
+
                                 newRow.add(insertFormElement(key, timeString, "", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
-                            }*/
+                            }
                             else {
                                 newRow.add(insertFormElement(key, mylist.get(key).toString(), "", "pattern=\"[0-9]+(\\.[0-9]*)?\""));
                             }
@@ -301,7 +302,7 @@ public class ParseExcelServlet extends AbstractAppServlet {
                 rowNum++;
             }
 
-            out.print("<form method='post' id='tableForm"+i+"' action='postExcel' target='_blank'>");
+            out.print("<form method='post' id='tableForm"+(i+1)+"' action='postExcel' target='_blank'>");
             out.print("<div class=\"\">");
 
             out.print(htmlTable);
@@ -318,11 +319,20 @@ public class ParseExcelServlet extends AbstractAppServlet {
                     "    <option>11</option>\n" +
                     "    <option>44</option>\n" +
                     "</select>");
-            out.print("<input type='submit' value='Submit all' onclick='if($(\"#tableForm"+i+" input:invalid\").length == 0){ $(\"#table"+i+"\").slideUp(); }'>");
+            out.print("<input type='submit' value='Submit all' onclick='if($(\"#tableForm"+(i+1)+" input:invalid\").length == 0){ $(\"#table"+i+"\").slideUp(); }'>");
             out.print("</div>");
             out.print("</form>");
-            out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
-            out.print("<p>** 3000 Tid er regnet ut fra 3000 Total i excel.</p></div><hr>");
+//            out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
+            out.print("<p>* 3000 Tid er regnet ut fra 3000 Total i excel.</p></div><hr>");
+            out.print("<script>\n" +
+                    "    " +
+                    "validateTable(\"table"+(i+1)+"\");\n" +
+                    "    " +
+                    "$(\"#table"+(i+1)+" input\").on('change', function(){\n" +
+                    "        validateTable(\"table"+(i+1)+"\");\n" +
+                    "    " +
+                    "});\n" +
+                    "</script>");
         }
     }
 
@@ -354,15 +364,15 @@ public class ParseExcelServlet extends AbstractAppServlet {
             case "5000Watt":
                 return "5000 Watt";
             case "5000Tid":
-                return "5000 Tid*";
+                return "5000 Tid";
             case "3000Total":
                 return "3000 Total";
             case "3000Tid":
-                return "3000 Tid**";
+                return "3000 Tid*";
             case "2000Watt":
                 return "2000 Watt";
             case "2000Tid":
-                return "2000 Tid*";
+                return "2000 Tid";
             case "60Watt":
                 return "60 Watt";
             case "liggroProsent":

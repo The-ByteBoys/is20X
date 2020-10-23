@@ -26,3 +26,18 @@ function updateToTheme(){
         $("table").removeClass("table-dark");
     }
 }
+
+function validateTable(tableid){
+    $("#"+tableid+" tbody tr").each(function(key, val){
+        validateTableRow(tableid, "row"+key);
+    })
+}
+
+function validateTableRow(tableid, tablerow){
+    if( $("#"+tableid+" ."+tablerow+" input:invalid").length > 0){
+        $("#"+tableid+" ."+tablerow).css("background-color", "#ee00003d");
+    }
+    else {
+        $("#"+tableid+" ."+tablerow).css("background-color", "");
+    }
+}

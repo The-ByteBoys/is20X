@@ -12,11 +12,7 @@ public class HtmlTableUtil {
     private ArrayList<String> tableHeader;
     private ArrayList< ArrayList<String> > tableRows;
     private String editCell;
-
-
-    public HtmlTableUtil(){
-
-    }
+    private String tableID;
 
     public HtmlTableUtil(HashMap<String, Object> inputs){
         Iterator iterator = inputs.entrySet().iterator();
@@ -37,6 +33,10 @@ public class HtmlTableUtil {
         if(!tableHeader.contains(newHeader)){
             tableHeader.add(newHeader);
         }
+    }
+
+    public void setTableID(String newTableID){
+        tableID = newTableID;
     }
 
     public void addHeaders(Set<String> headerName){
@@ -69,18 +69,22 @@ public class HtmlTableUtil {
     @Override
     public String toString(){
         StringBuilder toReturn = new StringBuilder();
-        toReturn.append("<table class='table table-striped table-bordered'>");
+
+        toReturn.append("<table ").append(tableID != null ? "id='" + tableID + "' " : "").append("class='table table-striped table-bordered'>");
         toReturn.append("<thead><tr><th>");
         toReturn.append(String.join("</th><th>",tableHeader));
         toReturn.append("</th></tr></thead>");
 
         toReturn.append("<tbody>");
 
+        int tableRow = 0;
         for(ArrayList<String> row : tableRows){
-            toReturn.append("<tr>");
-            toReturn.append("<td>"+String.join("</td><td>", row)+"</td>");
+            tableRow++;
+
+            toReturn.append("<tr class='row").append(tableRow).append("'>");
+            toReturn.append("<td>").append(String.join("</td><td>", row)).append("</td>");
             if(editCell != null){
-                toReturn.append("<td>"+editCell+"</td>");
+                toReturn.append("<td>").append(editCell).append("</td>");
             }
             toReturn.append("</tr>");
         }
