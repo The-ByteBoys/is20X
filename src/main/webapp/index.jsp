@@ -10,12 +10,17 @@
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css"/>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
     <!-- MDBootstrap Datatables  -->
     <link href="css/addons/datatables.min.css" rel="stylesheet">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
+
+    <!-- MDBootstrap Datatables  -->
+    <script type="text/javascript" src="js/addons/datatables.min.js"></script>
 </head>
 <body style="text-align: center;">
 
@@ -77,8 +82,7 @@
         </tr>
     </tbody>
 </table>
-<!-- MDBootstrap Datatables  -->
-<script type="text/javascript" src="js/addons/datatables.min.js"></script>
+
 <script>
     $(document).ready(function () {
         $('#exTable').DataTable();
