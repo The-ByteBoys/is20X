@@ -1,26 +1,44 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: toringebrekka
-  Date: 21/10/2020
-  Time: 14:45
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<!DOCTYPE html>
+<html lang="no">
 <head>
-    <title>Roforbundet</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Club Register - Roforbundet</title>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css"/>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
+
 </head>
 <body>
-<div style="text-align: center">
-    <h1>Club Registration</h1>
-    <form action="login" method="post">
-        <label>
-            Club name:
-            <input name="name" size="30" />
-        </label>
-        <br><br>
-        <button type="submit">Register</button>
-    </form>
-</div>
+
+    <div id="nav-placeholder"></div>
+    <script src="js/menu.js"></script>
+
+        <div class="container" style="text-align: center;">
+            <h1>Club register</h1>
+
+            <form action="registration" method="post">
+                <div class="form-group">
+                    <label>Username:
+                        <input type="clubname" class="form-control" name="clubname" size="30" />
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Owner ID:
+                        <input type="ownerid" class="form-control" name="ownerid" size="30" />
+                    </label>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Register" class="btn btn-secondary" />
+                </div>
+            </form>
+        </div>
 </body>
 </html>
