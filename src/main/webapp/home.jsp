@@ -1,5 +1,6 @@
-<%@ page import ="tools.UserAuth" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<% UserAuth.verifyLogin(request, response); %>
+<%@ page import ="tools.UserAuth" import="models.UserModel" import="enums.User" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<% UserModel currentUser = UserAuth.requireLogin(request, response);
+if(currentUser == null){ return; } %>
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -22,5 +23,6 @@
 
 <h1>Roing webapp</h1>
 <h2>Min Side</h2>
+<p>Welcome back, <%=currentUser.get(User.EMAIL)%></p>
 </body>
 </html>

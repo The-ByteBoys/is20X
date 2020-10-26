@@ -15,6 +15,11 @@ $(function(){
                 updateToTheme();
             });
         updateToTheme();
+
+        // Set login-button content
+        if($("#loginInfo").length > 0){
+            $("#navLogin").html( $("#loginInfo").html() );
+        }
     });
 });
 
