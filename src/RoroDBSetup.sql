@@ -76,11 +76,11 @@ CREATE TABLE club_exercise (
 
 
 CREATE TABLE class (
-    Class_id INT AUTO_INCREMENT,
+    class_id INT AUTO_INCREMENT,
     name varchar(10) NOT NULL,
     ageFrom INT(2) NOT NULL,
 
-    CONSTRAINT class_PK PRIMARY KEY (Class_id)
+    CONSTRAINT class_PK PRIMARY KEY (class_id)
 );
 
 CREATE TABLE class_period (
@@ -96,11 +96,11 @@ CREATE TABLE class_period (
 );
 
 CREATE TABLE test_set (
-    testClass INT NOT NULL,
+    class INT NOT NULL,
     exercise INT NOT NULL,
 
     CONSTRAINT test_set_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
-    CONSTRAINT test_set_testClass_FK FOREIGN KEY (testClass) REFERENCES class(Class_id)
+    CONSTRAINT test_set_Class_FK FOREIGN KEY (class) REFERENCES class(class_id)
     /*CONSTRAINT test_set_PK PRIMARY KEY (exercise, testClass)*/
 );
 
@@ -170,7 +170,7 @@ INSERT INTO class_period (start, athlete, class)
         ('2019-11-19', 1, 1);
 
 
-INSERT INTO test_set (testClass, exercise)
+INSERT INTO test_set (class, exercise)
     VALUES
         (1, 1), (1, 2), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
         (2, 1), (2, 2), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 13), (2, 12),
