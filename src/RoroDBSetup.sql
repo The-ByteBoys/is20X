@@ -13,7 +13,6 @@ CREATE TABLE athlete (
 
     CONSTRAINT athlete_PK PRIMARY KEY (athlete_id),
     CONSTRAINT athlete_UN UNIQUE KEY (firstName, lastName, birth)
-
 );
 
 
@@ -76,24 +75,13 @@ CREATE TABLE club_exercise (
 );
 
 
-CREATE TABLE test_class (
-    testClass_id INT AUTO_INCREMENT,
-    name varchar(10) NOT NULL,
-
-    CONSTRAINT test_class_PK PRIMARY KEY (testClass_id)
-);
-
-
 CREATE TABLE class (
-    class_id INT AUTO_INCREMENT,
-    class_sex ENUM('F', 'M', 'O') NOT NULL,
-    age_From INT(2) NOT NULL,
-    testClass INT NOT NULL,
+    Class_id INT AUTO_INCREMENT,
+    name varchar(10) NOT NULL,
+    ageFrom INT(2) NOT NULL,
 
-    CONSTRAINT class_PK PRIMARY KEY (class_id),
-    CONSTRAINT class_testClass_FK FOREIGN KEY (testClass) REFERENCES test_class(testClass_id)
+    CONSTRAINT class_PK PRIMARY KEY (Class_id)
 );
-
 
 CREATE TABLE class_period (
     period_id INT AUTO_INCREMENT,
@@ -102,16 +90,18 @@ CREATE TABLE class_period (
     class INT NOT NULL ,
 
     CONSTRAINT class_period_PK PRIMARY KEY (period_id),
+    CONSTRAINT class_period_class_FK FOREIGN KEY (class) REFERENCES class(class_id),
     CONSTRAINT class_period_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id)
+
 );
 
 CREATE TABLE test_set (
-    exercise INT NOT NULL,
     testClass INT NOT NULL,
+    exercise INT NOT NULL,
 
     CONSTRAINT test_set_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
-    CONSTRAINT test_set_testClass_FK FOREIGN KEY (testClass) REFERENCES test_class(testClass_id),
-    CONSTRAINT test_set_PK PRIMARY KEY (exercise, testClass)
+    CONSTRAINT test_set_testClass_FK FOREIGN KEY (testClass) REFERENCES class(Class_id)
+    /*CONSTRAINT test_set_PK PRIMARY KEY (exercise, testClass)*/
 );
 
 
@@ -129,8 +119,19 @@ CREATE TABLE result (
 );
 
 
+INSERT INTO class (name, ageFrom)
+    VALUES
+        ('SENIOR', 19),
+        ('A', 17),
+        ('B', 15),
+        ('C', 13);
+
 INSERT INTO athlete (firstName, lastName, birth, sex)
-    VALUES ('Johannes', 'Birkeland', 2000, 'M');
+    VALUES ('Johannes', 'Birkeland', 2000, 'M'),
+           ('Mona', 'Bond', 1950, 'F'),
+           ('Per', 'Olavsen', 2003, 'M'),
+           ('Sonja', 'Haraldsen', 2005, 'F'),
+           ('Frank', 'Haarfagre', 2007, 'M');
 
 INSERT INTO user (email, password, userType)
     VALUES
@@ -167,27 +168,6 @@ INSERT INTO club_exercise (exercise, club) VALUES (3, 1);
 INSERT INTO class_period (start, athlete, class)
     VALUES
         ('2019-11-19', 1, 1);
-
-
-
-INSERT INTO test_class (name)
-    VALUES
-        ('Senior'),
-        ('A'),
-        ('B'),
-        ('C');
-
-
-INSERT INTO class (class_sex, age_From, testClass)
-    VALUES
-        ('M', 19, 1),
-        ('F', 19, 1),
-        ('M', 17, 2),
-        ('F', 17, 2),
-        ('M', 15, 3),
-        ('F', 15, 3),
-        ('M', 13, 4),
-        ('F', 13, 4);
 
 
 INSERT INTO test_set (testClass, exercise)
