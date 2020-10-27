@@ -1,6 +1,5 @@
 package servlets;
 
-import com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2RTFDTM;
 import enums.*;
 import models.*;
 import tools.repository.*;
@@ -13,9 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.sql.Date;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
@@ -48,12 +45,6 @@ public class PostExcelServlet extends AbstractAppServlet {
         String[] clubs = req.getParameterValues("clubs");
 
         Map<String, String[]> parameters = req.getParameterMap();
-        String[] extraParameters = parameters.keySet().toArray(new String[0]);
-
-//        out.print(extraParameters.toString());
-//        return;
-//    }
-//    public void never(HttpServletRequest req, PrintWriter out, String[] lastNames, String[] firstNames, String[] births, String[] clubs, String[] extraParameters){
 
         String sex = req.getParameter("sex");
         String year = req.getParameter("year");
@@ -109,24 +100,14 @@ public class PostExcelServlet extends AbstractAppServlet {
             out.print( addToClubs(newAthleteId, newClubs));
 
 
-            // CLASS
-            // TODO: insert athlete class?
-            // start = birth[i]
-            // insert into class_period (start, athlete, class) VALUES(
-
-
-            // Results?
-//            parameters.forEach((key, value) -> {
-
             for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
                 String key = entry.getKey();
 
-                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week")) {
+                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week") && !key.equals("3000Total")) {
                     String[] values = entry.getValue();
                     if(values[i].equals("")){
                         continue;
                     }
-                    // param = 5000Watt, 5000Tid, 2000Watt, 2000Tid, 60Watt, liggeroProsent, liggeroKg, osv..
 
                     int exerciseId = getExerciseIdFromKey(key);
                     if(exerciseId <= 0){
@@ -196,13 +177,13 @@ public class PostExcelServlet extends AbstractAppServlet {
         return Athletes.addAthlete(newAthlete);
     }
 
-    private String addToClubs(int AthleteId, String[] newClubs){
+    private String addToClubs(int athleteId, String[] newClubs){
         StringBuilder toReturn = new StringBuilder();
         for (String c : newClubs){
             c = c.trim();
             try {
                 int newClubId = Clubs.addClub(c);
-                Athletes.addAthleteToClub(AthleteId, newClubId);
+                Athletes.addAthleteToClub(athleteId, newClubId);
                 toReturn.append(" - added to club \"").append(c).append("\"");
             }
             catch(Exception e){

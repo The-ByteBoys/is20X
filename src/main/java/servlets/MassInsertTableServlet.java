@@ -18,27 +18,28 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
-import java.util.*;
-
-// import models.AthleteModel;
-// import tools.repository.Athletes;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  *
  * @author Eirik Svagård
  */
-@WebServlet(name= "ParseExcelServlet", urlPatterns = {"/parseExcel"})
-public class ParseExcelServlet extends AbstractAppServlet {
+@WebServlet(name= "MassInsert", urlPatterns = {"/massinsert"})
+public class MassInsertTableServlet extends AbstractAppServlet {
+
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        writeResponse(request, response, "Import Excel - Roing Webapp");
+        writeResponseHeadless(request, response);
     }
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
 
-        out.print(htmlConstants.getHtmlHead("Upload File"));
-        out.print("<div class=\"container-fluid\" style=\"text-align: left;\">");
+        out.print(htmlConstants.getHtmlHead("Sett inn data - Roing Webapp"));
+        out.print("<div class=\"container-fluid\" style=\"text-align: left; overflow-x: auto; padding-bottom: 20px;\" id='tableHolder'>");
 
         // Create a factory for disk-based file items
         DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -52,21 +53,12 @@ public class ParseExcelServlet extends AbstractAppServlet {
         ServletFileUpload upload = new ServletFileUpload(factory);
 
         // Parse the request
-        List<FileItem> items;
+        List<FileItem> items = null;
         try {
             items = upload.parseRequest(req);
         } catch (FileUploadException e) {
 //            e.printStackTrace();
-
-            out.print("<div style='text-align: center; margin-top: 15vh;'>\n" +
-                    "<form method=\"POST\" enctype=\"multipart/form-data\" action=\"parseExcel\">\n" +
-                    "    <h3><b>Upload an .xlsx file to start parsing</b></h3>\n" +
-                    "    <p><label>.xlsx to upload: <input type=\"file\" name=\"upfile\" accept=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\" /></label></p>\n" +
-                    "    " +
-                    "<p><label><input type=\"submit\" value=\"Press\"> to upload the file!</label></p>\n" +
-                    "</form>\n" +
-                    "</div>");
-            return;
+//            return;
         }
 
         String cssStyle =
@@ -78,23 +70,49 @@ public class ParseExcelServlet extends AbstractAppServlet {
                         "}\n" +
                         "input[type=\"text\"]:invalid {\n" +
                         "    " +
-                        "color: red;\n" +
+                        "color: #ff0000;\n" +
                         "    " +
                         "font-weight: bold;\n" +
-                        "}";
+                        "}\n" +
+                        "td, th {\n" +
+                        "    text-align: center;\n" +
+                        "}\n";
 
-        out.print("<style>"+cssStyle+"</style>");
+        out.print("<style>" + cssStyle + "</style><script src='js/parseExcel.js'></script>");
 
-        // Process the uploaded items
-        for (FileItem item : items) {
-            if (item.isFormField()) {
-//                out.print("<br>Form field: " + item.getFieldName() + " - " + item.getName());
-            } else {
-                processUploadedFile(item, out);
+        if (items != null){
+            // Process the uploaded items
+            for (FileItem item : items) {
+                if (!item.isFormField()) {
+                    processUploadedFile(item, out);
+                }
             }
         }
 
+        out.print("<a href='uploadExcel.jsp'>Du kan også laste opp en fil</a>");
         out.print("</div>");
+
+        out.print("<div class='container-sm' style='max-width: 500px; " +
+                "margin-top: 20px;'>\n" +
+                "    " +
+                "<form id='addNewTable' action='#' class='form-group'>\n" +
+                "    " +
+                "<!--" +
+                "    <input type='text' id='tableName' class='form-control'>-->\n" +
+                "        <select class='form-control'>\n" +
+                "            <option value='senior'>Senior</option>\n" +
+                "    " +
+                "        <option value='jA'>Junior A</option>\n" +
+                "    " +
+                "        <option value='jB'>Junior B</option>\n" +
+                "    " +
+                "        <option value='jC'>Junior C</option>\n" +
+                "        " +
+                "</select>\n" +
+                "        <input type='submit' class='form-control' value='Add new table'>\n" +
+                "    " +
+                "</form>\n" +
+                "</div>");
     }
 
     private void processUploadedFile(FileItem item, PrintWriter out){
@@ -121,8 +139,8 @@ public class ParseExcelServlet extends AbstractAppServlet {
 
                 out.print("<h2>Reading from file: "+item.getName()+"</h2>\n" +
                         "<p>\n" +
-                        "    <label>År: <input onchange='$(\".yearPicker\").val( this.value );' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px;' /></label>\n" +
-                        "    <select onchange='$(\".weekPicker\").val( this.value );' name='week'>\n" +
+                        "    <label>År: <input onchange='$(\".yearPicker\").val( this.value );' type='number' name='year' min='1980' max='2100' value='"+ Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px; display: initial;' class='form-control' /></label>\n" +
+                        "    <select onchange='$(\".weekPicker\").val( this.value );' name='week' style='width: initial; display: initial;' class='form-control'>\n" +
                         "        <option>Velg uke</option>\n" +
                         "        <option>2</option>\n" +
                         "        <option>11</option>\n" +
@@ -172,24 +190,41 @@ public class ParseExcelServlet extends AbstractAppServlet {
 
             htmlTable = new HtmlTableUtil("Fornavn", "Etternavn", "Fødselsår", "Klubb");
 
-//            htmlTable.addEditCell("Edit");
+            htmlTable.addEditCell("<img src='add.png' onClick='addNewRow($(this).parent().parent());' style='cursor: pointer;' alt='+' />&nbsp;<img src='remove.png' onClick='deleteRow($(this).parent().parent());' style='cursor: pointer;' alt='-' />");
 
             rowNum = 0;
             while(true) {
-                HashMap<String, Object> mylist = er.getRowValues(rowNum);
+                HashMap<String, Object> mylist;
+                try {
+                    mylist = er.getRowValues(rowNum);
+                }
+                catch (NullPointerException e){
+                    e.printStackTrace();
+                    break;
+                }
+
                 if (mylist.get("navn") == null) {
                     break;
                 }
                 ArrayList<String> newRow = new ArrayList<>();
 
-                // Get the name-field from dataset and put each name in a String[]. TRIM to get rid of spaces at the end or beginning of cells
-                String[] newNames = mylist.get("navn").toString().trim().split(" ");
+                String newLastName;
+                String newFirstName;
 
-                // Last name is the last name in string
-                String newLastName = newNames[newNames.length - 1];
+                // If name is in form Lastname, Firstname; set it accordingly.
+                if(mylist.get("navn").toString().contains(",")) {
+                    String[] newNames = mylist.get("navn").toString().split(",");
+                    newLastName = newNames[0].trim();
+                    newFirstName = newNames[1].trim();
+                }
+                else {
+                    // Get the name-field from dataset and put each name in a String[]. TRIM to get rid of spaces at the end or beginning of cells
+                    String[] newNames = mylist.get("navn").toString().trim().split(" ");
 
-                // First name is the rest of the name, except the last name
-                String newFirstName = String.join(" ", newNames).replace(" " + newLastName, "");
+                    newLastName = newNames[newNames.length - 1];
+
+                    newFirstName = String.join(" ", newNames).replace(" " + newLastName, "");
+                }
 
                 newRow.add(insertFormElement("fname", newFirstName, "longInput"));
                 newRow.add(insertFormElement("lname", newLastName, "longInput", "required"));
@@ -214,56 +249,32 @@ public class ParseExcelServlet extends AbstractAppServlet {
 
                 ArrayList<String> currentKeys = er.keyGenerator();
                 for (String key : currentKeys) {
-                    if(!key.equals("navn") && !key.equals("født") && !key.equals("klubb") && !key.equals("rank") && !key.equals("score") && !key.equals("3000Total")){
+                    if(!key.equals("navn") && !key.equals("født") && !key.equals("klubb") && !key.equals("rank") && !key.equals("score")){ //  && (!key.equals("3000Total") && mylist.containsKey("3000Tid"))
                         if(rowNum == 0){
                             htmlTable.addHeader(beautifyTableHeader(key));
                         }
+
+                        String numberFormatPattern = "pattern=\"[0-9-]+(\\.[0-9]*)?\"";
+                        String timeFormatPattern = "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\"";
+
                         if(mylist.get(key) != null){
-//                            if(key.matches("(.)Tid")){
-                            /*if(key.equals("5000Watt") || key.equals("2000Watt")){
-//                            if(key.equals("5000Tid") || key.equals("2000Tid")){
-                                /**
-                                 * 391 = 2.80 / x³
-                                 *
-                                 * x = Math.pow(2.80 / 391, 3)
-                                 * /
-                                try {
+                            if(key.equals("3000Tid") && mylist.get("3000Total") != null){
 
-                                    int distance = Integer.parseInt(key.replace("Watt", ""));
-
-                                    double pace = Math.pow(2.80 / Double.parseDouble(mylist.get(key.replace("Tid", "Watt")).toString()), 1.0/3.0);
-                                    double time = pace*distance;
-                                    double totalMinutes = time/60;
-                                    int minutes = (int) Math.floor(totalMinutes);
-                                    double secounds = ((totalMinutes-minutes)*60);
-//
-                                    DecimalFormat df = new DecimalFormat("00.##");
-                                    String timeString = minutes+":"+df.format(secounds);
-
-//                                newRow.add(insertFormElement(key, mylist.get(key).toString())+"<br>"+);
-                                    newRow.add(insertFormElement(key, timeString, "", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
-                                }
-                                catch (ClassCastException e){
-                                    newRow.add(insertFormElement(key, "math failed", "failed", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
-                                }
-                            }
-                            else */if(key.equals("3000Tid") && mylist.get("3000Total") != null){
                                 try {
                                     double totalSecs = Double.parseDouble(mylist.get("3000Total").toString());
                                     double totalMinutes = totalSecs/60;
                                     int minutes = (int) Math.floor(totalMinutes);
                                     double secounds = ((totalMinutes-minutes)*60);
-//
+
                                     DecimalFormat df = new DecimalFormat("00.##");
                                     String timeString = minutes+":"+df.format(secounds);
-                                    newRow.add(insertFormElement(key, timeString, "", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
+                                    newRow.add(insertFormElement(key, timeString, "", timeFormatPattern));
                                 }
                                 catch (NumberFormatException e){
-                                    newRow.add(insertFormElement(key, "math failed", "failed", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
+                                    newRow.add(insertFormElement(key, "math failed", "failed", timeFormatPattern));
                                 }
                             }
                             else if(key.equals("5000Tid") || key.equals("2000Tid")){
-
 
                                 String timeString = mylist.get(key).toString().trim();
 
@@ -276,23 +287,31 @@ public class ParseExcelServlet extends AbstractAppServlet {
                                     timeString = timeString.replace("F",":");
                                     timeString = timeString.replace("S",".");
                                 }
-                                else if(timeString.matches("[0-9]+.[0-9]{15,}")){
-                                    double newTime = Double.valueOf(timeString);
+                                else if(timeString.matches("[0-9]+.0[0-9]+")){
+
+                                    double newTime = Double.parseDouble(timeString);
                                     double newMinutes = newTime*24*60;
                                     double newSeconds = (newMinutes-Math.floor(newMinutes))*60;
 
-                                    DecimalFormat df = new DecimalFormat("##.##");
+                                    DecimalFormat df = new DecimalFormat("00.##");
                                     timeString = (int) Math.floor(newMinutes)+":"+df.format(newSeconds);
                                 }
 
-                                newRow.add(insertFormElement(key, timeString, "", "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\""));
+
+                                // Calculate time from watts for verification of this value
+                                String checkValueTxt = "";
+                                if(mylist.containsKey( key.replace("Tid", "Watt") )){
+                                    checkValueTxt = " "+wattsToTimeStr(key.replace("Tid", ""), mylist.get(key.replace("Tid", "Watt")).toString());
+                                }
+
+                                newRow.add(insertFormElement(key, timeString, "", timeFormatPattern +checkValueTxt));
                             }
                             else {
-                                newRow.add(insertFormElement(key, mylist.get(key).toString(), "", "pattern=\"[0-9]+(\\.[0-9]*)?\""));
+                                newRow.add(insertFormElement(key, mylist.get(key).toString(), "", numberFormatPattern));
                             }
                         }
                         else {
-                            newRow.add(insertFormElement(key, "", "", "pattern=\"[0-9]+(\\.[0-9]*)?\""));
+                            newRow.add(insertFormElement(key, "", "", numberFormatPattern));
                         }
                     }
 
@@ -306,20 +325,20 @@ public class ParseExcelServlet extends AbstractAppServlet {
             out.print("<div class=\"\">");
 
             out.print(htmlTable);
-            out.print("<select class='sexPicker' name=\"sex\"> " +
+            out.print("<select class='sexPicker form-control' name=\"sex\" style='width: initial; display: initial;'> " +
                     "<option value='-'>Velg kjønn</option> " +
                     "<option value='M'>Menn</option> " +
                     "<option value='F'>Kvinner</option> " +
                     "<option value='O'>Andre</option> " +
                     "</select>");
-            out.print("<label>År: <input class='yearPicker' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px;' /></label>");
-            out.print("<select class='weekPicker' name='week'>\n" +
+            out.print("<label>År: <input class='yearPicker form-control' type='number' name='year' min='1980' max='2100' value='"+Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px; display: initial;' /></label>");
+            out.print("<select class='weekPicker form-control' name='week' style='width: initial; display: initial;'>\n" +
                     "    <option>Velg uke</option>\n" +
                     "    <option>2</option>\n" +
                     "    <option>11</option>\n" +
                     "    <option>44</option>\n" +
                     "</select>");
-            out.print("<input type='submit' value='Submit all' onclick='if($(\"#tableForm"+(i+1)+" input:invalid\").length == 0){ $(\"#table"+i+"\").slideUp(); }'>");
+            out.print("<input type='submit' value='Submit all' class='form-control' style='width: initial; display: initial;' onclick='if($(\"#tableForm"+(i+1)+" input:invalid\").length == 0){ $(\"#table"+(i+1)+"\").slideUp(); }'>");
             out.print("</div>");
             out.print("</form>");
 //            out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
@@ -333,6 +352,24 @@ public class ParseExcelServlet extends AbstractAppServlet {
                     "    " +
                     "});\n" +
                     "</script>");
+        }
+    }
+
+    private String wattsToTimeStr(String distanceStr, String value){
+        try {
+            int distance = Integer.parseInt(distanceStr);
+
+            double pace = Math.pow(2.80 / Double.parseDouble(value), 1.0/3.0);
+            double time = pace*distance;
+            double totalMinutes = time/60;
+            int minutes = (int) Math.floor(totalMinutes);
+            double secounds = ((totalMinutes-minutes)*60);
+
+            DecimalFormat df = new DecimalFormat("00.##");
+            return minutes+":"+df.format(secounds);
+        }
+        catch (NumberFormatException e){
+            return value;
         }
     }
 
