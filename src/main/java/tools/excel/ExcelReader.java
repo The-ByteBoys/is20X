@@ -20,6 +20,7 @@ public class ExcelReader {
 
     XSSFSheet sheet;
     XSSFWorkbook wb;
+    String fileName;
 
     //empty constructor
     public ExcelReader() {}
@@ -34,6 +35,7 @@ public class ExcelReader {
     public void chooseDocument(String path) throws IOException, InvalidFormatException {
         File file  = new File(path);
         wb = new XSSFWorkbook(file);
+        fileName = path;
     }
 
     /**
@@ -110,14 +112,13 @@ public class ExcelReader {
     public ArrayList<String> keyGenerator(){
         Row row = sheet.getRow(0);
         String athleteClass = row.getCell(0).getStringCellValue(); //The first cell (AI) of the sheet contains the athlete class.
-        String yearBclass = row.getCell(4).getStringCellValue(); //The b classes have some differences in the 2020 reports. So we need this field.
         ArrayList<String> keys = new ArrayList<>();
 
         //Boolean variables that check if the A1 contains something that can ID the athlete class.
         boolean senior = athleteClass.contains("senior");
         boolean a = athleteClass.contains("A");
         boolean b = athleteClass.contains("B"); //For the reports before 2020
-        boolean b2020 = athleteClass.contains("B") && yearBclass.contains("2020"); //For the 2020 reports.
+        boolean b2020 = athleteClass.contains("B") && fileName.contains("2020") && fileName.contains("11"); //For the 2020 uke 11 reports.
         boolean c = athleteClass.contains("C");
         boolean allClasses_C_Excluded = senior || a || b || b2020;
 
