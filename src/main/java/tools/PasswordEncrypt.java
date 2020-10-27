@@ -16,27 +16,32 @@ import java.util.Map;
 
 public class PasswordEncrypt {
 
-    private String lagToken() {
+    public static String lagToken() {
         SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[20];
+        byte[] bytes = new byte[10];
         random.nextBytes(bytes);
-        return bytes.toString();
+        StringBuilder returnToken = new StringBuilder();
+
+        for(byte bit : bytes){
+            returnToken.append( String.format("%x", bit));
+        }
+
+        return returnToken.toString();
     }
 
     private static String PASSWORD_SECRET = "FrityrstektSnitzel";
 
-    private static String getKrypterPassord(String passord) {
+    public static String getKrypterPassord(String passord) {
         return DigestUtils.md5Hex(passord + PASSWORD_SECRET).toUpperCase();
     }
 
     public static Integer opprettBruker(UserModel bruker) throws NamingException {
 
         String passord = getKrypterPassord(bruker.get(User.PASSWORD).toString());
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("fName", bruker.get(User.FNAME));
-        parameters.put("lName", bruker.get(User.LNAME));
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put("email", bruker.get(User.EMAIL));
-        parameters.put("pass", passord);
+        parameters.put("password", passord);
+        parameters.put("userType", bruker.get(User.TYPE));
 
         Context ctx = new InitialContext();
         JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));

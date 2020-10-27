@@ -19,7 +19,7 @@ public class ServletMal extends AbstractAppServlet {
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
-        writeResponseJson(request, response, "Roing Webapp API");
+        writeResponse(request, response, "Roing Webapp API");
     }
 
     @Override

@@ -1,83 +1,49 @@
 package servlets;
 
-import models.UserModel;
+import tools.PasswordEncrypt;
 import tools.UserAuth;
-import tools.repository.UserRepository;
 import java.io.*;
 import java.sql.SQLException;
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
-import javax.xml.registry.infomodel.User;
 
 @WebServlet(name= "LogginServlet", urlPatterns = {"/login"})
 public class LogginServlet extends AbstractAppServlet {
     @Override
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        writeResponse(request, response, "Hello!");
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.sendRedirect("login.jsp");
     }
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
-        //String username = req.getParameter("uname");
-        //String nameFromDb = UserRepository.getUserName(username, out);
-        //out.format("<h1> Here is your request: %s</h1", nameFromDb);
-
-        String username = req.getParameter("email");
-        String password = req.getParameter("password");
-
-        UserModel user = null;
-
-        out.print("<h1>Login!</h1>");
-
-        try {
-            user = UserAuth.checkLogin(username, password);
-            out.print(user.toString());
-            out.print("<br>Login complete!");
-        }
-        catch( SQLException e){
-            e.printStackTrace();
-            out.print("Exception: "+e);
-        }
-
-        if(user == null){
-            out.print("Login failed");
-        }
-
+        // Never used
     }
 
-    private static final long serialVersionUID = 1L;
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
 
-    public LogginServlet() {
-        super();
-    }
-
-    /*
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-
-        /* userDAO userDao = new userDAO();
+        String username = request.getParameter("email");
+        String password = request.getParameter("password");
 
         try {
-            User user = userDao.checkLogin(username, password);
-            String destPage = "login.jsp";
+            PrintWriter out = response.getWriter();
+            String token = UserAuth.checkLogin(username, password);
 
-            if (user != null) {
-                HttpSession session = request.getSession();
-                session.setAttribute("user", user);
-                destPage = "home.jsp";
-            } else {
-                String message = "Invalid username/password";
-                request.setAttribute("message", message);
+            if(token != null){
+                /* SUCCESSFUL LOGIN */
+                Cookie ck = new Cookie("auth", token);
+                ck.setMaxAge(600);
+
+                response.addCookie(ck);
+                response.sendRedirect("home.jsp");
             }
-
-            RequestDispatcher dispatcher = request.getRequestDispatcher(destPage);
-            dispatcher.forward(request, response);
-
-        } catch (SQLException | ClassNotFoundException ex) {
-            throw new ServletException(ex);
+            else {
+                out.print("Login failed! <a href='login.jsp'>Login</a>.");
+            }
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
         }
-    }*/
+    }
 }
