@@ -152,7 +152,7 @@ INSERT INTO exercise (name, description, unit, exerciseType)
         ('3000', '', 'TIME', 'ALLEX'),
         ('2000', '', 'WATT', 'ALLEX'),
         ('2000', '', 'TIME', 'ALLEX'),
-        ('60"', '', 'WATT', 'ALLEX'),
+        ('60', 'WATT produsert på 60 sek', 'WATT', 'ALLEX'),
         ('ligg.ro', '', 'PERCENT', 'ALLEX'),
         ('ligg.ro', '', 'KG', 'ALLEX'),
         ('knebøy', '', 'PERCENT', 'ALLEX'),
