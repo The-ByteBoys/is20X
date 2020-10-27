@@ -38,7 +38,7 @@
             <tr><th><%=cl%></th></tr>
 
             <%
-                String query = "SELECT a.firstName, a.lastName, (2020 - a.birth) age,\n" +
+                String query = "SELECT a.firstName, a.lastName, a.athlete_id, (2020 - a.birth) age,\n" +
                         "        (SELECT c.name FROM class c WHERE ageFrom <= age ORDER BY ageFrom DESC LIMIT 1) class\n" +
                         "FROM athlete a;";
 
@@ -49,12 +49,13 @@
                         if (rs.getString("class").equals(cl)) {
                             String f = rs.getString("a.firstName");
                             String l = rs.getString("a.lastName");
+                            int id = rs.getInt("a.athlete_id");
 
             %>
                             <tr>
                                 <td>
                                     <label>
-                                        <input type="checkbox" name="athletes" value="<%=cl+"-"+f + " " + l%>">
+                                        <input type="checkbox" name="athletes" value="<%=cl+"-"+f + " " + l +"-"+ id%>">
                                         <%=f + " " +  l%>
                                     </label>
                                 </td>
@@ -67,10 +68,10 @@
             <tr>
                 <td>
                     <label>
-                        <select name="exercises">
+                        <select name="<%=cl%>-exercises">
                             <option disabled selected>Velg test</option>
                             <%
-                                query = "SELECT c.name, e.name, e.unit FROM EXERCISE e\n" +
+                                query = "SELECT c.name, e.name, e.unit, e.exercise_id FROM EXERCISE e\n" +
                                         "INNER JOIN test_set ts ON e.exercise_id = ts.exercise\n" +
                                         "INNER JOIN class c ON c.class_id = ts.class\n" +
                                         "WHERE c.name = '" + cl + "'";
@@ -78,8 +79,9 @@
                                 while (rs.next()) {
                                     String name = rs.getString("e.name");
                                     String unit = rs.getString("e.unit");
+                                    int exid = rs.getInt("e.exercise_id");
                             %>
-                            <option name="exercises" value="<%=cl + "-" + name+unit%>"><%=name + " " + unit%></option>
+                            <option value="<%=exid + "-" + name+unit%>"><%=name + " " + unit%></option>
                             <%
                                 }
                             %>
