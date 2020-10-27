@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <title>Club Register - Roforbundet</title>
+    <title>Club Registration - Roforbundet</title>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css"/>
@@ -22,7 +22,7 @@
     <script src="js/menu.js"></script>
 
         <div class="container" style="text-align: center;">
-            <h1>Club register</h1>
+            <h1>Club registration</h1>
 
             <form action="registration" method="post">
                 <div class="form-group">
