@@ -24,7 +24,7 @@
         <div class="container" style="text-align: center;">
             <h1>Club registration</h1>
 
-            <form action="registration" method="post">
+            <form action="clubregistration" method="POST">
                 <div class="form-group">
                     <label>Username:
                         <input type="clubname" class="form-control" name="clubname" size="30" />
