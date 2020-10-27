@@ -1,5 +1,9 @@
 package tools;
 
+import models.UserModel;
+import tools.repository.UserRepository;
+
+import javax.naming.NamingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +23,7 @@ public class UserAuth {
 
         ResultSet rs = null;
 
-        statement = db.prepareStatement("SELECT * FROM user WHERE email = ? AND password = ?");
+        statement = db.prepareStatement("SELECT user_id, email FROM user WHERE email = ? AND password = ?");
         statement.setString(1, username);
         statement.setString(2, PasswordEncrypt.getKrypterPassord(password));
         rs = statement.executeQuery();
@@ -28,7 +32,12 @@ public class UserAuth {
             if(rs.getString("email").equals(username)) {
                 toReturn = PasswordEncrypt.lagToken();
 
-                // TODO: Legg token inn i databasen
+                try {
+                    UserRepository.setUserToken(rs.getInt("user_id"), toReturn);
+                } catch (NamingException e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
         }
 
@@ -38,27 +47,36 @@ public class UserAuth {
         return toReturn;
     }
 
-    public static boolean verifyLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public static UserModel verifyLogin(HttpServletRequest request) {
+        UserModel user = null;
         Cookie[] cks = request.getCookies();
         if (cks != null) {
-            for (int i = 0; i < cks.length; i++) {
-                String name = cks[i].getName();
-                String value = cks[i].getValue();
+            for (Cookie ck : cks) {
+                String name = ck.getName();
+                String value = ck.getValue();
                 if (name.equals("auth")) {
-                    return true; // exit the loop and continue the page
+                    try {
+                        user = UserRepository.getUserFromToken(value);
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+
+                    return user;
                 }
-                if (i == (cks.length - 1)) // if all cookie are not valid redirect to error page
-                {
-                    response.sendRedirect("login.jsp");
-                    return false; // to stop further execution
-                }
-                i++;
             }
-        } else {
-            response.sendRedirect("login.jsp");
-            return false; // to stop further execution
         }
-        return false;
+
+        return null;
+    }
+
+    public static UserModel requireLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        UserModel user = null;
+        user = verifyLogin(request);
+        if( user == null ){
+            response.sendRedirect("login.jsp");
+        }
+
+        return user;
     }
 
 }

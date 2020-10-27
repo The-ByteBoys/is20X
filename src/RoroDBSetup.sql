@@ -22,9 +22,16 @@ CREATE TABLE user (
     email VARCHAR(100) NOT NULL UNIQUE,
     password varchar(250) NOT NULL,
     userType enum('ADMIN', 'ATHLETE', 'COACH') NOT NULL,
-    loginCookie VARCHAR(20) NOT NULL DEFAULT '',
 
     CONSTRAINT user_PK PRIMARY KEY (user_id)
+);
+
+CREATE TABLE userLogin (
+    user INT AUTO_INCREMENT,
+    created timestamp default CURRENT_TIMESTAMP,
+    loginToken VARCHAR(20) NOT NULL,
+
+    CONSTRAINT userLogin_FK FOREIGN KEY (user) REFERENCES user(user_id)
 );
 
 

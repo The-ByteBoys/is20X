@@ -1,4 +1,5 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import ="tools.UserAuth" import="models.UserModel" import="enums.User" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<% UserModel currentUser = UserAuth.verifyLogin(request); %>
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -17,7 +18,18 @@
 <body style="text-align: center;">
 
 <div id="nav-placeholder"></div>
+<div id="loginInfo" style="display: none;">
+    <%
+        if(currentUser != null){
+            out.print("<a class=\"nav-item nav-link\" id='login' href=\"logout.jsp\">Log out</a>");
+        }
+        else {
+            out.print("<a class=\"nav-item nav-link\" id='login' href=\"login.jsp\">Login</a>");
+        }
+    %>
+</div>
 <script src="js/menu.js"></script>
+
 
 <h1>Roing webapp</h1>
 <table class="table table-striped table-bordered table-hover">
