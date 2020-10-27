@@ -32,6 +32,12 @@ public abstract class AbstractAppServlet extends HttpServlet {
             out.format(HTML_PAGE_END);
         }
     }
+    protected void writeResponseHeadless(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            writeBody(request, out);
+        }
+    }
     protected PrintWriter getWriteResponse(HttpServletResponse response, String title) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {

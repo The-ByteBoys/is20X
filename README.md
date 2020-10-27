@@ -1,5 +1,5 @@
-# is20X
-Roforbund Resultater
+# is20X - Roforbund Resultater
+This project is developed by a student-group of 6 people. The application is trying to help reporting rowing-testresults, and give a better presentation of the data, that until now is stored in public Excel documents.
 
 
 <br>
@@ -13,12 +13,14 @@ To make this work, you need to have docker installed on your system.
 
 * Edit the `src/config.properties` file to match your IP and database-user.
 ```
-username=roro
-password=passord123
-URL=jdbc:mariadb://172.17.0.1:3306
+username=roing
+password=Passord123
+URL=jdbc:mariadb://172.17.0.1:3306/roro
 ```
 
-> You find your IP by doing the following:   
+* Update the same info in `setupDataSource.cmd`. Run the script some time after the setup script is complete, or it might fail. 
+
+> You may find your IP by doing the following:   
 > 
 > You can find the IP you need by entering: `docker network inspect bridge` into your terminal.    
 > Copy the IP under "Gateway" (Typically: `172.17.0.1`)    

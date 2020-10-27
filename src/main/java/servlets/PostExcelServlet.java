@@ -1,6 +1,5 @@
 package servlets;
 
-import com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2RTFDTM;
 import enums.*;
 import models.*;
 import tools.repository.*;
@@ -14,6 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -45,12 +45,6 @@ public class PostExcelServlet extends AbstractAppServlet {
         String[] clubs = req.getParameterValues("clubs");
 
         Map<String, String[]> parameters = req.getParameterMap();
-        String[] extraParameters = parameters.keySet().toArray(new String[0]);
-
-//        out.print(extraParameters.toString());
-//        return;
-//    }
-//    public void never(HttpServletRequest req, PrintWriter out, String[] lastNames, String[] firstNames, String[] births, String[] clubs, String[] extraParameters){
 
         String sex = req.getParameter("sex");
         String year = req.getParameter("year");
@@ -106,40 +100,76 @@ public class PostExcelServlet extends AbstractAppServlet {
             out.print( addToClubs(newAthleteId, newClubs));
 
 
-            // CLASS
-            // TODO: insert athlete class
-            // start = birth[i]
-            // insert into class_period (start, athlete, class) VALUES(
+            for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
+                String key = entry.getKey();
+
+                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week") && !key.equals("3000Total")) {
+                    String[] values = entry.getValue();
+                    if(values[i].equals("")){
+                        continue;
+                    }
+
+                    int exerciseId = getExerciseIdFromKey(key);
+                    if(exerciseId <= 0){
+                        out.print(" - Didn't find exercise for key: "+key+"<br>\n");
+                        continue;
+                    }
 
 
-            // Results?
-//            parameters.forEach((key, value) -> {
-            for(String param : extraParameters) {
-                if (param != "fname" && param != "lname" && param != "birth" && param != "clubs") {
-                    // key = 5000Watt, 5000Tid, 2000Watt, 2000Tid, 60Watt, liggeroProsent, liggeroKg, osv..
-                    // TODO: get exercise based on key
-                    if (param.equals("5000Watt")) {
-                        int exerciseId = Exercises.getExerciseId("5000", "watt");
+                    // Format testTime
+                    Calendar cal = Calendar.getInstance();
+                    cal.setWeekDate(Integer.parseInt(year), Integer.parseInt(week), Calendar.MONDAY);
+
+                    Timestamp newTime = new Timestamp(cal.getTimeInMillis());
+
+                    // Fix time-fields
+                    double newValue = 0.00;
+
+                    if (key.matches("[0-9]+Tid")){
+                        String inputTime = values[i].trim();
+                        if(inputTime.matches("[0-9]+:[0-9]{1,2}(\\.[0-9]*)?")){
+                            String[] inputTimes = inputTime.split(":");
+
+                            try {
+                                int minutes = Integer.parseInt(inputTimes[0]);
+                                double seconds = Double.parseDouble(inputTimes[1]);
+
+                                newValue = minutes*60+seconds;
+                            }
+                            catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                        else {
+                            out.print(" - Time doesn't match expected format.");
+                            continue;
+                        }
+                    }
+                    else {
+                        try {
+                            newValue = Double.parseDouble(values[i]);
+                        }
+                        catch (Exception e){
+                            // e.printStackTrace();
+                            out.print(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Didn't understand input field (key: "+key+"): "+values[i]+"</b><span style='display: none'><br>"+e+"<br></span>\n");
+                        }
+                    }
 
 
-                        // Format testTime
-                        Calendar cal = Calendar.getInstance();
-                        cal.setWeekDate(Integer.parseInt(year), Integer.parseInt(week), Calendar.MONDAY);
+                    try {
+                        ResultModel newResult = new ResultModel(newAthleteId, exerciseId, newValue, newTime, "IP");
 
-                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        String testTime = sdf.format(cal.getTimeInMillis());
-
-
-                        // Insert to database
-                        // insert into result (athlete, exercise, result, date_time, result_type) VALUES (newAthleteId, exerciseId, result, testTime, "IP");
-//                        out.print("insert into result (athlete, exercise, result, date_time, result_type) VALUES (" + newAthleteId + ", " + exerciseId + ", " + parameters[param][i] + ", " + testTime + ", \"IP\");");
+                        Results.addResult(newResult);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        out.print(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add result for exercise: "+key+"</b><span style='display: none'><br>"+e+"<br></span>\n");
                     }
                 }
-//            });
             }
 
             out.print("<br>\n");
         }
+
     }
 
     private int addAthlete(String fName, String lName, int birth, String sex) throws SQLException, NamingException {
@@ -147,21 +177,89 @@ public class PostExcelServlet extends AbstractAppServlet {
         return Athletes.addAthlete(newAthlete);
     }
 
-    private String addToClubs(int AthleteId, String[] newClubs){
+    private String addToClubs(int athleteId, String[] newClubs){
         StringBuilder toReturn = new StringBuilder();
         for (String c : newClubs){
             c = c.trim();
             try {
                 int newClubId = Clubs.addClub(c);
-                Athletes.addAthleteToClub(AthleteId, newClubId);
+                Athletes.addAthleteToClub(athleteId, newClubId);
                 toReturn.append(" - added to club \"").append(c).append("\"");
             }
             catch(Exception e){
                 e.printStackTrace();
-                toReturn.append(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add athlete to club</b><span style='display: none'><br>").append(e).append("</span>\n");
+                toReturn.append(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Failed to add athlete to club</b><span style='display: none'><br>").append(e).append("<br></span>\n");
             }
         }
         return toReturn.toString();
+    }
+
+    private int getExerciseIdFromKey(String key){
+        String name;
+        String unit;
+
+        switch (key) {
+            case "5000Watt":
+                name = "5000";
+                unit = "WATT";
+                break;
+            case "5000Tid":
+                name = "5000";
+                unit = "TIME";
+                break;
+            case "3000Watt":
+                name = "3000";
+                unit = "Watt";
+                break;
+            case "3000Tid":
+                name = "3000";
+                unit = "TIME";
+                break;
+            case "2000Watt":
+                name = "2000";
+                unit = "WATT";
+                break;
+            case "2000Tid":
+                name = "2000";
+                unit = "TIME";
+                break;
+            case "60Watt":
+                name = "60\"";
+                unit = "WATT";
+                break;
+            case "liggroProsent":
+                name = "ligg.ro";
+                unit = "PERCENT";
+                break;
+            case "liggroKg":
+                name = "ligg.ro";
+                unit = "KG";
+                break;
+            case "kroppshev":
+                name = "kroppshevning";
+                unit = "REPS";
+                break;
+            case "knebProsent":
+                name = "knebøy";
+                unit = "PERCENT";
+                break;
+            case "knebKg":
+                name = "knebøy";
+                unit = "KG";
+                break;
+            case "cmSargeant":
+                name = "sargeant";
+                unit = "CM";
+                break;
+            case "antBev":
+                name = "bevegelse";
+                unit = "REPS";
+                break;
+            default:
+                return 0;
+        }
+
+        return Exercises.getExerciseId(name, unit);
     }
 
     /**

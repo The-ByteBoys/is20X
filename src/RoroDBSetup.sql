@@ -26,6 +26,14 @@ CREATE TABLE user (
     CONSTRAINT user_PK PRIMARY KEY (user_id)
 );
 
+CREATE TABLE userLogin (
+    user INT AUTO_INCREMENT,
+    created timestamp default CURRENT_TIMESTAMP,
+    loginToken VARCHAR(20) NOT NULL,
+
+    CONSTRAINT userLogin_FK FOREIGN KEY (user) REFERENCES user(user_id)
+);
+
 
 CREATE TABLE club_user (
     user INT NOT NULL,
