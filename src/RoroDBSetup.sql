@@ -13,7 +13,6 @@ CREATE TABLE athlete (
 
     CONSTRAINT athlete_PK PRIMARY KEY (athlete_id),
     CONSTRAINT athlete_UN UNIQUE KEY (firstName, lastName, birth)
-
 );
 
 
@@ -22,9 +21,16 @@ CREATE TABLE user (
     email VARCHAR(100) NOT NULL UNIQUE,
     password varchar(250) NOT NULL,
     userType enum('ADMIN', 'ATHLETE', 'COACH') NOT NULL,
-    loginCookie VARCHAR(20) NOT NULL DEFAULT '',
 
     CONSTRAINT user_PK PRIMARY KEY (user_id)
+);
+
+CREATE TABLE userLogin (
+    user INT AUTO_INCREMENT,
+    created timestamp default CURRENT_TIMESTAMP,
+    loginToken VARCHAR(20) NOT NULL,
+
+    CONSTRAINT userLogin_FK FOREIGN KEY (user) REFERENCES user(user_id)
 );
 
 
@@ -76,24 +82,13 @@ CREATE TABLE club_exercise (
 );
 
 
-CREATE TABLE test_class (
-    testClass_id INT AUTO_INCREMENT,
-    name varchar(10) NOT NULL,
-
-    CONSTRAINT test_class_PK PRIMARY KEY (testClass_id)
-);
-
-
 CREATE TABLE class (
     class_id INT AUTO_INCREMENT,
-    class_sex ENUM('F', 'M', 'O') NOT NULL,
-    age_From INT(2) NOT NULL,
-    testClass INT NOT NULL,
+    name varchar(10) NOT NULL,
+    ageFrom INT(2) NOT NULL,
 
-    CONSTRAINT class_PK PRIMARY KEY (class_id),
-    CONSTRAINT class_testClass_FK FOREIGN KEY (testClass) REFERENCES test_class(testClass_id)
+    CONSTRAINT class_PK PRIMARY KEY (class_id)
 );
-
 
 CREATE TABLE class_period (
     period_id INT AUTO_INCREMENT,
@@ -102,16 +97,18 @@ CREATE TABLE class_period (
     class INT NOT NULL ,
 
     CONSTRAINT class_period_PK PRIMARY KEY (period_id),
+    CONSTRAINT class_period_class_FK FOREIGN KEY (class) REFERENCES class(class_id),
     CONSTRAINT class_period_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id)
+
 );
 
 CREATE TABLE test_set (
+    class INT NOT NULL,
     exercise INT NOT NULL,
-    testClass INT NOT NULL,
 
     CONSTRAINT test_set_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
-    CONSTRAINT test_set_testClass_FK FOREIGN KEY (testClass) REFERENCES test_class(testClass_id),
-    CONSTRAINT test_set_PK PRIMARY KEY (exercise, testClass)
+    CONSTRAINT test_set_Class_FK FOREIGN KEY (class) REFERENCES class(class_id)
+    /*CONSTRAINT test_set_PK PRIMARY KEY (exercise, testClass)*/
 );
 
 
@@ -125,12 +122,23 @@ CREATE TABLE result (
 
     CONSTRAINT result_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT result_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
-    CONSTRAINT result_PK PRIMARY KEY (athlete, exercise)
+    CONSTRAINT result_PK PRIMARY KEY (athlete, exercise, date_time)
 );
 
 
+INSERT INTO class (name, ageFrom)
+    VALUES
+        ('SENIOR', 19),
+        ('A', 17),
+        ('B', 15),
+        ('C', 13);
+
 INSERT INTO athlete (firstName, lastName, birth, sex)
-    VALUES ('Johannes', 'Birkeland', 2000, 'M');
+    VALUES ('Johannes', 'Birkeland', 2000, 'M'),
+           ('Mona', 'Bond', 1950, 'F'),
+           ('Per', 'Olavsen', 2003, 'M'),
+           ('Sonja', 'Haraldsen', 2005, 'F'),
+           ('Frank', 'Haarfagre', 2007, 'M');
 
 INSERT INTO user (email, password, userType)
     VALUES
@@ -151,7 +159,7 @@ INSERT INTO exercise (name, description, unit, exerciseType)
         ('3000', '', 'TIME', 'ALLEX'),
         ('2000', '', 'WATT', 'ALLEX'),
         ('2000', '', 'TIME', 'ALLEX'),
-        ('60"', '', 'WATT', 'ALLEX'),
+        ('60', 'WATT produsert på 60 sek', 'WATT', 'ALLEX'),
         ('ligg.ro', '', 'PERCENT', 'ALLEX'),
         ('ligg.ro', '', 'KG', 'ALLEX'),
         ('knebøy', '', 'PERCENT', 'ALLEX'),
@@ -169,28 +177,7 @@ INSERT INTO class_period (start, athlete, class)
         ('2019-11-19', 1, 1);
 
 
-
-INSERT INTO test_class (name)
-    VALUES
-        ('Senior'),
-        ('A'),
-        ('B'),
-        ('C');
-
-
-INSERT INTO class (class_sex, age_From, testClass)
-    VALUES
-        ('M', 19, 1),
-        ('F', 19, 1),
-        ('M', 17, 2),
-        ('F', 17, 2),
-        ('M', 15, 3),
-        ('F', 15, 3),
-        ('M', 13, 4),
-        ('F', 13, 4);
-
-
-INSERT INTO test_set (testClass, exercise)
+INSERT INTO test_set (class, exercise)
     VALUES
         (1, 1), (1, 2), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
         (2, 1), (2, 2), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 13), (2, 12),
