@@ -22,6 +22,7 @@
     <h1>User Login</h1>
 
     <form action="login" method="post">
+
         <div class="form-group">
             <label>Username:
                 <input type="email" class="form-control" name="email" size="30" />
