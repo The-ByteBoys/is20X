@@ -122,7 +122,7 @@ CREATE TABLE result (
 
     CONSTRAINT result_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT result_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
-    CONSTRAINT result_PK PRIMARY KEY (athlete, exercise)
+    CONSTRAINT result_PK PRIMARY KEY (athlete, exercise, date_time)
 );
 
 
