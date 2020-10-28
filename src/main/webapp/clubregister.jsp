@@ -27,7 +27,7 @@
             <form action="clubregistration" method="POST">
                 <div class="form-group">
                     <label>Username:
-                        <input type="clubname" class="form-control" name="clubname" size="30" />
+                        <input type="clubName" class="form-control" name="clubname" size="30" />
                     </label>
                 </div>
                 <div class="form-group">

@@ -20,7 +20,7 @@ public class RegisterClub extends AbstractAppServlet {
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
 
-        out.print("<h1>Register club</h1>");
+        out.print("<h1>Registering club...</h1>");
 
         String name = req.getParameter("clubName");
 
