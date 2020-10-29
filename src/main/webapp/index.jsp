@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -10,10 +11,17 @@
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- MDBootstrap Datatables  -->
+    <link href="css/addons/datatables.min.css" rel="stylesheet">
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
+
+    <!-- MDBootstrap Datatables  -->
+    <script type="text/javascript" src="js/addons/datatables.min.js"></script>
 </head>
 <body style="text-align: center;">
 
@@ -32,7 +40,7 @@
 
 
 <h1>Roing webapp</h1>
-<table class="table table-striped table-bordered table-hover">
+<table id="exTable" class="table table-striped table-bordered table-hover">
     <thead>
         <tr>
             <th scope="col">Rank</th>
@@ -86,6 +94,13 @@
         </tr>
     </tbody>
 </table>
+
+<script>
+    $(document).ready(function () {
+        $('#exTable').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>
 
 </body>
 </html>

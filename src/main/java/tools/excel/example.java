@@ -10,9 +10,9 @@ public class example {
     public static void main(String[] args) throws IOException, InvalidFormatException {
 
         ExcelReader er = new ExcelReader();
-        er.chooseDocument("src/main/java/tools/excel/excelDocuments/2016_11.xlsx");
-        er.getSheet(1);
-        HashMap<String, Object> myList = er.getRowValues(5);
+        er.chooseDocument("src/main/java/tools/excel/excelDocuments/2020_11.xlsx");
+        er.getSheet(7);
+        HashMap<String, Object> myList = er.getRowValues(1);
 
         for (Map.Entry<String, Object> set : myList.entrySet()) {
             System.out.println(set.getKey() + " = " + set.getValue());
