@@ -31,11 +31,6 @@
                     </label>
                 </div>
                 <div class="form-group">
-                    <label>Owner ID (Coach ID):
-                        <input type="ownerid" class="form-control" name="ownerid" size="30" />
-                    </label>
-                </div>
-                <div class="form-group">
                     <input type="submit" value="Register" class="btn btn-secondary" />
                 </div>
             </form>
