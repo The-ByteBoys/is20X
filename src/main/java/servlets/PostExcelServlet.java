@@ -209,7 +209,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                 break;
             case "3000Watt":
                 name = "3000";
-                unit = "Watt";
+                unit = "WATT";
                 break;
             case "3000Tid":
                 name = "3000";
@@ -224,7 +224,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                 unit = "TIME";
                 break;
             case "60Watt":
-                name = "60\"";
+                name = "60";
                 unit = "WATT";
                 break;
             case "liggroProsent":
