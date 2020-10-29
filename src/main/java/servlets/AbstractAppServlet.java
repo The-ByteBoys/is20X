@@ -1,6 +1,8 @@
 package servlets;
 
 
+import models.UserModel;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -32,12 +34,6 @@ public abstract class AbstractAppServlet extends HttpServlet {
             out.format(HTML_PAGE_END);
         }
     }
-    protected void writeResponseHeadless(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            writeBody(request, out);
-        }
-    }
     protected PrintWriter getWriteResponse(HttpServletResponse response, String title) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
@@ -53,7 +49,25 @@ public abstract class AbstractAppServlet extends HttpServlet {
         }
     }
 
-    protected abstract void writeBody(HttpServletRequest req, PrintWriter out);
+    protected void writeResponseHeadless(HttpServletRequest request, HttpServletResponse response, UserModel currentUser) throws IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            if(currentUser != null){
+                writeBody(request, out, currentUser);
+            }
+            else {
+                writeBody(request, out);
+            }
+        }
+    }
+
+
+    protected void writeBody(HttpServletRequest req, PrintWriter out){
+        writeBody(req, out, null);
+    }
+    protected void writeBody(HttpServletRequest req, PrintWriter out, UserModel currentUser){
+        writeBody(req, out);
+    }
 
     /**
      * Handles the HTTP <code>GET</code> method.

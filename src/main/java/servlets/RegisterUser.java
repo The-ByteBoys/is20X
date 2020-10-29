@@ -1,41 +1,36 @@
 package servlets;
 
 import enums.User;
+import enums.UserLevel;
 import models.UserModel;
-import tools.PasswordEncrypt;
-import tools.repository.UserRepository;
+import tools.UserAuth;
+import tools.htmltools.HtmlConstants;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 
 @WebServlet(name = "RegisterUser", urlPatterns = {"/userregistration"})
 public class RegisterUser extends AbstractAppServlet {
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        writeResponse(request, response, "Register User");
-    }
 
-    @Override
-    protected void writeBody(HttpServletRequest req, PrintWriter out) {
+        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
 
-//        req.setContentType("text/html");
-//        PrintWriter out = response.getWriter();
+        HttpSession session = request.getSession();
 
-        out.print("<h1>Registering user...</h1>");
+        if(currentUser == null){
+            return;
+        }
 
-//        String fname=req.getParameter("userFname");
-//        String lname=req.getParameter("userLname");
-        String email=req.getParameter("userEmail");
-        String pass=req.getParameter("userPass");
-        String type=req.getParameter("userType");
+        String email=request.getParameter("userEmail");
+        String pass=request.getParameter("userPass");
+        String type=request.getParameter("userType");
 
         UserModel newUser = new UserModel();
         newUser.set(User.EMAIL, email);
@@ -43,33 +38,15 @@ public class RegisterUser extends AbstractAppServlet {
         newUser.set(User.TYPE, type);
 
         try {
-            int newID = PasswordEncrypt.opprettBruker(newUser);
-            out.print("User added with id: "+newID);
+            int newID = UserAuth.opprettBruker(newUser);
+            session.setAttribute("msg", "Succesfully added user with id: "+newID);
         }
         catch(Exception e){
             e.printStackTrace();
-            out.print("Exception! "+e);
+            session.setAttribute("error", "Failed to add user");
         }
 
-
-        /*try{
-            //Class.forName("oracle.jdbc.driver.OracleDriver");
-            //    Connection con= DriverManager.getConnection(
-            //            "jdbc:oracle:thin:@localhost:1521:xe","system","oracle");
-
-            //    PreparedStatement ps=con.prepareStatement(
-            //            "insert into registeruser values(?,?)");
-
-            ps.setString(1,n);
-            ps.setString(2,p);
-
-            int i=ps.executeUpdate();
-            if(i>0)
-                out.print("You are successfully registered...");
-
-        }catch (Exception e2) {System.out.println(e2);}
-
-        out.close();*/
+        response.sendRedirect("register.jsp");
     }
 
     /**
