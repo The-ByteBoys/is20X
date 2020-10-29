@@ -26,13 +26,8 @@
 
             <form action="clubregistration" method="POST">
                 <div class="form-group">
-                    <label>Username:
+                    <label>Club name:
                         <input type="clubName" class="form-control" name="clubname" size="30" />
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>Owner ID:
-                        <input type="ownerid" class="form-control" name="ownerid" size="30" />
                     </label>
                 </div>
                 <div class="form-group">

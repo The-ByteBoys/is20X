@@ -96,5 +96,4 @@ public class Clubs {
         return insert.executeAndReturnKey(parameters).intValue();
 
     }
-
 }
