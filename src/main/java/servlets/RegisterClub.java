@@ -2,6 +2,7 @@ package servlets;
 
 import enums.Club;
 import models.ClubModel;
+
 import tools.html.htmlConstants;
 import tools.repository.Clubs;
 
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.sql.SQLException;
 
 @WebServlet(name = "RegisterClub", urlPatterns = {"/clubregistration"})
