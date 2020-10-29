@@ -17,11 +17,6 @@
             border-collapse: collapse;
             width:300px;
         }
-
-        .floatedTable {
-            margin-right: 10px;
-            float: left;
-        }
     </style>
 </head>
 <body>
@@ -97,6 +92,7 @@
 
 
         </table>
+        <br>
     <%
         }
     %>

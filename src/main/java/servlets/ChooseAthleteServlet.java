@@ -35,11 +35,10 @@ public class ChooseAthleteServlet extends AbstractAppServlet{
             rd.forward(request, response);
 
 
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             request.setAttribute("errorMessage", "Velg minst en utøver");
             rd = request.getRequestDispatcher("/chooseAthlete.jsp");
             rd.forward(request, response);
-            //TODO: get this exception handler to work
         }
     }
 }
