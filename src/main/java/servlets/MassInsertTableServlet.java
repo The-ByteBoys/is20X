@@ -1,13 +1,16 @@
 package servlets;
 
+import enums.UserLevel;
+import models.UserModel;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import tools.HtmlTableUtil;
+import tools.htmltools.HtmlTableUtil;
+import tools.UserAuth;
 import tools.excel.ExcelReader;
-import tools.html.htmlConstants;
+import tools.htmltools.HtmlConstants;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -32,13 +35,15 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        writeResponseHeadless(request, response);
+        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
+
+        writeResponseHeadless(request, response, currentUser);
     }
 
     @Override
-    protected void writeBody(HttpServletRequest req, PrintWriter out) {
+    protected void writeBody(HttpServletRequest req, PrintWriter out, UserModel currentUser) {
 
-        out.print(htmlConstants.getHtmlHead("Sett inn data - Roing Webapp"));
+        out.print(HtmlConstants.getHtmlHead("Sett inn data - Roing Webapp", currentUser));
         out.print("<div class=\"container-fluid\" style=\"text-align: left; overflow-x: auto; padding-bottom: 20px;\" id='tableHolder'>");
 
         // Create a factory for disk-based file items
@@ -57,8 +62,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
         try {
             items = upload.parseRequest(req);
         } catch (FileUploadException e) {
-//            e.printStackTrace();
-//            return;
+            e.printStackTrace();
         }
 
         String cssStyle =
@@ -89,7 +93,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             }
         }
 
-        out.print("<a href='uploadExcel.jsp'>Du kan også laste opp en fil</a>");
+        out.print("<p style='text-align: center;'><a href='uploadExcel.jsp'>Du kan også laste opp en fil</a></p>");
         out.print("</div>");
 
         out.print("<div class='container-sm' style='max-width: 500px; " +

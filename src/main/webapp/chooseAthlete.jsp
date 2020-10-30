@@ -33,7 +33,7 @@
             <tr><th><%=cl%></th></tr>
 
             <%
-                String query = "SELECT a.firstName, a.lastName, a.athlete_id, (2020 - a.birth) age,\n" +
+                String query = "SELECT a.firstName, a.lastName, a.athlete_id, (2020 - a.birth) age,\n" +  
                         "        (SELECT c.name FROM class c WHERE ageFrom <= age ORDER BY ageFrom DESC LIMIT 1) class\n" +
                         "FROM athlete a;";
 

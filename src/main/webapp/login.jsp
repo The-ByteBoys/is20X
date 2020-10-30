@@ -1,17 +1,13 @@
-<!DOCTYPE html>
+<%@ page import ="tools.UserAuth" import="models.UserModel" import="enums.User" import="tools.htmltools.HtmlConstants" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%
+    UserModel currentUser = UserAuth.verifyLogin(request);
+
+    // IF ALREADY LOGGED IN, GO TO "Min side"
+    if(currentUser != null){ response.sendRedirect("mypage.jsp"); }
+%><!DOCTYPE html>
 <html lang="no">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Login - Roing Webapp</title>
-
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css"/>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
+    <%=HtmlConstants.getHtmlHeaders()%>
 </head>
 <body>
 
@@ -20,6 +16,7 @@
 
 <div class="container" style="text-align: center;">
     <h1>User Login</h1>
+    <%=UserAuth.getSessionNotes(session)%>
 
     <form action="login" method="post">
 
@@ -37,6 +34,7 @@
             <input type="submit" value="Login" class="btn btn-secondary" />
         </div>
     </form>
+
 </div>
 </body>
 </html>
