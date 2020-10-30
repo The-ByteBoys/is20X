@@ -1,20 +1,15 @@
-package tools.html;
+package tools.htmltools;
 
-public class htmlConstants {
+import models.UserModel;
+import tools.UserAuth;
 
-    public static String getHtmlHead(String title){
-        StringBuilder html = new StringBuilder();
-        if(title.isEmpty()){
-            title = "Roing Webapp";
-        }
+public class HtmlConstants {
 
-        html.append("<!DOCTYPE html>\n" +
-                "<html lang=\"no\">\n" +
-                "<head>\n" +
-                "    <meta charset=\"UTF-8\">\n" +
+    public static String getHtmlHeaders(){
+
+        return "<meta charset=\"UTF-8\">\n" +
                 "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
                 "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n" +
-                "    <title>"+title+"</title>\n" +
                 "\n" +
                 "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/bootstrap.min.css\">\n" +
                 "    <link rel=\"stylesheet\" href=\"https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css\"/>\n" +
@@ -28,12 +23,31 @@ public class htmlConstants {
                 "    <script src=\"https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js\"></script>\n" +
                 "\n" +
                 "    <!-- MDBootstrap Datatables  -->\n" +
-                "    <script type=\"text/javascript\" src=\"js/addons/datatables.min.js\"></script>\n" +
-                "</head>\n" +
-                "<body style=\"text-align: center;\">\n" +
-                "\n" +
-                "<div id=\"nav-placeholder\"></div>\n" +
-                "<script src=\"js/menu.js\"></script>\n");
+                "    <script type=\"text/javascript\" src=\"js/addons/datatables.min.js\"></script>\n";
+    }
+
+    public static String getHtmlHead(String title){
+        return getHtmlHead(title, null);
+    }
+
+    public static String getHtmlHead(String title, UserModel currUser){
+        StringBuilder html = new StringBuilder();
+
+        if(title.isEmpty()){
+            title = "Roing Webapp";
+        }
+
+        html.append("<!DOCTYPE html>\n");
+        html.append("<html lang=\"no\">\n");
+        html.append("<head>\n");
+        html.append("    <title>").append(title).append("</title>\n    ");
+        html.append( getHtmlHeaders() );
+        html.append("</head>\n");
+        html.append("<body style=\"text-align: center;\">\n");
+        html.append("\n");
+        html.append("<div id=\"nav-placeholder\"></div>\n");
+        html.append(UserAuth.navBarLogin(currUser));
+        html.append("<script src=\"js/menu.js\"></script>\n");
 
         return html.toString();
     }
