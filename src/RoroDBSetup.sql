@@ -45,7 +45,7 @@ CREATE TABLE club_user (
 
 CREATE TABLE club (
     club_id INT AUTO_INCREMENT,
-    name VARCHAR(250) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL UNIQUE,
 
     CONSTRAINT club_PK PRIMARY KEY (club_id)
 );
@@ -127,21 +127,12 @@ CREATE TABLE result (
 );
 
 
-
-INSERT INTO athlete (firstName, lastName, birth, sex)
-    VALUES ('Johannes', 'Birkeland', 2000, 'M'),
-           ('Mona', 'Bond', 1950, 'F'),
-           ('Per', 'Olavsen', 2003, 'M'),
-           ('Sonja', 'Haraldsen', 2005, 'F'),
-           ('Frank', 'Haarfagre', 2007, 'M');
-
 INSERT INTO class (class_id, name, ageFrom)
     VALUES
         (1, 'SENIOR', 19),
         (2, 'A', 17),
         (3, 'B', 15),
         (4, 'C', 13);
-
 
 INSERT INTO user (user_id, email, password, userType)
     VALUES
@@ -188,41 +179,11 @@ INSERT INTO club (name) VALUES ('BRK');
 
 INSERT INTO club_reg (athlete, club) VALUES (1, 1);
 
-
-INSERT INTO exercise (name, description, unit, exerciseType)
-    VALUES
-        ('5000', '', 'WATT', 'ALLEX'),
-        ('5000', '', 'TIME', 'ALLEX'),
-        ('3000', '', 'WATT', 'ALLEX'),
-        ('3000', '', 'TIME', 'ALLEX'),
-        ('2000', '', 'WATT', 'ALLEX'),
-        ('2000', '', 'TIME', 'ALLEX'),
-        ('60', 'WATT produsert på 60 sek', 'WATT', 'ALLEX'),
-        ('ligg.ro', '', 'PERCENT', 'ALLEX'),
-        ('ligg.ro', '', 'KG', 'ALLEX'),
-        ('knebøy', '', 'PERCENT', 'ALLEX'),
-        ('knebøy', '', 'KG', 'ALLEX'),
-        ('bevegelse', '', 'REPS', 'ALLEX'),
-        ('sargeant', '', 'CM', 'ALLEX'),
-        ('kroppshevning', '', 'REPS', 'ALLEX'),
-
-        ('100Sek', 'lengde på 100 sek', 'METER', 'CLUBEX');
-
-
 INSERT INTO club_exercise (exercise, club) VALUES (3, 1);
 
 INSERT INTO class_period (start, athlete, class)
     VALUES
         ('2019-11-19', 1, 1);
-
-
-INSERT INTO test_set (class, exercise)
-    VALUES
-        (1, 1), (1, 2), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
-        (2, 1), (2, 2), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 13), (2, 12),
-        (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 14), (3, 13), (3, 12),
-        (4, 4), (4, 7), (4, 14), (4, 13), (4, 12);
-
 
 INSERT INTO result (athlete, exercise, result, date_time, result_Type)
     VALUES
