@@ -28,12 +28,12 @@
     <p>Trener funksjoner</p>
     <p><a href="register.jsp">Registrer ny utøver-bruker</a></p>
     <p><a href="massinsert">Sett inn masse data</a></p>
-    <p><a href="uploadExcel.jsp">Opplast excel-fil</a></p>
+    <p><a href="uploadExcel.jsp">Last opp excel-fil</a></p>
     <% } %>
 
     <% if(currentUser.get(User.TYPE).equals("ADMIN")){ %>
     <br>
-    <p>Superbruker funksjoner</p>
+    <p>Superbruker-funksjoner</p>
     <p><a href="clubregister.jsp">Registrer ny klubb</a></p>
     <% } %>
 
