@@ -45,7 +45,7 @@ CREATE TABLE club_user (
 
 CREATE TABLE club (
     club_id INT AUTO_INCREMENT,
-    name VARCHAR(250) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL UNIQUE,
 
     CONSTRAINT club_PK PRIMARY KEY (club_id)
 );
