@@ -1,38 +1,20 @@
-<%@ page import ="tools.UserAuth" import="models.UserModel" import="enums.User" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<% UserModel currentUser = UserAuth.verifyLogin(request); %>
-<!DOCTYPE html>
+<%@ page import ="tools.UserAuth" import="models.UserModel" import="tools.htmltools.HtmlConstants" import="enums.User" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%
+    UserModel currentUser = UserAuth.verifyLogin(request);
+%><!DOCTYPE html>
 <html lang="no">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Roing Webapp</title>
-
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css"/>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="https://unpkg.com/bootstrap-darkmode@0.7.0/dist/theme.js"></script>
+    <%=HtmlConstants.getHtmlHeaders()%>
 </head>
 <body style="text-align: center;">
 
 <div id="nav-placeholder"></div>
-<div id="loginInfo" style="display: none;">
-    <%
-        if(currentUser != null){
-            out.print("<a class=\"nav-item nav-link\" id='login' href=\"logout.jsp\">Log out</a>");
-        }
-        else {
-            out.print("<a class=\"nav-item nav-link\" id='login' href=\"login.jsp\">Login</a>");
-        }
-    %>
-</div>
+<%=UserAuth.navBarLogin(currentUser)%>
 <script src="js/menu.js"></script>
 
 
 <h1>Roing webapp</h1>
-<table class="table table-striped table-bordered table-hover">
+<table id="exTable" class="table table-striped table-bordered table-hover">
     <thead>
         <tr>
             <th scope="col">Rank</th>
@@ -86,6 +68,13 @@
         </tr>
     </tbody>
 </table>
+
+<script>
+    $(document).ready(function () {
+        $('#exTable').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>
 
 </body>
 </html>

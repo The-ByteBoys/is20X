@@ -57,8 +57,7 @@ CREATE TABLE club_reg (
 
     CONSTRAINT club_reg_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT club_reg_club_FK FOREIGN KEY (club) REFERENCES club(club_id),
-    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club)
-);
+    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club));
 
 
 CREATE TABLE exercise (
@@ -105,6 +104,7 @@ CREATE TABLE class_period (
 CREATE TABLE test_set (
     class INT NOT NULL,
     exercise INT NOT NULL,
+    weight INT NOT NULL,
 
     CONSTRAINT test_set_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
     CONSTRAINT test_set_Class_FK FOREIGN KEY (class) REFERENCES class(class_id)
@@ -122,28 +122,55 @@ CREATE TABLE result (
 
     CONSTRAINT result_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT result_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
-    CONSTRAINT result_PK PRIMARY KEY (athlete, exercise)
+    CONSTRAINT result_PK PRIMARY KEY (athlete, exercise, date_time)
 );
 
 
-INSERT INTO class (name, ageFrom)
+INSERT INTO class (class_id, name, ageFrom)
     VALUES
-        ('SENIOR', 19),
-        ('A', 17),
-        ('B', 15),
-        ('C', 13);
+        (1, 'SENIOR', 19),
+        (2, 'A', 17),
+        (3, 'B', 15),
+        (4, 'C', 13);
 
+INSERT INTO user (user_id, email, password, userType)
+    VALUES
+        (1, 'admin@admin', 'DA4263CC96DD21071FC9C864A74C774D', 'ADMIN');
+
+INSERT INTO exercise (exercise_id, name, description, unit, exerciseType)
+    VALUES
+        (1, '5000', '', 'WATT', 'ALLEX'),
+        (2, '5000', '', 'TIME', 'ALLEX'),
+        (3, '3000', '', 'WATT', 'ALLEX'),
+        (4, '3000', '', 'TIME', 'ALLEX'),
+        (5, '2000', '', 'WATT', 'ALLEX'),
+        (6, '2000', '', 'TIME', 'ALLEX'),
+        (7, '60', 'WATT produsert på 60 sek', 'WATT', 'ALLEX'),
+        (8, 'ligg.ro', '', 'PERCENT', 'ALLEX'),
+        (9, 'ligg.ro', '', 'KG', 'ALLEX'),
+        (10, 'knebøy', '', 'PERCENT', 'ALLEX'),
+        (11, 'knebøy', '', 'KG', 'ALLEX'),
+        (12, 'bevegelse', '', 'REPS', 'ALLEX'),
+        (13, 'sargeant', '', 'CM', 'ALLEX'),
+        (14, 'kroppshevning', '', 'REPS', 'ALLEX'),
+
+        (15, '100Sek', 'lengde på 100 sek', 'METER', 'CLUBEX');
+
+INSERT INTO test_set (class, exercise, weight)
+    VALUES
+        (1, 1, 45), (1, 2, 0), (1, 5, 30), (1, 6, 0), (1, 7, 10), (1, 8, 5), (1, 9, 0), (1, 10, 5), (1, 11, 0), (1, 12, 5),
+        (2, 1, 45), (2, 2, 0), (2, 5, 30), (2, 6, 0), (2, 7, 10), (2, 8, 5), (2, 9, 0), (2, 13, 5), (2, 12, 5),
+        (3, 3, 40), (3, 4, 0), (3, 5, 40), (3, 6, 0), (3, 7, 5), (3, 14, 5), (3, 13, 5), (3, 12, 5),
+        (4, 4, 0), (4, 7, 0), (4, 14, 0), (4, 13, 0), (4, 12, 0);
+
+
+# DUMMY DATA BELOW:
 INSERT INTO athlete (firstName, lastName, birth, sex)
-    VALUES ('Johannes', 'Birkeland', 2000, 'M'),
-           ('Mona', 'Bond', 1950, 'F'),
-           ('Per', 'Olavsen', 2003, 'M'),
-           ('Sonja', 'Haraldsen', 2005, 'F'),
-           ('Frank', 'Haarfagre', 2007, 'M');
-
-INSERT INTO user (email, password, userType)
-    VALUES
-        ('johannesbirkeland@gmail.com', 'pwd123', 'COACH'),
-        ('admin@example.com', 'pwd123', 'ADMIN');
+VALUES ('Johannes', 'Birkeland', 2000, 'M'),
+       ('Mona', 'Bond', 1950, 'F'),
+       ('Per', 'Olavsen', 2003, 'M'),
+       ('Sonja', 'Haraldsen', 2005, 'F'),
+       ('Frank', 'Haarfagre', 2007, 'M');
 
 INSERT INTO club_user (user, athlete) VALUES (1, 1);
 
@@ -151,40 +178,12 @@ INSERT INTO club (name) VALUES ('BRK');
 
 INSERT INTO club_reg (athlete, club) VALUES (1, 1);
 
-INSERT INTO exercise (name, description, unit, exerciseType)
-    VALUES
-        ('5000', '', 'WATT', 'ALLEX'),
-        ('5000', '', 'TIME', 'ALLEX'),
-        ('3000', '', 'WATT', 'ALLEX'),
-        ('3000', '', 'TIME', 'ALLEX'),
-        ('2000', '', 'WATT', 'ALLEX'),
-        ('2000', '', 'TIME', 'ALLEX'),
-        ('60', 'WATT produsert på 60 sek', 'WATT', 'ALLEX'),
-        ('ligg.ro', '', 'PERCENT', 'ALLEX'),
-        ('ligg.ro', '', 'KG', 'ALLEX'),
-        ('knebøy', '', 'PERCENT', 'ALLEX'),
-        ('knebøy', '', 'KG', 'ALLEX'),
-        ('bevegelse', '', 'REPS', 'ALLEX'),
-        ('sargeant', '', 'CM', 'ALLEX'),
-        ('kroppshevning', '', 'REPS', 'ALLEX'),
-
-        ('100Sek', 'lengde på 100 sek', 'METER', 'CLUBEX');
-
 INSERT INTO club_exercise (exercise, club) VALUES (3, 1);
 
 INSERT INTO class_period (start, athlete, class)
     VALUES
         ('2019-11-19', 1, 1);
 
-
-INSERT INTO test_set (class, exercise)
-    VALUES
-        (1, 1), (1, 2), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
-        (2, 1), (2, 2), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 13), (2, 12),
-        (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 14), (3, 13), (3, 12),
-        (4, 4), (4, 7), (4, 14), (4, 13), (4, 12);
-
-
 INSERT INTO result (athlete, exercise, result, date_time, result_Type)
     VALUES
-    (1, 1, 700.999, '2020-08-15 15:41:33', 'NP');
+        (1, 1, 700.999, '2020-08-15 15:41:33', 'NP');
