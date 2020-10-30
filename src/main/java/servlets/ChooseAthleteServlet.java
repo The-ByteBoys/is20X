@@ -28,19 +28,17 @@ public class ChooseAthleteServlet extends AbstractAppServlet{
         RequestDispatcher rd = null;
 
         try {
-            String seniorTest = request.getParameter("SENIOR + \"-\" + name+unit");
             String[] athletes = request.getParameterValues("athletes");
             List<String> list = Arrays.asList(athletes);
             request.setAttribute("athletes", list);
-            rd = request.getRequestDispatcher("submitTest_testRegister.jsp");
+            rd = request.getRequestDispatcher("submitTest.jsp");
             rd.forward(request, response);
 
 
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             request.setAttribute("errorMessage", "Velg minst en utøver");
             rd = request.getRequestDispatcher("/chooseAthlete.jsp");
             rd.forward(request, response);
-            //TODO: get this exception handler to work
         }
     }
 }
