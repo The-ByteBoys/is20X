@@ -1,6 +1,9 @@
 package servlets;
 
+import enums.UserLevel;
+import models.UserModel;
 import tools.DbTool;
+import tools.UserAuth;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -19,6 +22,7 @@ import java.util.*;
 public class SubmitTestServlet extends AbstractAppServlet {
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
         writeResponse(request, response, "Submit tests");
     }
 
@@ -43,22 +47,22 @@ public class SubmitTestServlet extends AbstractAppServlet {
             String[] idArray = id.split("-");
             int ex_id = Integer.parseInt(idArray[0]);
             int at_id = Integer.parseInt(idArray[1]);
-            int result = Integer.parseInt(req.getParameter(at_id + "result"));
+            String ex_unit = idArray[2];
+            int result;
+
+            if (ex_unit.contains("TIME")) {
+                int minutes = Integer.parseInt(req.getParameter(at_id + "resultMin")) * 60;
+                int seconds = Integer.parseInt(req.getParameter(at_id + "resultSec"));
+                result = minutes + seconds;
+
+            } else {
+                result = Integer.parseInt(req.getParameter(at_id + "result"));
+            }
 
             pstm.setInt(1, at_id);
             pstm.setInt(2, ex_id);
             pstm.setInt(3, result);
             pstm.setString(4, DATE);
-            /*
-            String queryPart = "(" + at_id + ", " + ex_id + ", " + result + ", " + "'"+DATE+"'" + ", 'NP')";
-
-            if (id.equals(idsList.get(idsList.size() - 1))) {
-                queryPart += ";\n";
-            } else {
-                queryPart += ",\n";
-            }
-
-             */
             pstm.executeUpdate();
         }
         db.close();

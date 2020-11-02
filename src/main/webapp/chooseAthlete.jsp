@@ -5,8 +5,13 @@
 <%@ page import="enums.UserLevel" %>
 <%@ page import="tools.UserAuth" %>
 <%@ page import="models.UserModel" %>
+<%@ page import="enums.User" %>
+<%@ page import="models.AthleteModel" %>
+<%@ page import="java.util.List" %>
+<%@ page import="tools.repository.Athletes" %>
+<%@ page import="enums.Athlete" %>
 <%
-    UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.ADMIN);
+    UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
     if(currentUser == null){ return; }
 %><%--
   Created by IntelliJ IDEA.
@@ -46,18 +51,15 @@
             <tr><th><%=cl%></th></tr>
 
             <%
-                String query = "SELECT a.firstName, a.lastName, a.athlete_id, (2020 - a.birth) age,\n" +  
-                        "        (SELECT c.name FROM class c WHERE ageFrom <= age ORDER BY ageFrom DESC LIMIT 1) class\n" +
-                        "FROM athlete a;";
-
-
                 try {
-                    ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
-                    while (rs.next()) {
-                        if (rs.getString("class").equals(cl)) {
-                            String firstName = rs.getString("a.firstName");
-                            String lastName = rs.getString("a.lastName");
-                            int athlete_id = rs.getInt("a.athlete_id");
+                    if (currentUser.get(User.CLUBID) != null) {
+                    List<AthleteModel> athletes = Athletes.getAthletes((int) currentUser.get(User.CLUBID));
+                    for (AthleteModel a : athletes) {
+                        if (a.get(Athlete.CLASS).toString().equals(cl)) {
+                            String firstName = a.get(Athlete.FNAME).toString();
+                            String lastName = a.get(Athlete.LNAME).toString();
+                            int athlete_id = Integer.parseInt(a.get(Athlete.ID).toString());
+
 
             %>
                             <tr>
@@ -79,11 +81,11 @@
                         <select name="<%=cl%>-exercises">
                             <option disabled selected>Velg test</option>
                             <%
-                                query = "SELECT c.name, e.name, e.unit, e.exercise_id FROM EXERCISE e\n" +
+                                String query = "SELECT e.name, e.unit, e.exercise_id FROM exercise e\n" +
                                         "INNER JOIN test_set ts ON e.exercise_id = ts.exercise\n" +
                                         "INNER JOIN class c ON c.class_id = ts.class\n" +
                                         "WHERE c.name = '" + cl + "'";
-                                rs = DbTool.getINSTANCE().selectQuery(query);
+                                ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
                                 while (rs.next()) {
                                     String exercise_name = rs.getString("e.name");
                                     String exercise_unit = rs.getString("e.unit");
@@ -98,6 +100,7 @@
                 </td>
             </tr>
             <%
+                    }
                 } catch (SQLException throwables) {
                 throwables.printStackTrace();
                 }
