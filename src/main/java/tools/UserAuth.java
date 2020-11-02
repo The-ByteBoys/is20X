@@ -61,18 +61,10 @@ public class UserAuth {
     }
 
     public static String checkLogin(String username, String password) throws SQLException {
-        Connection db = null;
-        PreparedStatement statement = null;
         String toReturn = null;
 
-        db = DbTool.getINSTANCE().dbLoggIn();
-
-        ResultSet rs = null;
-
-        statement = db.prepareStatement("SELECT user_id, email FROM user WHERE email = ? AND password = ?");
-        statement.setString(1, username);
-        statement.setString(2, getKrypterPassord(password));
-        rs = statement.executeQuery();
+        String query = "SELECT user_id, email FROM user WHERE email = ? AND password = ?";
+        ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, username, getKrypterPassord(password));
 
         while(rs.next()){
             if(rs.getString("email").equals(username)) {
@@ -88,26 +80,18 @@ public class UserAuth {
         }
 
         rs.close();
-        db.close();
 
         return toReturn;
     }
 
     public static UserModel verifyLogin(HttpServletRequest request) {
-        UserModel user = null;
         Cookie[] cks = request.getCookies();
         if (cks != null) {
             for (Cookie ck : cks) {
                 String name = ck.getName();
                 String value = ck.getValue();
                 if (name.equals("auth")) {
-                    try {
-                        user = UserRepository.getUserFromToken(value);
-                    } catch (SQLException throwables) {
-                        throwables.printStackTrace();
-                    }
-
-                    return user;
+                    return UserRepository.getUserFromToken(value);
                 }
             }
         }
