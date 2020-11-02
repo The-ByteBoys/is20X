@@ -1,7 +1,12 @@
 package tools;
 
 import enums.Result;
+import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +21,7 @@ import java.util.*;
 public final class DbTool {
     private static final tools.DbTool INSTANCE = new tools.DbTool();
     static Connection connection;
+    private DataSource dataSource;
 
     /**
      * initiates the class as a singleton.
@@ -111,5 +117,13 @@ public final class DbTool {
         db.close();
 
         return rs;
+    }
+
+    public DataSource getDataSource() throws NamingException {
+        if(dataSource == null){
+            Context ctx = new InitialContext();
+            dataSource = (DataSource) ctx.lookup("roingdb");
+        }
+        return dataSource;
     }
 }

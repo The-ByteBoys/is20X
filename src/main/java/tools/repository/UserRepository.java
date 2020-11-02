@@ -93,9 +93,7 @@ public class UserRepository {
         parameters.put("user", userid);
         parameters.put("loginToken", token);
 
-        Context ctx = new InitialContext();
-        JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
-
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("userLogin").usingGeneratedKeyColumns("created");
         insert.execute(parameters);
     }

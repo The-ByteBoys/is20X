@@ -7,18 +7,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import tools.repository.UserRepository;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -26,7 +21,13 @@ import java.util.Map;
 
 public class UserAuth {
 
-    private static String lagToken() {
+    private static final String PASSWORD_SECRET = "FrityrstektSnitzel";
+
+    /**
+     * Generates a token
+     * @return token
+     */
+    private static String generateToken() {
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[10];
         random.nextBytes(bytes);
@@ -39,49 +40,50 @@ public class UserAuth {
         return returnToken.toString();
     }
 
-    private static final String PASSWORD_SECRET = "FrityrstektSnitzel";
-
-    private static String getKrypterPassord(String passord) {
+    private static String getEncryptedPassword(String passord) {
         return DigestUtils.md5Hex(passord + PASSWORD_SECRET).toUpperCase();
     }
 
-    public static Integer opprettBruker(UserModel bruker) throws NamingException {
+    public static Integer createUser(UserModel user) throws NamingException {
 
-        String passord = getKrypterPassord(bruker.get(User.PASSWORD).toString());
+        String passord = getEncryptedPassword(user.get(User.PASSWORD).toString());
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("email", bruker.get(User.EMAIL));
+        parameters.put("email", user.get(User.EMAIL));
         parameters.put("password", passord);
-        parameters.put("userType", bruker.get(User.TYPE));
+        parameters.put("userType", user.get(User.TYPE));
 
-        Context ctx = new InitialContext();
-        JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
-
-        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("user").usingGeneratedKeyColumns("user_id");
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
+        SimpleJdbcInsert insert = new SimpleJdbcInsert( jdbcTemplate ).withTableName("user").usingGeneratedKeyColumns("user_id");
         return insert.executeAndReturnKey(parameters).intValue();
     }
 
-    public static String checkLogin(String username, String password) throws SQLException {
-        String toReturn = null;
+    /**
+     * Checks if the login is correct
+     * @param username -
+     * @param password -
+     * @return token that is also put into database
+     */
+    public static String checkLogin(String username, String password) {
+        String token = null;
 
         String query = "SELECT user_id, email FROM user WHERE email = ? AND password = ?";
-        ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, username, getKrypterPassord(password));
+        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, username, getEncryptedPassword(password))) {
 
-        while(rs.next()){
-            if(rs.getString("email").equals(username)) {
-                toReturn = lagToken();
+            while(rs.next()){
+                if(rs.getString("email").equals(username)) {
+                    token = generateToken();
 
-                try {
-                    UserRepository.setUserToken(rs.getInt("user_id"), toReturn);
-                } catch (NamingException e) {
-                    e.printStackTrace();
-                    return null;
+                    UserRepository.setUserToken(rs.getInt("user_id"), token);
                 }
             }
+
+        }
+        catch (SQLException | NamingException e){
+            e.printStackTrace();
+            return null;
         }
 
-        rs.close();
-
-        return toReturn;
+        return token;
     }
 
     public static UserModel verifyLogin(HttpServletRequest request) {
