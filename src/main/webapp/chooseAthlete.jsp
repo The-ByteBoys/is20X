@@ -1,6 +1,14 @@
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="tools.DbTool" %>
-<%@ page import="java.sql.SQLException" %><%--
+<%@ page import="java.sql.SQLException" %>
+<%@ page import="tools.htmltools.HtmlConstants" %>
+<%@ page import="enums.UserLevel" %>
+<%@ page import="tools.UserAuth" %>
+<%@ page import="models.UserModel" %>
+<%
+    UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.ADMIN);
+    if(currentUser == null){ return; }
+%><%--
   Created by IntelliJ IDEA.
   User: johan
   Date: 26.10.2020
@@ -16,20 +24,25 @@
             border: 1px solid black;
             border-collapse: collapse;
             width:300px;
+
         }
     </style>
+    <%=HtmlConstants.getHtmlHeaders()%>
 </head>
 <body>
+    <div id="nav-placeholder"></div>
+    <%=UserAuth.navBarLogin(currentUser)%>
+    <script src="js/menu.js"></script>
+
     <h1>Velg utøvere</h1>
     <br>
 
     <form action="choose-athlete" method="post">
     <%
         String[] classes = {"SENIOR", "A", "B", "C"};
-
         for (String cl : classes) {
     %>
-        <table class="floatedTable">
+        <table>
             <tr><th><%=cl%></th></tr>
 
             <%
@@ -42,16 +55,16 @@
                     ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
                     while (rs.next()) {
                         if (rs.getString("class").equals(cl)) {
-                            String f = rs.getString("a.firstName");
-                            String l = rs.getString("a.lastName");
-                            int id = rs.getInt("a.athlete_id");
+                            String firstName = rs.getString("a.firstName");
+                            String lastName = rs.getString("a.lastName");
+                            int athlete_id = rs.getInt("a.athlete_id");
 
             %>
                             <tr>
                                 <td>
                                     <label>
-                                        <input type="checkbox" name="athletes" value="<%=cl+"-"+f + " " + l +"-"+ id%>">
-                                        <%=f + " " +  l%>
+                                        <input type="checkbox" name="athletes" value="<%=cl+"-"+firstName + " " + lastName +"-"+ athlete_id%>">
+                                        <%=firstName + " " +  lastName%>
                                     </label>
                                 </td>
                             </tr>
@@ -72,11 +85,11 @@
                                         "WHERE c.name = '" + cl + "'";
                                 rs = DbTool.getINSTANCE().selectQuery(query);
                                 while (rs.next()) {
-                                    String name = rs.getString("e.name");
-                                    String unit = rs.getString("e.unit");
-                                    int exid = rs.getInt("e.exercise_id");
+                                    String exercise_name = rs.getString("e.name");
+                                    String exercise_unit = rs.getString("e.unit");
+                                    int exercise_id = rs.getInt("e.exercise_id");
                             %>
-                            <option value="<%=exid + "-" + name+unit%>"><%=name + " " + unit%></option>
+                            <option value="<%=exercise_id + "-" + exercise_name + "-" + exercise_unit%>"><%=exercise_name + " " + exercise_unit%></option>
                             <%
                                 }
                             %>
