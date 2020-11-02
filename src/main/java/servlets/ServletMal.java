@@ -1,5 +1,9 @@
 package servlets;
 
+import enums.UserLevel;
+import models.UserModel;
+import tools.UserAuth;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 // import java.sql.SQLException;
@@ -17,13 +21,14 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name= "Servlet", urlPatterns = {"/mal"})
 public class ServletMal extends AbstractAppServlet {
     @Override
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-        writeResponse(request, response, "Roing Webapp API");
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
+
+        writeResponseHeadless(request, response, currentUser);
     }
 
     @Override
-    protected void writeBody(HttpServletRequest req, PrintWriter out) {
+    protected void writeBody(HttpServletRequest req, PrintWriter out, UserModel currentUser) {
         // CODE HERE
         
     }
