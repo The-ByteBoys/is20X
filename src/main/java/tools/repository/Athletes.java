@@ -50,12 +50,12 @@ public class Athletes {
         }
 
         try {
-            String query = "SELECT a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c WHERE ageFrom <= ("+classCheckYear+"-a.birth) ORDER BY ageFrom DESC LIMIT 1) class FROM athlete a"+queryWhere;
+            String query = "SELECT a.athlete_id , a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c WHERE ageFrom <= ("+classCheckYear+"-a.birth) ORDER BY ageFrom DESC LIMIT 1) class FROM athlete a"+queryWhere;
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while (rs.next()) {
-                AthleteModel athlete = new AthleteModel(null, rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getInt("a.birth"), rs.getString("a.sex"));
+                AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getInt("a.birth"), rs.getString("a.sex"));
                 athlete.setAthleteClass(rs.getString("class"));
 
                 toReturn.add(athlete);
@@ -87,7 +87,7 @@ public class Athletes {
         }
 
         try {
-            String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c WHERE ageFrom <= (\"+classCheckYear+\"-a.birth) ORDER BY ageFrom DESC LIMIT 1) class FROM athlete a WHERE "+queryWhere;
+            String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c WHERE ageFrom <= ("+classCheckYear+"-a.birth) ORDER BY ageFrom DESC LIMIT 1) class FROM athlete a WHERE "+queryWhere;
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
