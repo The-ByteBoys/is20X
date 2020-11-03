@@ -240,12 +240,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                     } catch (Exception ignored) {
                     }
                 }
-                if(sheetName.toLowerCase().contains("senior")){
-                    newRow.add(insertFormElement("birth", String.valueOf(newBirth)));
-                }
-                else {
-                    newRow.add(insertFormElement("birth", String.valueOf(newBirth), "", "pattern=\"[0-9]{4}\""));
-                }
+                newRow.add("<input type='date' name='birth' value='"+newBirth+"-01-01' class='form-control'"+(!sheetName.toLowerCase().contains("senior")?" required":"")+">");
 
 
                 String newClubs = mylist.get("klubb").toString().trim();
@@ -308,7 +303,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                                     checkValueTxt = " "+wattsToTimeStr(key.replace("Tid", ""), mylist.get(key.replace("Tid", "Watt")).toString());
                                 }
 
-                                newRow.add(insertFormElement(key, timeString, "", timeFormatPattern +checkValueTxt));
+                                newRow.add(insertFormElement(key, timeString, "", timeFormatPattern)+checkValueTxt);
                             }
                             else {
                                 newRow.add(insertFormElement(key, mylist.get(key).toString().replace(",", "."), "", numberFormatPattern));
@@ -327,6 +322,8 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
             out.print("<form method='post' id='tableForm"+(i+1)+"' action='postExcel' target='_blank'>");
             out.print("<div class=\"\">");
+            out.print("<input type='hidden' name='class' value='"+(sheetName.contains("Senior")?"senior": (sheetName.contains("Jun A")?"junA": (sheetName.contains("Jun B")?"junB": (sheetName.contains("Jun C")?"junC":""))))+"'>");
+//            out.print("<input type='hidden' name='class2' value='"+(sheetName.replace(" ","").replace("menn", "").replace("kvinner", "").replace("gutter", "").replace("jenter", ""))+"'>");
 
             out.print(htmlTable);
             out.print("<select class='sexPicker form-control' name=\"sex\" style='width: initial; display: initial;'> " +
