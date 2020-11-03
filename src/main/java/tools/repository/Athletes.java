@@ -80,7 +80,7 @@ public class Athletes {
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while(rs.next()){
-                athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getInt("a.birth"), rs.getString("a.sex"));
+                athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
             }
 
             rs.close();
