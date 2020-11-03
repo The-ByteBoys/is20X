@@ -57,7 +57,8 @@ CREATE TABLE club_reg (
 
     CONSTRAINT club_reg_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT club_reg_club_FK FOREIGN KEY (club) REFERENCES club(club_id),
-    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club));
+    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club)
+);
 
 
 CREATE TABLE exercise (
@@ -188,4 +189,3 @@ INSERT INTO class_period (start, athlete, class)
 INSERT INTO result (athlete, exercise, result, date_time, result_Type)
     VALUES
         (1, 1, 700.999, '2020-08-15 15:41:33', 'NP');
-

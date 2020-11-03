@@ -43,7 +43,7 @@ public class LogginServlet extends AbstractAppServlet {
                 session.setAttribute("error", "Login failed. Please check your username and password and try again!");
                 response.sendRedirect("login.jsp");
             }
-        } catch (IOException | SQLException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
