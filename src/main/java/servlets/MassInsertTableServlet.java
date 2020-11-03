@@ -304,14 +304,14 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
                                 // Calculate time from watts for verification of this value
                                 String checkValueTxt = "";
-                                if(mylist.containsKey( key.replace("Tid", "Watt") )){
+                                if(mylist.get( key.replace("Tid", "Watt") ) != null){
                                     checkValueTxt = " "+wattsToTimeStr(key.replace("Tid", ""), mylist.get(key.replace("Tid", "Watt")).toString());
                                 }
 
                                 newRow.add(insertFormElement(key, timeString, "", timeFormatPattern +checkValueTxt));
                             }
                             else {
-                                newRow.add(insertFormElement(key, mylist.get(key).toString(), "", numberFormatPattern));
+                                newRow.add(insertFormElement(key, mylist.get(key).toString().replace(",", "."), "", numberFormatPattern));
                             }
                         }
                         else {

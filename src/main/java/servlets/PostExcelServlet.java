@@ -2,6 +2,7 @@ package servlets;
 
 import enums.*;
 import models.*;
+import org.springframework.dao.DuplicateKeyException;
 import tools.repository.*;
 
 import javax.naming.NamingException;
@@ -170,6 +171,14 @@ public class PostExcelServlet extends AbstractAppServlet {
             out.print("<br>\n");
         }
 
+        out.println("<br><strong>Success!</strong>");
+
+//        try {
+//            Results.addResults(results);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
     }
 
     private int addAthlete(String fName, String lName, int birth, String sex) throws SQLException, NamingException {
@@ -185,6 +194,10 @@ public class PostExcelServlet extends AbstractAppServlet {
                 int newClubId = Clubs.addClub(c);
                 Athletes.addAthleteToClub(athleteId, newClubId);
                 toReturn.append(" - added to club \"").append(c).append("\"");
+            }
+            catch(DuplicateKeyException ignore){
+                // Duplicate Keys are expected.
+                toReturn.append(" - already in club \"").append(c).append("\"");
             }
             catch(Exception e){
                 e.printStackTrace();
