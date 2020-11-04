@@ -31,10 +31,19 @@ public class Athletes {
     }
 
     public static List<AthleteModel> getAthletes() throws SQLException {
+        return getAthletes(0);
+    }
+
+    public static List<AthleteModel> getAthletes(int clubId) throws SQLException {
         List<AthleteModel> toReturn = new ArrayList<>();
+        String queryWhere = "";
+
+        if(clubId > 0){
+            queryWhere = " INNER JOIN club_reg cr ON a.athlete_id = cr.athlete WHERE cr.club = "+clubId;
+        }
 
         try {
-            String query = "SELECT a.firstName, a.lastName, a.birth, a.sex FROM athlete a";
+            String query = "SELECT a.firstName, a.lastName, a.birth, a.sex FROM athlete a"+queryWhere;
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
@@ -53,8 +62,6 @@ public class Athletes {
     }
 
     public static AthleteModel getAthlete(String needle) throws SQLException {
-        Connection db = null;
-        PreparedStatement prepareStatement = null;
         String queryWhere = "";
         AthleteModel athlete = null;
 
@@ -77,17 +84,6 @@ public class Athletes {
             }
 
             rs.close();
-
-            /** if(athlete != null){
-                String query2 = "SELECT c.name FROM (classPeriod p INNER JOIN class c ON p.class = c.class_id ) INNER JOIN athlete a ON p.athlete = a.athlete_id WHERE "+queryWhere;
-                rs = DbTool.getINSTANCE().selectQuery(query2);
-
-                while(rs.next()){
-                    athlete.addAthleteClub( rs.getString("c.name") );
-                }
-                rs.close();
-            }*/
-
         } catch(SQLException | NullPointerException e){
             e.printStackTrace();
             throw e;

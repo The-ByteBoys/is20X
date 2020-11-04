@@ -45,7 +45,7 @@ CREATE TABLE club_user (
 
 CREATE TABLE club (
     club_id INT AUTO_INCREMENT,
-    name VARCHAR(250) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL UNIQUE,
 
     CONSTRAINT club_PK PRIMARY KEY (club_id)
 );
@@ -57,7 +57,8 @@ CREATE TABLE club_reg (
 
     CONSTRAINT club_reg_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT club_reg_club_FK FOREIGN KEY (club) REFERENCES club(club_id),
-    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club));
+    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club)
+);
 
 
 CREATE TABLE exercise (
@@ -105,6 +106,7 @@ CREATE TABLE test_set (
     class INT NOT NULL,
     exercise INT NOT NULL,
     weight INT NOT NULL,
+
 
     CONSTRAINT test_set_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
     CONSTRAINT test_set_Class_FK FOREIGN KEY (class) REFERENCES class(class_id)

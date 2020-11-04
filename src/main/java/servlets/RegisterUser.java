@@ -4,7 +4,6 @@ import enums.User;
 import enums.UserLevel;
 import models.UserModel;
 import tools.UserAuth;
-import tools.htmltools.HtmlConstants;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @WebServlet(name = "RegisterUser", urlPatterns = {"/userregistration"})
 public class RegisterUser extends AbstractAppServlet {
@@ -38,7 +36,7 @@ public class RegisterUser extends AbstractAppServlet {
         newUser.set(User.TYPE, type);
 
         try {
-            int newID = UserAuth.opprettBruker(newUser);
+            int newID = UserAuth.createUser(newUser);
             session.setAttribute("msg", "Succesfully added user with id: "+newID);
         }
         catch(Exception e){
