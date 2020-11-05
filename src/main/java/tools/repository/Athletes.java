@@ -57,7 +57,6 @@ public class Athletes {
             while (rs.next()) {
                 AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getInt("a.birth"), rs.getString("a.sex"));
                 athlete.setAthleteClass(rs.getString("class"));
-
                 toReturn.add(athlete);
             }
 

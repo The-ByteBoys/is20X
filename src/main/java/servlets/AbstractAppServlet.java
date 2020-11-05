@@ -2,9 +2,12 @@ package servlets;
 
 
 import models.UserModel;
+import tools.DbTool;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -92,6 +95,21 @@ public abstract class AbstractAppServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            DbTool.getINSTANCE().getDataSource();
+            request.setCharacterEncoding("UTF-8");
+        }
+        catch (NamingException e){
+            e.printStackTrace();
+            PrintWriter out = response.getWriter();
+            out.print("Datasource is giving an error. Please check if it is configures properly. <br><pre>"+e+"</pre>");
+            return;
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new ServletException(e);
+        }
+
         processRequest(request, response);
     }
 

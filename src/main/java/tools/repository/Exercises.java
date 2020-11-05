@@ -1,6 +1,7 @@
 package tools.repository;
 
 import enums.Exercise;
+import enums.Result;
 import models.ExerciseModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -81,6 +82,20 @@ public class Exercises {
         }
 
         return toReturn;
+    }
+
+    public static ExerciseModel getExerciseFromId(int exid) throws SQLException {
+        return getExerciseFromId(exid, true);
+    }
+    public static ExerciseModel getExerciseFromId(int exid, boolean onlyPublished) throws SQLException {
+        String query = "SELECT exercise_id, name, description, unit, exerciseType FROM exercise e WHERE exercise_id = ?"+(onlyPublished?" AND exerciseType = 'ALLEX'":"");
+
+        try(ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, exid)){
+            while (rs.next()){
+                return new ExerciseModel(rs.getInt("exercise_id"), rs.getString("name"), rs.getString("description"), rs.getString("unit"), rs.getString("exerciseType") );
+            }
+        }
+        return null;
     }
 
     /**

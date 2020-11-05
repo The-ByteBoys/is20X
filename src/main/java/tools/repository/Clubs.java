@@ -28,20 +28,13 @@ public class Clubs {
     public static List<ClubModel> getClubs() throws SQLException {
         List<ClubModel> toReturn = new ArrayList<>();
 
-        try {
-            String query = "SELECT club_id, name FROM club;";
+        String query = "SELECT club_id, name FROM club;";
 
-            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
-
+        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query)){
             while (rs.next()) {
                 ClubModel club = new ClubModel(rs.getInt("club_id"), rs.getString("name"));
                 toReturn.add(club);
             }
-
-            rs.close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            throw throwables;
         }
 
         return toReturn;
@@ -60,19 +53,11 @@ public class Clubs {
             queryWhere = "c.name = '"+needle+"'";
         }
 
-        try {
-            String query = "SELECT c.club_id, c.name FROM club c WHERE "+queryWhere;
-
-            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
-
+        String query = "SELECT c.club_id, c.name FROM club c WHERE "+queryWhere;
+        try (ResultSet rs = DbTool.getINSTANCE().selectQuery(query)){
             while(rs.next()){
                 club = new ClubModel(rs.getInt("club_id"), rs.getString("name"));
             }
-
-            rs.close();
-        } catch(SQLException | NullPointerException e){
-            e.printStackTrace();
-            throw e;
         }
 
         return club;

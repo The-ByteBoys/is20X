@@ -33,6 +33,34 @@ public class Results {
      * @return List<ResultModel>
      * @throws SQLException
      */
+    public static List<ResultModel> getResultsForAthlete(int AthleteId) throws SQLException {
+        List<ResultModel> toReturn = new ArrayList<>();
+
+        try {
+            String query = "SELECT athlete, exercise, `result`, date_time, result_Type FROM `result` r WHERE r.athlete = ? ORDER BY DATE_FORMAT(date_time, '%Y-%m-%d') DESC";
+
+            ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, AthleteId);
+
+            while (rs.next()) {
+                ResultModel exercise = new ResultModel(rs.getInt("athlete"), rs.getInt("exercise"), rs.getDouble("result"), rs.getTimestamp("date_time"), rs.getString("result_Type"));
+                toReturn.add(exercise);
+            }
+
+            rs.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throw throwables;
+        }
+
+        return toReturn;
+    }
+
+    /**
+     * Query for all results
+     *
+     * @return List<ResultModel>
+     * @throws SQLException
+     */
     public static List<ResultModel> getResults() throws SQLException {
         List<ResultModel> toReturn = new ArrayList<>();
 
