@@ -4,6 +4,8 @@
 <%@ page import="models.UserModel" %>
 <%@ page import="enums.UserLevel" %>
 <%@ page import="tools.UserAuth" %>
+<%@ page import="java.io.IOException" %>
+<%@ page import="java.io.PrintWriter" %>
 <%@ page contentType="text/html;charset=UTF-8"%>
 <%
     UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
@@ -34,7 +36,7 @@
             String[] classes = {"SENIOR", "A", "B", "C"};
             for (String cl : classes) {
 
-
+                try {
                 boolean classHasMembers = true;
                 List<String> athletes = (List<String>) request.getAttribute("athletes");
                 Iterator<String> it = athletes.iterator();
@@ -76,10 +78,10 @@
                                         <td>
                                             <label>
                                                 <%if (exerciseUnit.contains("TIME")) {%>
-                                                    <input type="number" name="<%=athlete_id%>resultMin" min="0" max="60" placeholder="Minutes">
-                                                    <input type="number" name="<%=athlete_id%>resultSec" min="0" max="59.999" placeholder="Seconds">
+                                                    <input type="number" name="<%=athlete_id%>resultMin" min="0" max="60" required="required" placeholder="Minutes">
+                                                    <input type="number" name="<%=athlete_id%>resultSec" min="0" max="59.999" required="required" placeholder="Seconds">
                                                 <%} else {   %>
-                                                    <input type="number" name="<%=athlete_id%>result" min="0" max="99999.999" placeholder="<%=exerciseUnit%>">
+                                                    <input type="number" name="<%=athlete_id%>result" min="0" max="99999.999" required="required" placeholder="<%=exerciseUnit%>">
                                                 <%} %>
                                                 <input type="hidden" name="ids" value="<%=exercise_id + "-" + athlete_id + "-" + exerciseUnit%>">
                                             </label>
@@ -99,6 +101,13 @@
                 }
         %>
         <%
+                } catch (Exception e) {
+                    PrintWriter writer = response.getWriter();
+                    writer.println(":( you can't access here now");
+                    writer.close();
+
+                    //TODO: Make this error feedback better
+                }
             }
         %>
         <input type="submit" value="Registrer tester">

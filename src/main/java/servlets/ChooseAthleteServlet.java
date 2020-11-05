@@ -41,9 +41,10 @@ public class ChooseAthleteServlet extends AbstractAppServlet{
 
 
         } catch (Exception e) {
-            request.setAttribute("errorMessage", "Velg minst en utøver");
             rd = request.getRequestDispatcher("/chooseAthlete.jsp");
             rd.forward(request, response);
+
+            //TODO: give feedback as in the mypage.jsp (userAuth) when something is wrong.
         }
     }
 }
