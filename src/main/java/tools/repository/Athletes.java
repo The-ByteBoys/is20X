@@ -1,13 +1,8 @@
 package tools.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.sql.Date;
+import java.util.*;
 
 import enums.Athlete;
 import enums.User;
@@ -62,6 +57,9 @@ public class Athletes {
     }
 
     public static AthleteModel getAthlete(String needle) throws SQLException {
+        return getAthlete(needle, new Date(Calendar.getInstance().getTime().getTime()) );
+    }
+    public static AthleteModel getAthlete(String needle, Date refClassDate) throws SQLException {
         String queryWhere = "";
         AthleteModel athlete = null;
 
@@ -74,16 +72,16 @@ public class Athletes {
             queryWhere = "CONCAT(a.firstName, ' ', a.lastName) = '"+needle+"'";
         }
 
-        try {
-            String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex FROM athlete a WHERE "+queryWhere;
-
-            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
+        String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, " +
+                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className" +
+                " FROM athlete a WHERE "+queryWhere;
+        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate)){
 
             while(rs.next()){
                 athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
+                athlete.set(Athlete.CLASS, rs.getString("className"));
             }
 
-            rs.close();
         } catch(SQLException | NullPointerException e){
             e.printStackTrace();
             throw e;
@@ -124,13 +122,13 @@ public class Athletes {
     /**
      * Add a clubID to an AthleteID for the DataSource
      *
-     * @param AthleteID
+     * @param athleteID
      * @param clubID
      * @throws NamingException
      */
-    public static void addAthleteToClub(int AthleteID, int clubID) throws NamingException {
+    public static void addAthleteToClub(int athleteID, int clubID) throws NamingException {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("athlete", AthleteID);
+        parameters.put("athlete", athleteID);
         parameters.put("club", clubID);
 
         Context ctx = new InitialContext();
@@ -138,6 +136,57 @@ public class Athletes {
 
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("club_reg");
         insert.execute(parameters);
+    }
+
+    /**
+     * Add a class to an AthleteID for the DataSource
+     *
+     * @param athleteID int
+     * @param atClass   String
+     * @param testDate  java.sql.Date
+     */
+    public static void addAthleteToClass(Integer athleteID, String atClass, Date testDate) throws SQLException {
+        int classId;
+        String className;
+        switch(atClass){
+            case "senior":
+                classId = 1;
+                className = "SENIOR";
+                break;
+            case "junA":
+                classId = 2;
+                className = "A";
+                break;
+            case "junB":
+                classId = 3;
+                className = "B";
+                break;
+            case "junC":
+                classId = 4;
+                className = "C";
+                break;
+            default:
+                return;
+        }
+
+        AthleteModel checkAthlete = getAthlete(athleteID.toString(), testDate);
+        if(checkAthlete != null && checkAthlete.get(Athlete.CLASS) != null && checkAthlete.get(Athlete.CLASS).toString().equals(className)){
+            // Athlete already in right class (?)
+            return;
+        }
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("athlete", athleteID);
+        parameters.put("class", classId);
+        parameters.put("start", testDate);
+
+        try {
+
+            JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
+            SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("class_period");
+            insert.execute(parameters);
+        }
+        catch (NamingException ignore){}
     }
 
 }
