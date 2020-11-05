@@ -60,7 +60,7 @@ public class Exercises {
      * Query for all exercises
      *
      * @return List<ExerciseModel>
-     * @throws SQLException
+     * @throws SQLException -
      */
     public static List<ExerciseModel> getExercises() throws SQLException {
         List<ExerciseModel> toReturn = new ArrayList<>();
@@ -104,7 +104,7 @@ public class Exercises {
      * @param name Exercise-name
      * @param unit Exercise-unit
      * @return ExerciseModel
-     * @throws SQLException
+     * @throws SQLException -
      */
     public static ExerciseModel getExercise(String name, String unit) throws SQLException {
         String queryWhere = "";

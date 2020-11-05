@@ -1,5 +1,9 @@
 package servlets;
 
+import enums.UserLevel;
+import models.UserModel;
+import tools.UserAuth;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,6 +18,7 @@ import java.util.List;
 public class ChooseAthleteServlet extends AbstractAppServlet{
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
         writeResponse(request, response, "Choose Athletes");
     }
 
@@ -36,9 +41,10 @@ public class ChooseAthleteServlet extends AbstractAppServlet{
 
 
         } catch (Exception e) {
-            request.setAttribute("errorMessage", "Velg minst en utøver");
             rd = request.getRequestDispatcher("/chooseAthlete.jsp");
             rd.forward(request, response);
+
+            //TODO: give feedback as in the mypage.jsp (userAuth) when something is wrong.
         }
     }
 }
