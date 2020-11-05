@@ -125,33 +125,4 @@ public final class DbTool {
         }
         return dataSource;
     }
-
-    public ResultSet selectQueryPrepared(String query, Object... args) throws SQLException {
-        Connection db = null;
-        PreparedStatement statement = null;
-
-        db = this.dbLoggIn();
-
-        ResultSet rs = null;
-        statement = db.prepareStatement(query);
-        int argCounter = 1;
-        for (Object arg : args){
-            statement.setString(argCounter, arg.toString());
-            argCounter++;
-        }
-
-        rs = statement.executeQuery();
-
-        db.close();
-
-        return rs;
-    }
-
-    public DataSource getDataSource() throws NamingException {
-        if(dataSource == null){
-            Context ctx = new InitialContext();
-            dataSource = (DataSource) ctx.lookup("roingdb");
-        }
-        return dataSource;
-    }
 }
