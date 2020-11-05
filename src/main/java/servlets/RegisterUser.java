@@ -79,8 +79,6 @@ public class RegisterUser extends AbstractAppServlet {
                 // ADD USER TO CLUB_USERS
                 UserRepository.connectUserAndAthlete(newUserID, athleteId);
             }
-
-
             session.setAttribute("msg", "Succesfully added user with id: "+newUserID);
         }
         catch(Exception e){
