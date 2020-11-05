@@ -3,6 +3,7 @@ package servlets;
 import enums.UserLevel;
 import models.UserModel;
 import tools.UserAuth;
+import tools.htmltools.HtmlConstants;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,6 +30,8 @@ public class ServletMal extends AbstractAppServlet {
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out, UserModel currentUser) {
+        out.print(HtmlConstants.getHtmlHead("Template - Roing Webapp", currentUser));
+
         // CODE HERE
         
     }
