@@ -2,7 +2,7 @@ const themeConfig = new ThemeConfig();
 themeConfig.initTheme();
 
 $(function(){
-    $("#nav-placeholder").load("nav.html", function(){
+    $("#nav-placeholder").load("/roingwebapp/nav.html", function(){
         $(".custom-control-input")
             .prop("checked", themeConfig.getTheme() == "dark")
             .on("change", function(){

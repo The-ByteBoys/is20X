@@ -2,6 +2,7 @@ package models;
 
 import enums.*;
 
+import java.sql.Date;
 import java.util.ArrayList;
 
 public class AthleteModel extends AbstractModel {
@@ -9,16 +10,16 @@ public class AthleteModel extends AbstractModel {
 
     /**
      * 
-     * @param athlete_id The ID of the user. May be null!
+     * @param athleteid The ID of the user. May be null!
      * @param fname First name of the athlete
      * @param lname Last name of the athlete
-     * @param birth Birth year of the athlete
+     * @param birth Birthdate of the athlete
      * @param sex Sex of the athlete (F/M/O)
      */
-    public AthleteModel(Integer athlete_id, String fname, String lname, Integer birth, String sex){
+    public AthleteModel(Integer athleteid, String fname, String lname, Date birth, String sex){
         super();
 
-        field.put(Athlete.ID, athlete_id);
+        field.put(Athlete.ID, athleteid);
         field.put(Athlete.FNAME, fname);
         field.put(Athlete.LNAME, lname);
         field.put(Athlete.BIRTH, birth);
