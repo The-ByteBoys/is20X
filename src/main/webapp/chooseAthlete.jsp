@@ -10,6 +10,9 @@
 <%@ page import="java.util.List" %>
 <%@ page import="tools.repository.Athletes" %>
 <%@ page import="enums.Athlete" %>
+<%@ page import="models.ExerciseModel" %>
+<%@ page import="tools.repository.Exercises" %>
+<%@ page import="enums.Exercise" %>
 <%
     UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
     if(currentUser == null){ return; }
@@ -81,15 +84,12 @@
                         <select name="<%=cl%>-exercises">
                             <option disabled selected>Velg test</option>
                             <%
-                                String query = "SELECT e.name, e.unit, e.exercise_id FROM exercise e\n" +
-                                        "INNER JOIN test_set ts ON e.exercise_id = ts.exercise\n" +
-                                        "INNER JOIN class c ON c.class_id = ts.class\n" +
-                                        "WHERE c.name = '" + cl + "'";
-                                ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
-                                while (rs.next()) {
-                                    String exercise_name = rs.getString("e.name");
-                                    String exercise_unit = rs.getString("e.unit");
-                                    int exercise_id = rs.getInt("e.exercise_id");
+                                int clubID = clubID = (int)currentUser.get(User.CLUBID);
+                                List<ExerciseModel> exercises = Exercises.getExercisesForClass(cl, clubID);
+                                for (ExerciseModel ex : exercises) {
+                                    String exercise_name = ex.get(Exercise.NAME).toString();
+                                    String exercise_unit = ex.get(Exercise.UNIT).toString();
+                                    int exercise_id = (int) ex.get(Exercise.ID);
                             %>
                             <option value="<%=exercise_id + "-" + exercise_name + "-" + exercise_unit%>"><%=exercise_name + " " + exercise_unit%></option>
                             <%
