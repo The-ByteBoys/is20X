@@ -29,6 +29,8 @@
     <p><a href="register.jsp">Registrer ny utøver-bruker</a></p>
     <p><a href="massinsert">Sett inn masse data</a></p>
     <p><a href="uploadExcel.jsp">Last opp excel-fil</a></p>
+    <p><a href="chooseAthlete.jsp">Registrer resultater</a></p>
+
     <% } %>
 
     <% if(currentUser.get(User.TYPE).equals("ADMIN")){ %>

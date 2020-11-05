@@ -26,10 +26,20 @@ public class Athletes {
     }
 
     public static List<AthleteModel> getAthletes() throws SQLException {
-        return getAthletes(0);
+        return getAthletes(0, Calendar.getInstance().get(Calendar.YEAR));
+    }
+    public static List<AthleteModel> getAthletes(int clubId) throws SQLException {
+        return getAthletes(clubId, Calendar.getInstance().get(Calendar.YEAR));
     }
 
-    public static List<AthleteModel> getAthletes(int clubId) throws SQLException {
+    /**
+     * Get athletes.
+     * @param clubId         Club id, if any, to limit to club. Default: 0
+     * @param classCheckYear Year to calculate class from. Default: 2020
+     * @return  List of AthleteModel
+     * @throws SQLException if SQL fails
+     */
+    public static List<AthleteModel> getAthletes(int clubId, int classCheckYear) throws SQLException {
         List<AthleteModel> toReturn = new ArrayList<>();
         String queryWhere = "";
 
@@ -38,12 +48,13 @@ public class Athletes {
         }
 
         try {
-            String query = "SELECT a.firstName, a.lastName, a.birth, a.sex FROM athlete a"+queryWhere;
+            String query = "SELECT a.athlete_id , a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c WHERE ageFrom <= ("+classCheckYear+"-a.birth) ORDER BY ageFrom DESC LIMIT 1) class FROM athlete a"+queryWhere;
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while (rs.next()) {
-                AthleteModel athlete = new AthleteModel(null, rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
+                AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
+                athlete.setAthleteClass(rs.getString("class"));
                 toReturn.add(athlete);
             }
 
@@ -57,9 +68,6 @@ public class Athletes {
     }
 
     public static AthleteModel getAthlete(String needle) throws SQLException {
-        return getAthlete(needle, new Date(Calendar.getInstance().getTime().getTime()) );
-    }
-    public static AthleteModel getAthlete(String needle, Date refClassDate) throws SQLException {
         String queryWhere = "";
         AthleteModel athlete = null;
 
@@ -72,10 +80,10 @@ public class Athletes {
             queryWhere = "CONCAT(a.firstName, ' ', a.lastName) = '"+needle+"'";
         }
 
-        String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, " +
-                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className" +
-                " FROM athlete a WHERE "+queryWhere;
-        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate)){
+        try {
+            String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex FROM athlete a WHERE "+queryWhere;
+
+            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while(rs.next()){
                 athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
