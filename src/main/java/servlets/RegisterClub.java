@@ -7,7 +7,6 @@ import tools.UserAuth;
 import tools.htmltools.HtmlConstants;
 import tools.repository.Clubs;
 
-
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,13 +39,11 @@ public class RegisterClub extends AbstractAppServlet {
         int newClubId = 0;
         try {
             newClubId = Clubs.addClub(name);
-        } catch (SQLException throwables) {
+            out.print("Club with name ´" + name + "´ (id: "+newClubId+") registered!");
+        } catch (SQLException | NamingException throwables) {
             throwables.printStackTrace();
-        } catch (NamingException e) {
-            e.printStackTrace();
+            out.print("Noe galt skjedde...");
         }
-
-        out.print("Club ("+newClubId+") with name ´" + name + "´ registered!");
     }
 
     @Override

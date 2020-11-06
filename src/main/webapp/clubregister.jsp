@@ -22,7 +22,7 @@
     <script src="js/menu.js"></script>
 
         <div class="container" style="text-align: center;">
-            <h1>Club registration</h1>
+            <h1>Club registration</h1><br><br><br>
 
             <form action="clubregistration" method="POST">
                 <div class="form-group">
