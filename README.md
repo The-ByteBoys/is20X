@@ -11,14 +11,8 @@ To make this work, you need to have docker installed on your system.
 ## Prepare
 * Run `setup.sh` (or `setup.cmd` in windows) to start your database and cache-volume for maven.
 
-* Edit the `src/config.properties` file to match your IP and database-user.
-```
-username=roing
-password=Passord123
-URL=jdbc:mariadb://172.17.0.1:3306/roro
-```
-
-* Update the same info in `setupDataSource.cmd`. Run the script some time after the setup script is complete, or it might fail. 
+* Edit the `setupDataSource.cmd` file to match your IP and database-user.     
+> Run the script some time after the setup script is complete, or it might fail.     
 
 > You may find your IP by doing the following:   
 > 

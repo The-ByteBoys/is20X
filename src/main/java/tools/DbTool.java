@@ -32,7 +32,7 @@ public final class DbTool {
         return INSTANCE;
     }
 
-    private static Map<String, String> getProperties() {
+    /*private static Map<String, String> getProperties() {
         Map<String, String> result = new HashMap<>();
         try (InputStream input = new FileInputStream("/opt/payara/config.properties")) {
             Properties prop = new Properties();
@@ -45,7 +45,7 @@ public final class DbTool {
         }
         return result;
 
-    }
+    }*/
 
 
     /**
@@ -56,20 +56,18 @@ public final class DbTool {
      */
     public Connection dbLoggIn() throws SQLException {
         Connection toReturn = null;
-        Map<String, String> result = getProperties();
+//        Map<String, String> result = getProperties();
 
         try {
             toReturn = (connection != null)
                 ? connection
-                : DriverManager.getConnection(
-                    result.get("URL"),
-                    result.get("username"),
-                    result.get("password"));
+                : getDataSource().getConnection();
 
-        } catch (SQLException e) {
+        }
+        catch(NamingException ignored){}
+        catch (SQLException e) {
             e.printStackTrace();
             throw e;
-            // out.println("SQL Exception " + e);
         }
         return toReturn;
     }
@@ -84,39 +82,40 @@ public final class DbTool {
      * @throws SQLException if query fails
      */
     public ResultSet selectQuery(String query) throws SQLException {
-        Connection db = null;
         PreparedStatement statement = null;
 
-        db = this.dbLoggIn();
+        try(Connection db = getDataSource().getConnection()){
+            ResultSet rs = null;
+            statement = db.prepareStatement(query);
+            rs = statement.executeQuery();
+            return rs;
+        }
+        catch (NamingException ignored){}
 
-        ResultSet rs = null;
-        statement = db.prepareStatement(query);
-        rs = statement.executeQuery();
-
-        db.close();
-        
-        return rs;
+        return null;
     }
 
     public ResultSet selectQueryPrepared(String query, Object... args) throws SQLException {
-        Connection db = null;
         PreparedStatement statement = null;
 
-        db = this.dbLoggIn();
+        try(Connection db = getDataSource().getConnection()) {
 
-        ResultSet rs = null;
-        statement = db.prepareStatement(query);
-        int argCounter = 1;
-        for (Object arg : args){
-            statement.setString(argCounter, arg.toString());
-            argCounter++;
+            ResultSet rs = null;
+            statement = db.prepareStatement(query);
+
+            int argCounter = 1;
+            for (Object arg : args) {
+                statement.setString(argCounter, arg.toString());
+                argCounter++;
+            }
+
+            rs = statement.executeQuery();
+
+            return rs;
         }
+        catch (NamingException ignored){}
 
-        rs = statement.executeQuery();
-
-        db.close();
-
-        return rs;
+        return null;
     }
 
     public DataSource getDataSource() throws NamingException {

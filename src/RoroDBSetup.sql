@@ -8,7 +8,7 @@ CREATE TABLE athlete (
     athlete_id INT AUTO_INCREMENT,
     firstName VARCHAR(250) NOT NULL,
     lastName VARCHAR(250) NOT NULL,
-    birth smallint(4) NOT NULL,
+    birth DATE NOT NULL,
     sex ENUM('F', 'M', 'O') NOT NULL,
 
     CONSTRAINT athlete_PK PRIMARY KEY (athlete_id),
@@ -137,7 +137,8 @@ INSERT INTO class (class_id, name, ageFrom)
 
 INSERT INTO user (user_id, email, password, userType)
     VALUES
-        (1, 'admin@admin', 'DA4263CC96DD21071FC9C864A74C774D', 'ADMIN');
+        (1, 'admin@admin', 'DA4263CC96DD21071FC9C864A74C774D', 'ADMIN'),
+        (2, 'johannes@coach', 'DA4263CC96DD21071FC9C864A74C774D', 'COACH');
 
 INSERT INTO exercise (exercise_id, name, description, unit, exerciseType)
     VALUES
@@ -168,13 +169,13 @@ INSERT INTO test_set (class, exercise, weight)
 
 # DUMMY DATA BELOW:
 INSERT INTO athlete (firstName, lastName, birth, sex)
-VALUES ('Johannes', 'Birkeland', 2000, 'M'),
-       ('Mona', 'Bond', 1950, 'F'),
-       ('Per', 'Olavsen', 2003, 'M'),
-       ('Sonja', 'Haraldsen', 2005, 'F'),
-       ('Frank', 'Haarfagre', 2007, 'M');
+VALUES ('Johannes', 'Birkeland', '2000-01-01', 'M'),
+       ('Mona', 'Bond', '1950-01-01', 'F'),
+       ('Per', 'Olavsen', '2003-01-01', 'M'),
+       ('Sonja', 'Haraldsen', '2005-01-01', 'F'),
+       ('Frank', 'Haarfagre', '2007-01-01', 'M');
 
-INSERT INTO club_user (user, athlete) VALUES (1, 1);
+INSERT INTO club_user (user, athlete) VALUES (2, 1);
 
 INSERT INTO club (name) VALUES ('BRK');
 

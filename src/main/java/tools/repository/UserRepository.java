@@ -13,10 +13,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import tools.DbTool;
 import enums.*;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 public class UserRepository {
 
@@ -95,6 +92,16 @@ public class UserRepository {
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("userLogin").usingGeneratedKeyColumns("created");
+        insert.execute(parameters);
+    }
+
+    public static void connectUserAndAthlete(int userid, int athleteid) throws NamingException {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("user", userid);
+        parameters.put("athlete", athleteid);
+
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("club_user");
         insert.execute(parameters);
     }
 }

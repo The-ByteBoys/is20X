@@ -136,7 +136,7 @@ public class UserAuth {
 
         if(user != null){
             string.append("<div id=\"loginInfo\" style=\"display: none;\">");
-            string.append("<a class=\"nav-item nav-link\" id='login' href=\"mypage.jsp\">Min side</a>");
+            string.append("<a class=\"nav-item nav-link\" id='login' href=\"/roingwebapp/mypage.jsp\">Min side</a>");
             string.append("</div>\n");
         }
 
