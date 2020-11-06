@@ -57,8 +57,7 @@ CREATE TABLE club_reg (
 
     CONSTRAINT club_reg_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT club_reg_club_FK FOREIGN KEY (club) REFERENCES club(club_id),
-    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club)
-);
+    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club));
 
 
 CREATE TABLE exercise (
@@ -137,7 +136,8 @@ INSERT INTO class (class_id, name, ageFrom)
 
 INSERT INTO user (user_id, email, password, userType)
     VALUES
-        (1, 'admin@admin', 'DA4263CC96DD21071FC9C864A74C774D', 'ADMIN');
+        (1, 'admin@admin', 'DA4263CC96DD21071FC9C864A74C774D', 'ADMIN'),
+        (2, 'johannes@coach', 'DA4263CC96DD21071FC9C864A74C774D', 'COACH');
 
 INSERT INTO exercise (exercise_id, name, description, unit, exerciseType)
     VALUES
@@ -174,7 +174,7 @@ VALUES ('Johannes', 'Birkeland', '2000-01-01', 'M'),
        ('Sonja', 'Haraldsen', '2005-01-01', 'F'),
        ('Frank', 'Haarfagre', '2007-01-01', 'M');
 
-INSERT INTO club_user (user, athlete) VALUES (1, 1);
+INSERT INTO club_user (user, athlete) VALUES (2, 1);
 
 INSERT INTO club (name) VALUES ('BRK');
 

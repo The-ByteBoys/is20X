@@ -51,6 +51,7 @@ public class PostExcelServlet extends AbstractAppServlet {
         String sex = req.getParameter("sex");
         String year = req.getParameter("year");
         String week = req.getParameter("week");
+        String atClass = req.getParameter("class");
 
         // CHECK sex FIELD
         if(!sex.equals("M") && !sex.equals("F") && !sex.equals("O")){
@@ -71,19 +72,33 @@ public class PostExcelServlet extends AbstractAppServlet {
             return;
         }
 
+        // Format testTime
+        Calendar cal = Calendar.getInstance();
+        cal.setWeekDate(Integer.parseInt(year), Integer.parseInt(week), Calendar.MONDAY);
+
+        Timestamp testTime = new Timestamp(cal.getTimeInMillis());
+        Date testTimeDate = new Date(cal.getTimeInMillis());
+
+
         for (int i = 0; i < lastNames.length; i++) {
 
             // GET ATHLETE, and add if doesnt exist
             int newAthleteId = 0;
-//            int birth = 0;
             Date birth;
+
             try {
-
-                 birth = Date.valueOf(births[i]);
-
+                if(!births[i].equals("")){
+                    birth = Date.valueOf(births[i]);
+                }
+                else {
+                    birth = Date.valueOf("0001-01-01");
+                }
 
                 // ADD ATHLETE
                 newAthleteId = addAthlete(firstNames[i], lastNames[i], birth, sex);
+
+                // Add athlete to class
+                Athletes.addAthleteToClass(newAthleteId, atClass, testTimeDate);
 
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -109,7 +124,7 @@ public class PostExcelServlet extends AbstractAppServlet {
             for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
                 String key = entry.getKey();
 
-                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week") && !key.equals("3000Total")) {
+                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week") && !key.equals("class") && !key.equals("3000Total")) {
                     String[] values = entry.getValue();
                     if(values[i].equals("")){
                         continue;
@@ -121,14 +136,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                         continue;
                     }
 
-
-                    // Format testTime
-                    Calendar cal = Calendar.getInstance();
-                    cal.setWeekDate(Integer.parseInt(year), Integer.parseInt(week), Calendar.MONDAY);
-
-                    Timestamp newTime = new Timestamp(cal.getTimeInMillis());
-
-                    // Fix time-fields
+                    // Convert time fields to seconds
                     double newValue = 0.00;
 
                     if (key.matches("[0-9]+Tid")){
@@ -163,7 +171,7 @@ public class PostExcelServlet extends AbstractAppServlet {
 
 
                     try {
-                        ResultModel newResult = new ResultModel(newAthleteId, exerciseId, newValue, newTime, "IP");
+                        ResultModel newResult = new ResultModel(newAthleteId, exerciseId, newValue, testTime, "IP");
 
                         Results.addResult(newResult);
                     } catch (Exception e) {
