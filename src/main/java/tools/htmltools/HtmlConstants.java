@@ -13,7 +13,9 @@ public class HtmlConstants {
                 "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
                 "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n" +
                 "\n" +
-                "    <link rel=\"stylesheet\" type=\"text/css\" href=\""+ROOTPATH+"/css/bootstrap.min.css\">\n" +
+                "    <link rel=\"stylesheet\" type=\"text/css\" href=\""+ROOTPATH+ "/css/bootstrap.min.css\">\n" +
+                "    " +
+                "<link rel=\"icon\" type=\"image/x-icon\" href=\""+ROOTPATH+ "/img/Roforbund.png\">\n" +
                 "    <link rel=\"stylesheet\" href=\"https://unpkg.com/bootstrap-darkmode@0.7.0/dist/darktheme.css\"/>\n" +
                 "    <!-- Font Awesome -->\n" +
                 "    <link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.8.2/css/all.css\">\n" +
