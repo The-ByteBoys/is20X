@@ -56,7 +56,8 @@
             <%
                 try {
                     if (currentUser.get(User.CLUBID) != null) {
-                    List<AthleteModel> athletes = Athletes.getAthletes((int) currentUser.get(User.CLUBID));
+                    int clubId = (int) currentUser.get(User.CLUBID);
+                    List<AthleteModel> athletes = Athletes.getAthletes(clubId);
                     for (AthleteModel a : athletes) {
                         if (a.get(Athlete.CLASS).toString().equals(cl)) {
                             String firstName = a.get(Athlete.FNAME).toString();
@@ -84,8 +85,7 @@
                         <select name="<%=cl%>-exercises">
                             <option disabled selected>Velg test</option>
                             <%
-                                int clubID = clubID = (int)currentUser.get(User.CLUBID);
-                                List<ExerciseModel> exercises = Exercises.getExercisesForClass(cl, clubID);
+                                List<ExerciseModel> exercises = Exercises.getExercisesForClass(cl, clubId);
                                 for (ExerciseModel ex : exercises) {
                                     String exercise_name = ex.get(Exercise.NAME).toString();
                                     String exercise_unit = ex.get(Exercise.UNIT).toString();

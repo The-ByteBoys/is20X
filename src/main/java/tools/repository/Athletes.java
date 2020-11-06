@@ -26,20 +26,20 @@ public class Athletes {
     }
 
     public static List<AthleteModel> getAthletes() throws SQLException {
-        return getAthletes(0, Calendar.getInstance().get(Calendar.YEAR));
+        return getAthletes(0, new Date(Calendar.getInstance().getTime().getTime()));
     }
     public static List<AthleteModel> getAthletes(int clubId) throws SQLException {
-        return getAthletes(clubId, Calendar.getInstance().get(Calendar.YEAR));
+        return getAthletes(clubId, new Date(Calendar.getInstance().getTime().getTime()));
     }
 
     /**
      * Get athletes.
      * @param clubId         Club id, if any, to limit to club. Default: 0
-     * @param classCheckYear Year to calculate class from. Default: 2020
+     * @param refClassDate   Year to calculate class from. Default: 2020
      * @return  List of AthleteModel
      * @throws SQLException if SQL fails
      */
-    public static List<AthleteModel> getAthletes(int clubId, int classCheckYear) throws SQLException {
+    public static List<AthleteModel> getAthletes(int clubId, Date refClassDate) throws SQLException {
         List<AthleteModel> toReturn = new ArrayList<>();
         String queryWhere = "";
 
@@ -47,18 +47,15 @@ public class Athletes {
             queryWhere = " INNER JOIN club_reg cr ON a.athlete_id = cr.athlete WHERE cr.club = "+clubId;
         }
 
-        try {
-            String query = "SELECT a.athlete_id , a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c WHERE ageFrom <= ("+classCheckYear+"-a.birth) ORDER BY ageFrom DESC LIMIT 1) class FROM athlete a"+queryWhere;
-
-            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
+        String query = "SELECT a.athlete_id , a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className FROM athlete a"+queryWhere;
+        try(ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate)){
 
             while (rs.next()) {
                 AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
-                athlete.setAthleteClass(rs.getString("class"));
+                athlete.setAthleteClass(rs.getString("className"));
                 toReturn.add(athlete);
             }
 
-            rs.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             throw throwables;
