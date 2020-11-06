@@ -68,6 +68,9 @@ public class Athletes {
     }
 
     public static AthleteModel getAthlete(String needle) throws SQLException {
+        return getAthlete(needle, new Date(Calendar.getInstance().getTime().getTime()) );
+    }
+    public static AthleteModel getAthlete(String needle, Date refClassDate) throws SQLException {
         String queryWhere = "";
         AthleteModel athlete = null;
 
@@ -80,10 +83,10 @@ public class Athletes {
             queryWhere = "CONCAT(a.firstName, ' ', a.lastName) = '"+needle+"'";
         }
 
-        try {
-            String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex FROM athlete a WHERE "+queryWhere;
-
-            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
+        String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, " +
+                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className" +
+                " FROM athlete a WHERE "+queryWhere;
+        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate)){
 
             while(rs.next()){
                 athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
@@ -139,9 +142,7 @@ public class Athletes {
         parameters.put("athlete", athleteID);
         parameters.put("club", clubID);
 
-        Context ctx = new InitialContext();
-        JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
-
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("club_reg");
         insert.execute(parameters);
     }
@@ -179,7 +180,7 @@ public class Athletes {
 
         AthleteModel checkAthlete = getAthlete(athleteID.toString(), testDate);
         if(checkAthlete != null && checkAthlete.get(Athlete.CLASS) != null && checkAthlete.get(Athlete.CLASS).toString().equals(className)){
-            // Athlete already in right class (?)
+            // Athlete already in right class
             return;
         }
 

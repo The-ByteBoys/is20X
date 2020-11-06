@@ -87,7 +87,12 @@ public class PostExcelServlet extends AbstractAppServlet {
             Date birth;
 
             try {
-                 birth = Date.valueOf(births[i]);
+                if(!births[i].equals("")){
+                    birth = Date.valueOf(births[i]);
+                }
+                else {
+                    birth = Date.valueOf("0001-01-01");
+                }
 
                 // ADD ATHLETE
                 newAthleteId = addAthlete(firstNames[i], lastNames[i], birth, sex);
