@@ -1,5 +1,9 @@
 package servlets;
 
+import enums.UserLevel;
+import models.UserModel;
+import tools.UserAuth;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,6 +18,7 @@ import java.util.List;
 public class ChooseAthleteServlet extends AbstractAppServlet{
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
         writeResponse(request, response, "Choose Athletes");
     }
 
@@ -28,19 +33,18 @@ public class ChooseAthleteServlet extends AbstractAppServlet{
         RequestDispatcher rd = null;
 
         try {
-            String seniorTest = request.getParameter("SENIOR + \"-\" + name+unit");
             String[] athletes = request.getParameterValues("athletes");
             List<String> list = Arrays.asList(athletes);
             request.setAttribute("athletes", list);
-            rd = request.getRequestDispatcher("submitTest_testRegister.jsp");
+            rd = request.getRequestDispatcher("submitTest.jsp");
             rd.forward(request, response);
 
 
-        } catch (NullPointerException e) {
-            request.setAttribute("errorMessage", "Velg minst en utøver");
+        } catch (Exception e) {
             rd = request.getRequestDispatcher("/chooseAthlete.jsp");
             rd.forward(request, response);
-            //TODO: get this exception handler to work
+
+            //TODO: give feedback as in the mypage.jsp (userAuth) when something is wrong.
         }
     }
 }

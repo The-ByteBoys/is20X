@@ -1,6 +1,7 @@
 package tools.repository;
 
 import enums.Exercise;
+import enums.Result;
 import models.ExerciseModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -27,10 +28,39 @@ public class Exercises {
     }
 
     /**
+     * Query for all exercises connected to a class, plus the club-specific ones
+     *
+     * @return List<ExerciseModel>
+     * @param exClass Exercise class to check for. Currently either "Senior", "A", "B", "C"
+     * @throws SQLException if sql fails
+     */
+    public static List<ExerciseModel> getExercisesForClass(String exClass) throws SQLException {
+        return getExercisesForClass(exClass, 0);
+    }
+
+    public static List<ExerciseModel> getExercisesForClass(String exClass, int clubId) throws SQLException {
+        List<ExerciseModel> toReturn = new ArrayList<>();
+
+        String query = "SELECT e.exercise_id, e.name, e.description, e.unit, e.exerciseType FROM exercise e" +
+                " LEFT OUTER JOIN test_set ts ON e.exercise_id = ts.exercise" +
+                " LEFT OUTER JOIN class c ON c.class_id = ts.class" +
+                " LEFT OUTER JOIN club_exercise ce ON e.exercise_id = ce.exercise" +
+                " WHERE c.name = ? OR (exerciseType = 'CLUBEX' AND ce.club = ?)";
+
+        ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, exClass, clubId);
+        while (rs.next()) {
+            ExerciseModel exercise = new ExerciseModel(rs.getInt("e.exercise_id"), rs.getString("e.name"), rs.getString("e.description"), rs.getString("e.unit"), rs.getString("e.exerciseType"));
+            toReturn.add(exercise);
+        }
+
+        return toReturn;
+    }
+
+    /**
      * Query for all exercises
      *
      * @return List<ExerciseModel>
-     * @throws SQLException
+     * @throws SQLException -
      */
     public static List<ExerciseModel> getExercises() throws SQLException {
         List<ExerciseModel> toReturn = new ArrayList<>();
@@ -54,13 +84,27 @@ public class Exercises {
         return toReturn;
     }
 
+    public static ExerciseModel getExerciseFromId(int exid) throws SQLException {
+        return getExerciseFromId(exid, true);
+    }
+    public static ExerciseModel getExerciseFromId(int exid, boolean onlyPublished) throws SQLException {
+        String query = "SELECT exercise_id, name, description, unit, exerciseType FROM exercise e WHERE exercise_id = ?"+(onlyPublished?" AND exerciseType = 'ALLEX'":"");
+
+        try(ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, exid)){
+            while (rs.next()){
+                return new ExerciseModel(rs.getInt("exercise_id"), rs.getString("name"), rs.getString("description"), rs.getString("unit"), rs.getString("exerciseType") );
+            }
+        }
+        return null;
+    }
+
     /**
      * Query for a single exercise
      *
      * @param name Exercise-name
      * @param unit Exercise-unit
      * @return ExerciseModel
-     * @throws SQLException
+     * @throws SQLException -
      */
     public static ExerciseModel getExercise(String name, String unit) throws SQLException {
         String queryWhere = "";
@@ -104,9 +148,9 @@ public class Exercises {
      * Method to add exercise to the datasource, if it doesn't already exist
      *
      * @param newExercise <ExerciseModel>
-     * @return
-     * @throws NamingException
-     * @throws SQLException
+     * @return Integer of the new exercise ID
+     * @throws NamingException if datasource is not found
+     * @throws SQLException -
      */
     public static Integer addExercise(ExerciseModel newExercise) throws NamingException, SQLException {
         ExerciseModel checkIfExistsExercise= getExercise(newExercise.get(Exercise.NAME).toString(), newExercise.get(Exercise.UNIT).toString());
@@ -121,9 +165,7 @@ public class Exercises {
             parameters.put("unit", newExercise.get(Exercise.UNIT));
             parameters.put("exerciseType", newExercise.get(Exercise.TYPE));
 
-            Context ctx = new InitialContext();
-            JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
-
+            JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
             SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("exercise").usingGeneratedKeyColumns("exercise_id");
             return insert.executeAndReturnKey(parameters).intValue();
         }

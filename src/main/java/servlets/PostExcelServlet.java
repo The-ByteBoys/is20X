@@ -2,6 +2,7 @@ package servlets;
 
 import enums.*;
 import models.*;
+import org.springframework.dao.DuplicateKeyException;
 import tools.repository.*;
 
 import javax.naming.NamingException;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -73,11 +75,15 @@ public class PostExcelServlet extends AbstractAppServlet {
 
             // GET ATHLETE, and add if doesnt exist
             int newAthleteId = 0;
-
+//            int birth = 0;
+            Date birth;
             try {
 
+                 birth = Date.valueOf(births[i]);
+
+
                 // ADD ATHLETE
-                newAthleteId = addAthlete(firstNames[i], lastNames[i], Integer.parseInt(births[i]), sex);
+                newAthleteId = addAthlete(firstNames[i], lastNames[i], birth, sex);
 
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -170,9 +176,17 @@ public class PostExcelServlet extends AbstractAppServlet {
             out.print("<br>\n");
         }
 
+        out.println("<br><strong>Success!</strong>");
+
+//        try {
+//            Results.addResults(results);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
     }
 
-    private int addAthlete(String fName, String lName, int birth, String sex) throws SQLException, NamingException {
+    private int addAthlete(String fName, String lName, Date birth, String sex) throws SQLException, NamingException {
         AthleteModel newAthlete = new AthleteModel(null, fName, lName, birth, sex);
         return Athletes.addAthlete(newAthlete);
     }
@@ -185,6 +199,10 @@ public class PostExcelServlet extends AbstractAppServlet {
                 int newClubId = Clubs.addClub(c);
                 Athletes.addAthleteToClub(athleteId, newClubId);
                 toReturn.append(" - added to club \"").append(c).append("\"");
+            }
+            catch(DuplicateKeyException ignore){
+                // Duplicate Keys are expected.
+                toReturn.append(" - already in club \"").append(c).append("\"");
             }
             catch(Exception e){
                 e.printStackTrace();

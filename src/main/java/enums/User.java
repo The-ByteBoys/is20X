@@ -1,5 +1,5 @@
 package enums;
 
 public enum User {
-    ID, EMAIL, PASSWORD, TYPE, ATHLETEID
+    ID, EMAIL, PASSWORD, TYPE, ATHLETEID, CLUBID
 }

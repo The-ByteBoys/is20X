@@ -1,5 +1,19 @@
-<%@ page import="tools.html.htmlConstants" contentType="text/html;charset=UTF-8" language="java" %>
-<%=htmlConstants.getHtmlHead("Upload File")%>
+<%@ page import ="tools.UserAuth" import="models.UserModel" import="tools.htmltools.HtmlConstants" import="enums.UserLevel" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%
+    UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
+    if(currentUser == null){ return; }
+%>
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <title>Register - Roing Webapp</title>
+    <%=HtmlConstants.getHtmlHeaders()%>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+<%=UserAuth.navBarLogin(currentUser)%>
+<script src="js/menu.js"></script>
+
 <div class="container-fluid" style="text-align: left;">
     <div style='text-align: center; margin-top: 15vh;'>
         <form method="POST" enctype="multipart/form-data" action="massinsert">

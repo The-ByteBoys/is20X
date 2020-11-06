@@ -1,8 +1,13 @@
 package servlets;
 
 
+import models.UserModel;
+import tools.DbTool;
+
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -32,12 +37,6 @@ public abstract class AbstractAppServlet extends HttpServlet {
             out.format(HTML_PAGE_END);
         }
     }
-    protected void writeResponseHeadless(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            writeBody(request, out);
-        }
-    }
     protected PrintWriter getWriteResponse(HttpServletResponse response, String title) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
@@ -53,7 +52,25 @@ public abstract class AbstractAppServlet extends HttpServlet {
         }
     }
 
-    protected abstract void writeBody(HttpServletRequest req, PrintWriter out);
+    protected void writeResponseHeadless(HttpServletRequest request, HttpServletResponse response, UserModel currentUser) throws IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            if(currentUser != null){
+                writeBody(request, out, currentUser);
+            }
+            else {
+                writeBody(request, out);
+            }
+        }
+    }
+
+
+    protected void writeBody(HttpServletRequest req, PrintWriter out){
+        writeBody(req, out, null);
+    }
+    protected void writeBody(HttpServletRequest req, PrintWriter out, UserModel currentUser){
+        writeBody(req, out);
+    }
 
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -78,6 +95,21 @@ public abstract class AbstractAppServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            DbTool.getINSTANCE().getDataSource();
+            request.setCharacterEncoding("UTF-8");
+        }
+        catch (NamingException e){
+            e.printStackTrace();
+            PrintWriter out = response.getWriter();
+            out.print("Datasource is giving an error. Please check if it is configures properly. <br><pre>"+e+"</pre>");
+            return;
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new ServletException(e);
+        }
+
         processRequest(request, response);
     }
 

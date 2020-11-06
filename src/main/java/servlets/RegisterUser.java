@@ -1,75 +1,92 @@
 package servlets;
 
 import enums.User;
+import enums.UserLevel;
+import models.AthleteModel;
 import models.UserModel;
-import tools.PasswordEncrypt;
+import tools.UserAuth;
+import tools.repository.Athletes;
+import tools.repository.Clubs;
 import tools.repository.UserRepository;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
+import java.sql.Date;
+import java.sql.SQLException;
 
 @WebServlet(name = "RegisterUser", urlPatterns = {"/userregistration"})
 public class RegisterUser extends AbstractAppServlet {
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        writeResponse(request, response, "Register User");
-    }
 
-    @Override
-    protected void writeBody(HttpServletRequest req, PrintWriter out) {
+        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
 
-//        req.setContentType("text/html");
-//        PrintWriter out = response.getWriter();
+        HttpSession session = request.getSession();
 
-        out.print("<h1>Registering user...</h1>");
+        if(currentUser == null){
+            return;
+        }
 
-//        String fname=req.getParameter("userFname");
-//        String lname=req.getParameter("userLname");
-        String email=req.getParameter("userEmail");
-        String pass=req.getParameter("userPass");
-        String type=req.getParameter("userType");
+        String email=request.getParameter("userEmail");
+        String pass=request.getParameter("userPass");
+        String type=request.getParameter("userType");
+
+        String fName = request.getParameter("userFname");
+        String lName = request.getParameter("userLname");
+        String birthStr = request.getParameter("userBirth");
+        String sex = request.getParameter("userSex");
+        String club = request.getParameter("userClub");
+
+        if(
+                email == null || pass == null || type == null ||
+                (!type.equals("ADMIN") && (fName == null || lName == null || birthStr == null || sex == null || club == null))
+        ){
+            session.setAttribute("msg", "Empty fields. Not continuing!");
+            response.sendRedirect("register.jsp");
+            return;
+        }
+
+//        Integer birth = Integer.parseInt(birthStr);
+        Date birth = Date.valueOf(birthStr);
 
         UserModel newUser = new UserModel();
         newUser.set(User.EMAIL, email);
         newUser.set(User.PASSWORD, pass);
         newUser.set(User.TYPE, type);
 
+        int newUserID;
         try {
-            int newID = PasswordEncrypt.opprettBruker(newUser);
-            out.print("User added with id: "+newID);
+            newUserID = UserAuth.createUser(newUser);
+
+            if(!type.equals("ADMIN")){
+
+                // ADD ATHLETE IF NOT EXIST
+                AthleteModel newAthelte = new AthleteModel(null, fName, lName, birth, sex);
+                int athleteId = Athletes.addAthlete(newAthelte);
+
+                // ADD CLUB IF NOT EXIST
+                int clubId = Clubs.addClub(club);
+
+                // ADD ATHLETE TO CLUB
+                Athletes.addAthleteToClub(athleteId, clubId);
+
+                // ADD USER TO CLUB_USERS
+                UserRepository.connectUserAndAthlete(newUserID, athleteId);
+            }
+            session.setAttribute("msg", "Succesfully added user with id: "+newUserID);
         }
         catch(Exception e){
             e.printStackTrace();
-            out.print("Exception! "+e);
+            session.setAttribute("error", "Failed to add user");
         }
 
-
-        /*try{
-            //Class.forName("oracle.jdbc.driver.OracleDriver");
-            //    Connection con= DriverManager.getConnection(
-            //            "jdbc:oracle:thin:@localhost:1521:xe","system","oracle");
-
-            //    PreparedStatement ps=con.prepareStatement(
-            //            "insert into registeruser values(?,?)");
-
-            ps.setString(1,n);
-            ps.setString(2,p);
-
-            int i=ps.executeUpdate();
-            if(i>0)
-                out.print("You are successfully registered...");
-
-        }catch (Exception e2) {System.out.println(e2);}
-
-        out.close();*/
+        response.sendRedirect("register.jsp");
     }
 
     /**

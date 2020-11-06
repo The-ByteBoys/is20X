@@ -1,6 +1,5 @@
 package servlets;
 
-import tools.PasswordEncrypt;
 import tools.UserAuth;
 import java.io.*;
 import java.sql.SQLException;
@@ -10,6 +9,7 @@ import javax.servlet.http.*;
 
 @WebServlet(name= "LogginServlet", urlPatterns = {"/login"})
 public class LogginServlet extends AbstractAppServlet {
+
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.sendRedirect("login.jsp");
@@ -28,21 +28,22 @@ public class LogginServlet extends AbstractAppServlet {
         String password = request.getParameter("password");
 
         try {
-            PrintWriter out = response.getWriter();
             String token = UserAuth.checkLogin(username, password);
 
             if(token != null){
                 /* SUCCESSFUL LOGIN */
                 Cookie ck = new Cookie("auth", token);
-                ck.setMaxAge(600);
+                ck.setMaxAge(1800);
 
                 response.addCookie(ck);
-                response.sendRedirect("home.jsp");
+                response.sendRedirect("mypage.jsp");
             }
             else {
-                out.print("Login failed! <a href='login.jsp'>Login</a>.");
+                HttpSession session = request.getSession();
+                session.setAttribute("error", "Login failed. Please check your username and password and try again!");
+                response.sendRedirect("login.jsp");
             }
-        } catch (IOException | SQLException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
