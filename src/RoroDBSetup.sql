@@ -57,8 +57,7 @@ CREATE TABLE club_reg (
 
     CONSTRAINT club_reg_athlete_FK FOREIGN KEY (athlete) REFERENCES athlete(athlete_id),
     CONSTRAINT club_reg_club_FK FOREIGN KEY (club) REFERENCES club(club_id),
-    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club)
-);
+    CONSTRAINT club_reg_PK PRIMARY KEY (athlete, club));
 
 
 CREATE TABLE exercise (

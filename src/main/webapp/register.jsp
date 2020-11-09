@@ -34,7 +34,7 @@
         <div id="userClubDiv">
             Fornavn: <input type="text" name="userFname" class="form-control">
             Etternavn: <input type="text" name="userLname" class="form-control">
-            Fødselsår: <input type="number" name="userBirth" class="form-control" min="0" max="2100" placeholder="2020">
+            Fødselsår: <input type="date" name="userBirth" class="form-control">
             Klubb: <input type="text" name="userClub" class="form-control" >
             Kjønn: <select class='sexPicker form-control' name="userSex" style='width: initial; display: initial;' required>
                 <option>Velg kjønn</option>
