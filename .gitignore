@@ -5,3 +5,8 @@ target/
 lib/
 RoingWebapp.iml
 src/main/java/tools/excel/excelDocuments/
+
+.classpath
+.project
+.settings/
+
