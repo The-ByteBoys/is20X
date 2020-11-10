@@ -19,6 +19,7 @@ public class HtmlTableUtil {
     private ArrayList< ArrayList<String> > tableRows;
     private String editCell;
     private String tableID;
+    private ArrayList<String> newCellRow;
 
     public HtmlTableUtil(HashMap<String, Object> inputs){
         Iterator iterator = inputs.entrySet().iterator();
@@ -57,6 +58,20 @@ public class HtmlTableUtil {
     }
     public void addRow(ArrayList<String> newRowList){
         tableRows.add(newRowList);
+    }
+
+    public void addCell(String cellText){
+        if(newCellRow == null){
+            newRow();
+        }
+        newCellRow.add(cellText);
+    }
+
+    public void newRow(){
+        if(newCellRow != null && !newCellRow.isEmpty()){
+            addRow(newCellRow);
+        }
+        newCellRow = new ArrayList<>();
     }
 
     public void addRow(Collection<Object> inputs){

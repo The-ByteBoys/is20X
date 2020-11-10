@@ -66,11 +66,13 @@ public class AthleteInfoServlet extends AbstractAppServlet {
                 out.print("Latest results: <br>");
                 String lastDate = "";
                 List<ResultModel> results = Results.getResultsForAthlete(athleteId);
-                HtmlTableUtil resultTable = new HtmlTableUtil();
+                HtmlTableUtil resultTable = new HtmlTableUtil("");
+
                 for(ResultModel r : results){
                     String newDate = r.get(Result.DATETIME).toString().substring(0,10);
                     if(!lastDate.equals(newDate)){
-                        resultTable.addRow("<h4>"+newDate+"</h4>");
+                        resultTable.newRow();
+                        resultTable.addCell("<h4>"+newDate+"</h4>");
                         lastDate = newDate;
                     }
 
@@ -83,7 +85,10 @@ public class AthleteInfoServlet extends AbstractAppServlet {
                         ex = Exercises.getExerciseFromId(exId);
                         exercises.put(exId, ex);
                     }
-                    resultTable.addRow(ex.get(Exercise.NAME)+": "+r.get(Result.RESULT)+" "+ex.get(Exercise.UNIT));
+                    resultTable.addHeader( ex.get(Exercise.NAME)+" "+ex.get(Exercise.UNIT));
+                    resultTable.addCell(r.get(Result.RESULT).toString());
+//                    resultTable.addRow(ex.get(Exercise.NAME)+": "+r.get(Result.RESULT)+" "+ex.get(Exercise.UNIT));
+
                 }
 
                 out.print( resultTable.toString() );

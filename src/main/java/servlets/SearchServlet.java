@@ -50,35 +50,45 @@ public class SearchServlet extends AbstractAppServlet {
             out.print("<hr><h4>Searchresults for \""+search+"\":</h4><br>");
 
             out.print("<div class=\"list-group\" style='width: 80vw; max-width: 600px;margin: auto;'>");
+            int numResults = 0;
 
-            // SEARCH ATHLETES
             try {
+                // SEARCH ATHLETES
                 List<AthleteModel> foundAthletes = Athletes.findAthletes(search);
                 for(AthleteModel a : foundAthletes){
+                    numResults++;
                     String fullName = a.get(Athlete.FNAME)+" "+a.get(Athlete.LNAME);
                     String birth = a.get(Athlete.BIRTH).toString().substring(0,4);
                     out.print("<a href='./athlete/"+fullName+"' class='list-group-item list-group-item-action justify-content-between align-items-center d-flex'>" +
                             "<span>"+fullName+
                                 (!birth.equals("0001")?" <span style='font-size: 12px; padding-left: 10px;'>("+birth+")</span>":"")+
                             "</span>" +
-                            "<span class='badge badge-primary badge-pill'>Utøver</span>" +
+                            "<span class='badge badge-primary'>Utøver</span>" +
                             "</a>");
                 }
 
+                // SEARCH CLUBS
                 List<ClubModel> foundClubs = Clubs.findClubs(search);
                 for(ClubModel c : foundClubs){
+                    numResults++;
                     String clubName = c.get(Club.NAME).toString();
-                    out.print("<a href='./club/"+clubName+"' class='list-group-item list-group-item-action justify-content-between align-items-center d-flex'>"+clubName+"<span class='badge badge-warning badge-pill'>Klubb</span></a>");
+                    out.print("<a href='./club/"+clubName+"' class='list-group-item list-group-item-action justify-content-between align-items-center d-flex'>"+
+                            clubName+
+                            "<span class='badge badge-warning'>Klubb</span>" +
+                            "</a>");
                 }
+
 
             }
             catch (SQLException e){
-                out.print("No athletes found.");
+                e.printStackTrace();
+                out.print("Some sql failed: "+e);
             }
             out.print("</div>");
+
+            out.print("<br><br><h5>Found "+numResults+" results</h5>");
         }
 
-        out.print("");
         out.print("</div>");
     }
 
@@ -88,6 +98,6 @@ public class SearchServlet extends AbstractAppServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Search Servlet used to search for athletes or clubs";
     }
 }
