@@ -8,7 +8,7 @@
 </head>
 <body style="text-align: center;">
 
-<div id="nav-placeholder"></div>
+<div id="nav-placeholder" style="min-height: 70px;"></div>
 <%=UserAuth.navBarLogin(currentUser)%>
 <script src="js/menu.js"></script>
 
@@ -38,9 +38,9 @@
             <td scope="row">1</td>
             <td>89,1</td>
             <td>2004</td>
-            <td>Tyra</td>
-            <td>Hjemdal</td>
-            <td>Ormsund</td>
+            <td><a href="./athlete/Tyra%20Hjemdal">Tyra</a></td>
+            <td><a href="./athlete/Tyra%20Hjemdal">Hjemdal</a></td>
+            <td><a href="./club/Ormsund">Ormsund</a></td>
             <td>879</td>
             <td>14,39</td>
             <td>216</td>
@@ -54,9 +54,9 @@
             <td scope="row">2</td>
             <td>88,2</td>
             <td>2004</td>
-            <td>Mia</td>
-            <td>Engvik</td>
-            <td>Aalesunds</td>
+            <td><a href="./athlete/Mia%20Engvik">Mia</a></td>
+            <td><a href="./athlete/Mia%20Engvik">Engvik</a></td>
+            <td><a href="./club/Aalesunds">Aalesunds</a></td>
             <td>881</td>
             <td>14,41</td>
             <td>198</td>
