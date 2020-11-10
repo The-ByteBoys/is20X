@@ -72,7 +72,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                         "input.longInput {\n" +
                         "    width: 150px;\n" +
                         "}\n" +
-                        "input[type=\"text\"]:invalid {\n" +
+                        "input[type=text]:invalid, input[type=date]:invalid {\n" +
                         "    " +
                         "color: #ff0000;\n" +
                         "    " +
@@ -286,10 +286,19 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                                     timeString = timeString.replace("F",":");
                                     timeString = timeString.replace("S",".");
                                 }
-                                else if(timeString.matches("[0-9]+.0[0-9]+")){
-
+                                else if(timeString.matches("[0-9]+.[0-9]+")){
                                     double newTime = Double.parseDouble(timeString);
-                                    double newMinutes = newTime*24*60;
+                                    double newMinutes;
+
+                                    if(newTime >= 0.1){
+                                        // newMinutes is calculated as newHours.
+                                        newMinutes = newTime*24; // (hours)
+                                    }
+                                    else {
+                                        // Converts the time from days to minutes (e.g: 0.01255787037)
+                                        newMinutes = newTime*24*60;
+                                    }
+
                                     double newSeconds = (newMinutes-Math.floor(newMinutes))*60;
 
                                     DecimalFormat df = new DecimalFormat("00.##");
