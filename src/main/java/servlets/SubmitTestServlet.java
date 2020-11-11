@@ -55,20 +55,20 @@ public class SubmitTestServlet extends AbstractAppServlet {
             int ex_id = Integer.parseInt(idArray[0]);
             int at_id = Integer.parseInt(idArray[1]);
             String ex_unit = idArray[2];
-            int result;
+            double result;
 
             if (ex_unit.contains("TIME")) {
-                int minutes = Integer.parseInt(req.getParameter(at_id + "resultMin")) * 60;
-                int seconds = Integer.parseInt(req.getParameter(at_id + "resultSec"));
+                double minutes = Double.parseDouble(req.getParameter(at_id + "resultMin")) * 60;
+                double seconds = Double.parseDouble(req.getParameter(at_id + "resultSec"));
                 result = minutes + seconds;
 
             } else {
-                result = Integer.parseInt(req.getParameter(at_id + "result"));
+                result = Double.parseDouble(req.getParameter(at_id + "result"));
             }
 
             pstm.setInt(1, at_id);
             pstm.setInt(2, ex_id);
-            pstm.setInt(3, result);
+            pstm.setDouble(3, result);
             pstm.setString(4, DATE);
             pstm.executeUpdate();
         }
