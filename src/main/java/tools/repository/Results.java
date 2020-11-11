@@ -56,6 +56,34 @@ public class Results {
     }
 
     /**
+     * Query for all results in a club
+     *
+     * @return List<ResultModel>
+     * @throws SQLException
+     */
+    public static List<ResultModel> getResultsFromClub(int ClubId) throws SQLException {
+        List<ResultModel> toReturn = new ArrayList<>();
+
+        try {
+            String query = "SELECT r.athlete, exercise, result, date_time, result_Type FROM  result r INNER JOIN club_reg cr on r.athlete = cr.athlete WHERE cr.club = ? ORDER BY DATE_FORMAT(date_time, '%Y-%m-%d') DESC;";
+
+            ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, ClubId);
+
+            while (rs.next()) {
+                ResultModel exercise = new ResultModel(rs.getInt("r.athlete"), rs.getInt("exercise"), rs.getDouble("result"), rs.getTimestamp("date_time"), rs.getString("result_Type"));
+                toReturn.add(exercise);
+            }
+
+            rs.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throw throwables;
+        }
+
+        return toReturn;
+    }
+
+    /**
      * Query for all results
      *
      * @return List<ResultModel>
