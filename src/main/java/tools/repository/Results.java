@@ -1,6 +1,5 @@
 package tools.repository;
 
-import enums.Exercise;
 import enums.Result;
 import models.ResultModel;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -65,13 +64,15 @@ public class Results {
         List<ResultModel> toReturn = new ArrayList<>();
 
         try {
-            String query = "SELECT e.exercise_id, e.name, e.description, e.unit, e.exerciseType FROM exercise e";
+            String query = "SELECT r.athlete, CONCAT(a.firstName, ' ', a.lastName) athleteName, r.exercise, r.`result`, r.date_time, r.result_Type FROM `result` r " +
+                    "INNER JOIN athlete a ON r.athlete = a.athlete_id ORDER BY DATE_FORMAT(date_time, '%Y-%m-%d') DESC";
 
             ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
 
             while (rs.next()) {
-//                ResultModel exercise = new ResultModel(rs.getInt("e.exercise_id"), rs.getString("e.name"), rs.getString("e.description"), rs.getString("e.unit"), rs.getString("e.exerciseType"));
-//                toReturn.add(exercise);
+                ResultModel result = new ResultModel(rs.getInt("athlete"), rs.getInt("exercise"), rs.getDouble("result"), rs.getTimestamp("date_time"), rs.getString("result_Type"));
+                result.set(Result.ATHLETENAME, rs.getString("athleteName"));
+                toReturn.add(result);
             }
 
             rs.close();
