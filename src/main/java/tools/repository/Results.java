@@ -65,13 +65,21 @@ public class Results {
         List<ResultModel> toReturn = new ArrayList<>();
 
         try {
-            String query = "SELECT r.athlete, exercise, result, date_time, result_Type FROM  result r INNER JOIN club_reg cr on r.athlete = cr.athlete WHERE cr.club = ? ORDER BY DATE_FORMAT(date_time, '%Y-%m-%d') DESC;";
+            String query = "SELECT r.athlete, exercise, CONCAT(a.firstName, ' ', a.lastName) athleteName, e.name, e.unit, result, date_time, result_Type\n" +
+                    "FROM result r\n" +
+                    "INNER JOIN club_reg cr on r.athlete = cr.athlete\n" +
+                    "INNER JOIN exercise e on r.exercise = e.exercise_id\n" +
+                    "INNER JOIN athlete a on cr.athlete = a.athlete_id\n" +
+                    "WHERE cr.club = ? ORDER BY DATE_FORMAT(date_time, '%Y-%m-%d %HH-%MM-%SS') DESC";
 
             ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, ClubId);
 
             while (rs.next()) {
-                ResultModel exercise = new ResultModel(rs.getInt("r.athlete"), rs.getInt("exercise"), rs.getDouble("result"), rs.getTimestamp("date_time"), rs.getString("result_Type"));
-                toReturn.add(exercise);
+                ResultModel result = new ResultModel(rs.getInt("r.athlete"), rs.getInt("exercise"), rs.getDouble("result"), rs.getTimestamp("date_time"), rs.getString("result_Type"));
+                result.set(Result.ATHLETENAME, rs.getString("athleteName"));
+                result.set(Result.EXERCISENAME, rs.getString("e.name"));
+                result.set(Result.EXERCISEUNIT, rs.getString("e.unit"));
+                toReturn.add(result);
             }
 
             rs.close();
