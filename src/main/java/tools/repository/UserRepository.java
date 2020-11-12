@@ -15,6 +15,8 @@ import javax.naming.NamingException;
 
 public class UserRepository {
 
+    public static final int TIMEOUT = 30;
+
     /**
      * Get UserModel from token provided
      * @param token from cookie
@@ -23,10 +25,18 @@ public class UserRepository {
     public static UserModel getUserFromToken(String token) {
         UserModel user = null;
         try {
-            String query = "SELECT user FROM userLogin WHERE loginToken = ?";
+            String query = "SELECT user, created FROM userLogin WHERE loginToken = ?";
             ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, token);
             while (rs.next()) {
-                user = getUserFromId(rs.getInt("user"));
+//                System.out.println("created: "+rs.getTimestamp("created").getTime()+ "\t timestamp: "+(new Timestamp(Calendar.getInstance().getTime().getTime()).getTime()-(TIMEOUT*60*1000))+"\n");
+                if( rs.getTimestamp("created").getTime() > (new Timestamp(Calendar.getInstance().getTime().getTime()).getTime()-(TIMEOUT*60*1000)) ){
+                    // EXPIRED TOKEN
+                    //TODO: delete token
+                    return null;
+                }
+                else {
+                    user = getUserFromId(rs.getInt("user"));
+                }
             }
             rs.close();
         } catch (SQLException throwables) {
