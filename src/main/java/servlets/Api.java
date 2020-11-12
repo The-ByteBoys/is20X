@@ -79,10 +79,15 @@ public class Api extends AbstractAppServlet {
         } else if( req.getRequestURI().substring(baseURI.length()).matches("/ut(.*)ver($|/)(.*)") ){ // True for "api/utover/" and "api/ut%C3%B8ver/" but not "api/utovere/" etc.
             /** %C3%B8 = ø */
 
-            String[] uriparts = req.getRequestURI().split("/");
+            String[] uriparts = req.getRequestURI().substring(baseURI.length()).split("/");
             String lastPart = uriparts[ uriparts.length-1 ];
 
             lastPart = lastPart.replace("%20", " ");
+
+            String search = req.getParameter("search");
+            if(uriparts.length <= 2 && search != null){
+                lastPart = search;
+            }
 
             try{
 //                AthleteModel athlete = Athletes.getAthlete( lastPart );
