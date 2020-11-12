@@ -60,13 +60,13 @@ function addTable(title, type){
     $.each(getKeySet(type), function (key, value){
         switch (value) {
             case "fname":
-                newHtml += "<td><input type=\"text\" name=\"fname\" value=\"\" class=\"form-control  longInput\"></td>";
+                newHtml += "<td><img src='img/search.png' alt='s' class='searchBtn' />&nbsp;<input type=\"text\" name=\"fname\" value=\"\" class=\"form-control  longInput\"></td>";
                 break;
             case "lname":
                 newHtml += "<td><input type=\"text\" name=\"lname\" value=\"\" class=\"form-control  longInput\" required></td>";
                 break;
             case "birth":
-                newHtml += "<td><input type=\"text\" name=\"birth\" value=\"\" class=\"form-control \""+(type!=='senior'?" pattern='[0-9]{4}'":"")+"></td>";
+                newHtml += "<td><input type=\"date\" name=\"birth\" value=\"\" class=\"form-control \""+(type!=='senior'?" required":"")+"></td>";
                 break;
             case "clubs":
                 newHtml += "<td><input type=\"text\" name=\"clubs\" value=\"\" class=\"form-control\"></td>";
@@ -190,5 +190,93 @@ $(document).ready(function(){
     $("#addNewTable").on('submit', function(e){
         e.preventDefault();
         addTable("New table", $("#addNewTable select").val());
+        attachSearchListeners();
     })
+
+    attachSearchListeners();
 });
+
+function searchForUser(firstName, lastName){
+    let searchString = firstName+" "+lastName;
+    $.getJSON("api/utover/", { search: searchString })
+        .done(function(data){
+            console.log(data);
+            $.each(data["data"][0], function (key, val){
+                console.log(val.fname, val.lname, val.birth);
+            });
+        });
+}
+
+function getSearchResultHtml(left, top, rowId){
+    let html = "<div id='searchResultTable' style='display: block;position: fixed;top: "+top+"px; left: "+left+"px; border-radius: 5px;border: 1px solid;'>" + //background: "+$("body").css('background-color')+"
+        "<table id='"+rowId+"' class='table table-striped table-bordered table-light'><thead><tr><th>Fornavn</th><th>Etternavn</th><th>Fødselsdato</th></tr></thead><tbody></tbody></table>" +
+        "</div>";
+
+    return html;
+}
+
+function attachSearchListeners(){
+    $(".searchBtn").unbind().on('click', function(e){
+        buildSearchBlock($(this).parent().parent());
+    });
+}
+
+let timeOut = null;
+let currentRow = null;
+
+function buildSearchBlock(parentRow){
+    let firstNameInput = parentRow.find("input[name=fname]");
+    let lastNameInput = parentRow.find("input[name=lname]");
+
+    currentRow = parentRow;
+
+    $(firstNameInput).on('keyup', function(){
+        updateSearch(firstNameInput.val()+" "+lastNameInput.val());
+    });
+    $(lastNameInput).on('keyup', function(){
+        updateSearch(firstNameInput.val()+" "+lastNameInput.val());
+    });
+
+    let pos = parentRow.offset();
+    let posX = pos.left;
+    let posY = pos.top+parentRow.height();
+
+    $("#searchResultTable").remove();
+    $(getSearchResultHtml(posX, posY, parentRow.attr("id"))).appendTo("body");
+    updateToTheme();
+    updateSearch(firstNameInput.val()+" "+lastNameInput.val());
+}
+
+function updateSearch(search){
+    let searchResult = $("#searchResultTable").find("tbody");
+    searchResult.empty();
+
+    if(search.length <= 3){
+        searchResult.append("<tr><td colspan='3'>Start å skrive et navn for å søke</td></tr>");
+    }
+    else {
+        searchResult.append("<tr><td colspan='3'>Loading...</td></tr>");
+        if(timeOut != null){ clearTimeout(timeOut); }
+        timeOut = setTimeout(function() {
+            searchResult.empty();
+            $.getJSON("api/utover/", {search: search})
+                .done(function (data) {
+                    // console.log(data);
+                    if (data["data"].length > 0) {
+                        $.each(data["data"][0], function (key, val) {
+                            searchResult.append("<tr onclick='selectRow(this);'><td>" + val.fname + "</td><td>" + val.lname + "</td><td>" + val.birth + "</td></tr>");
+                        });
+                    } else {
+                        searchResult.append("<tr><td colspan='3'>Ingen resultater</td></tr>");
+                    }
+                });
+        }, 800);
+    }
+}
+
+function selectRow(that){
+    // let tableId = $(that).parent().parent().attr("id");
+
+    currentRow.find("input[type=fname]").val($(that).children("tr")[0]);
+    // $("#searchResultTable").remove();
+}
