@@ -1,9 +1,7 @@
 package tools.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,13 +53,14 @@ public class UserRepository {
             while(rs.next()){
                 String userType = rs.getString("userType");
                 user = new UserModel(userid, rs.getString("email"), userType, null);
-                if(userType.equals(UserLevel.COACH.toString())){
+                if(userType.equals(UserLevel.COACH.toString()) || userType.equals(UserLevel.ATHLETE.toString())){
 
-                    query = "SELECT cr.club FROM ((club_user cu INNER JOIN athlete a ON cu.athlete = a.athlete_id) INNER JOIN user u ON cu.user = u.user_id) INNER JOIN club_reg cr ON a.athlete_id = cr.athlete WHERE user_id = ? LIMIT 1";
+                    query = "SELECT cr.club, a.athlete_id FROM ((club_user cu INNER JOIN athlete a ON cu.athlete = a.athlete_id) INNER JOIN user u ON cu.user = u.user_id) INNER JOIN club_reg cr ON a.athlete_id = cr.athlete WHERE user_id = ? LIMIT 1";
                     ResultSet rs2 = DbTool.getINSTANCE().selectQueryPrepared(query, userid);
 
                     while(rs2.next()){
                         user.set(User.CLUBID, rs2.getInt("club"));
+                        user.set(User.ATHLETEID, rs2.getInt("athlete_id"));
                     }
                     rs2.close();
 
