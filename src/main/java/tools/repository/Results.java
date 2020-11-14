@@ -70,7 +70,7 @@ public class Results {
                     "INNER JOIN club_reg cr on r.athlete = cr.athlete\n" +
                     "INNER JOIN exercise e on r.exercise = e.exercise_id\n" +
                     "INNER JOIN athlete a on cr.athlete = a.athlete_id\n" +
-                    "WHERE cr.club = ? ORDER BY DATE_FORMAT(date_time, '%Y-%m-%d %HH-%MM-%SS') DESC";
+                    "WHERE cr.club = ? ORDER BY DATE_FORMAT(date_time, '%Y-%m-%d %H %i %s') DESC";
 
             ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, ClubId);
 
