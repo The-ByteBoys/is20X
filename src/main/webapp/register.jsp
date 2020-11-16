@@ -26,9 +26,9 @@
         Password: <input name="userPass" type="password" placeholder="Password" class="form-control" required>
         Type: <select name="userType" class="form-control" id="userTypeSelect">
             <option value="ATHLETE">Athlete</option>
+            <option value="COACH">Coach</option>
             <% if(currentUser.get(User.TYPE).equals(UserLevel.ADMIN.toString())){
-            %><option value="COACH">Coach</option>
-            <option value="ADMIN">Admin</option><% } %>
+            %><option value="ADMIN">Admin</option><% } %>
         </select>
         <br>
         <div id="userClubDiv">

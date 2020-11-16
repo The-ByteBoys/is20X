@@ -52,6 +52,14 @@ public class RegisterUser extends AbstractAppServlet {
             return;
         }
 
+        if(type.equals("ADMIN")){
+            if(!UserAuth.checkUserPerm(currentUser, UserLevel.ADMIN)){
+                session.setAttribute("error", "You are not permitted to do that.");
+                response.sendRedirect("register.jsp");
+                return;
+            }
+        }
+
 //        Integer birth = Integer.parseInt(birthStr);
         Date birth = Date.valueOf(birthStr);
 
