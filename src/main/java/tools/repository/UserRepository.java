@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import tools.DbTool;
 import enums.*;
+import tools.ExpiredTokenException;
 
 import javax.naming.NamingException;
 
@@ -22,17 +23,18 @@ public class UserRepository {
      * @param token from cookie
      * @return UserModel if not expired, null if it is
      */
-    public static UserModel getUserFromToken(String token) {
+    public static UserModel getUserFromToken(String token) throws ExpiredTokenException {
         UserModel user = null;
         try {
             String query = "SELECT user, created FROM userLogin WHERE loginToken = ?";
             ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, token);
             while (rs.next()) {
 //                System.out.println("created: "+rs.getTimestamp("created").getTime()+ "\t timestamp: "+(new Timestamp(Calendar.getInstance().getTime().getTime()).getTime()-(TIMEOUT*60*1000))+"\n");
-                if( rs.getTimestamp("created").getTime() > (new Timestamp(Calendar.getInstance().getTime().getTime()).getTime()-(TIMEOUT*60*1000)) ){
+                if( rs.getTimestamp("created").getTime() <= (new Timestamp(Calendar.getInstance().getTime().getTime()).getTime()-(TIMEOUT*60*1000)) ){
                     // EXPIRED TOKEN
-                    //TODO: delete token
-                    return null;
+                    deleteToken(token);
+
+                    throw new ExpiredTokenException("expiredToken");
                 }
                 else {
                     user = getUserFromId(rs.getInt("user"));
@@ -44,6 +46,11 @@ public class UserRepository {
         }
 
         return user;
+    }
+
+    public static void deleteToken(String token){
+        String query = "DELETE FROM userLogin WHERE loginToken = ?";
+        try(ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, token)){ } catch (Exception ignored){ }
     }
 
     /**
