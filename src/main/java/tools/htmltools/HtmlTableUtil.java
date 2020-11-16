@@ -15,11 +15,12 @@ import java.util.Set;
 public class HtmlTableUtil {
 
     private StringBuilder html;
-    private ArrayList<String> tableHeader;
+    private ArrayList<String> tableHeaders;
     private ArrayList< ArrayList<String> > tableRows;
     private String editCell;
     private String tableID;
     private ArrayList<String> newCellRow;
+    private String tableCaption;
 
     public HtmlTableUtil(HashMap<String, Object> inputs){
         Iterator iterator = inputs.entrySet().iterator();
@@ -30,15 +31,15 @@ public class HtmlTableUtil {
     }
 
     public HtmlTableUtil(String... headers){
-        tableHeader = new ArrayList<>();
+        tableHeaders = new ArrayList<>();
         tableRows = new ArrayList<>();
 
-        tableHeader.addAll(Arrays.asList(headers));
+        tableHeaders.addAll(Arrays.asList(headers));
     }
 
     public void addHeader(String newHeader){
-        if(!tableHeader.contains(newHeader)){
-            tableHeader.add(newHeader);
+        if(!tableHeaders.contains(newHeader)){
+            tableHeaders.add(newHeader);
         }
     }
 
@@ -46,8 +47,12 @@ public class HtmlTableUtil {
         tableID = newTableID;
     }
 
+    public void setTableCaption(String tableCaption) {
+        this.tableCaption = tableCaption;
+    }
+
     public void addHeaders(Set<String> headerName){
-        tableHeader.addAll(headerName);
+        tableHeaders.addAll(headerName);
     }
 
     public void addRow(String... inputs){
@@ -65,6 +70,20 @@ public class HtmlTableUtil {
             newRow();
         }
         newCellRow.add(cellText);
+    }
+
+    public void setCell(int colIndex, String cellText){
+        if(newCellRow == null){
+            newRow();
+        }
+        colIndex = colIndex-1;
+
+        if(newCellRow.size() <= colIndex){
+            for (int i = newCellRow.size(); i < tableHeaders.size(); i++) {
+                newCellRow.add("");
+            }
+        }
+        newCellRow.set(colIndex, cellText);
     }
 
     public void newRow(){
@@ -91,27 +110,30 @@ public class HtmlTableUtil {
     public String toString(){
         StringBuilder toReturn = new StringBuilder();
 
-        toReturn.append("<table ").append(tableID != null ? "id='" + tableID + "' " : "").append("class='table table-striped table-bordered'>");
-        toReturn.append("<thead><tr><th>");
-        toReturn.append(String.join("</th><th>",tableHeader));
-        toReturn.append("</th></tr></thead>");
+        toReturn.append("<table ").append(tableID != null ? "id='" + tableID + "' " : "").append("class='table table-striped table-bordered'>\n");
+        if(tableCaption != null){
+            toReturn.append("  <caption>").append(tableCaption).append("</caption>\n");
+        }
+        toReturn.append("  <thead><tr><th>");
+        toReturn.append(String.join("</th><th>", tableHeaders));
+        toReturn.append("</th></tr></thead>\n");
 
-        toReturn.append("<tbody>");
+        toReturn.append("  <tbody>\n");
 
         int tableRow = 0;
         for(ArrayList<String> row : tableRows){
             tableRow++;
 
-            toReturn.append("<tr class='row").append(tableRow).append("'>");
+            toReturn.append("    <tr class='row").append(tableRow).append("'>");
             toReturn.append("<td>").append(String.join("</td><td>", row)).append("</td>");
             if(editCell != null){
                 toReturn.append("<td>").append(editCell).append("</td>");
             }
-            toReturn.append("</tr>");
+            toReturn.append("</tr>\n");
         }
 
 
-        toReturn.append("</tbody>");
+        toReturn.append("  </tbody>\n");
         toReturn.append("</table>");
 
         return toReturn.toString();

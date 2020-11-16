@@ -3,7 +3,6 @@ package servlets;
 import enums.Athlete;
 import enums.Exercise;
 import enums.Result;
-import enums.UserLevel;
 import models.AthleteModel;
 import models.ExerciseModel;
 import models.ResultModel;
@@ -21,8 +20,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,7 +44,12 @@ public class AthleteInfoServlet extends AbstractAppServlet {
         out.print(HtmlConstants.getHtmlHead("Utøver - Roing Webapp", currentUser));
 
         String baseURI = "/roingwebapp/athlete";
-        String requestArg = req.getRequestURI().substring(baseURI.length()).replace("%20", " ");
+        String requestArg = req.getRequestURI().substring(baseURI.length());
+        try {
+            requestArg = URLDecoder.decode(requestArg, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         HashMap<Integer, ExerciseModel> exercises = new HashMap<>();
 

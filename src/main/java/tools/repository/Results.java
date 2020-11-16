@@ -1,10 +1,13 @@
 package tools.repository;
 
+import enums.Exercise;
 import enums.Result;
+import models.ExerciseModel;
 import models.ResultModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import tools.DbTool;
+import tools.PointCalculator;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -12,10 +15,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Eirik Svagård
@@ -25,6 +25,115 @@ public class Results {
     private Results() {
         throw new IllegalStateException("Utility class");
     }
+
+
+    /**
+     * Queries database for results with the given options:
+     * @param year      query year
+     * @param week      query week
+     * @param classSex  query sex (M, F, O)
+     * @param className query class-name (SENIOR, A, B, C)
+     * @return Map<athleteID,  Map<exerciseID,  ResultModel>>
+     * @throws SQLException if query fails
+     */
+    public static Map<Integer, Map<Integer, ResultModel>> getResultsByFilter(int year, int week, String classSex, String className) throws SQLException {
+        Calendar cal = Calendar.getInstance();
+        cal.setWeekDate(year, week, Calendar.MONDAY);
+
+        Calendar beforeCal = Calendar.getInstance();
+        Calendar afterCal = Calendar.getInstance();
+
+        afterCal.setTimeInMillis(cal.getTimeInMillis()-7*24*60*60*1000);
+        beforeCal.setTimeInMillis(cal.getTimeInMillis()+24*60*60*1000);
+
+        String afterDate = (afterCal.get(Calendar.YEAR))+ "-"+ (afterCal.get(Calendar.MONTH)+1) + "-"+ afterCal.get(Calendar.DATE);
+        String beforeDate = (beforeCal.get(Calendar.YEAR))+ "-"+ (beforeCal.get(Calendar.MONTH)+1) + "-"+ beforeCal.get(Calendar.DATE);
+
+
+        Map<Integer, Map<Integer, ResultModel>> resultsByAthleteExercise = new HashMap<>();
+
+        String query = "SELECT * FROM resultData WHERE DATE_FORMAT(date_time, '%Y-%m-%d') > ? AND DATE_FORMAT(date_time, '%Y-%m-%d') < ? AND sex = ? AND className = ?";
+        try(ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, afterDate, beforeDate, classSex, className)) {
+
+            if (rs == null) {
+                return null;
+            }
+
+            while (rs.next()) {
+                int athleteId = rs.getInt("athlete");
+                int exerciseId = rs.getInt("exercise");
+
+                ResultModel resultModel = new ResultModel(athleteId, exerciseId, rs.getDouble("result"), rs.getTimestamp("date_time"), rs.getString("result_Type"));
+
+                resultsByAthleteExercise.computeIfAbsent(athleteId, k -> new HashMap<>());
+                resultsByAthleteExercise.get(athleteId).put(exerciseId, resultModel);
+            }
+
+            return resultsByAthleteExercise;
+        }
+    }
+
+
+    /**
+     * Calculate scores from a map and put them as exercise -1 in a new map
+     * @param resultsByAthleteExercise Map<athleteID, Map<exerciseID, ResultModel>>
+     * @param exercises                List<ExerciseModel>
+     * @return Map<athleteID, Map<exerciseID, Result>>
+     */
+    public static Map<Integer, Map<Integer, Double>> calculateScores(Map<Integer, Map<Integer, ResultModel>> resultsByAthleteExercise, List<ExerciseModel> exercises){
+        HashMap<Integer, ArrayList<Double>> exerciseNums = new HashMap<>();
+
+        for (Map.Entry<Integer, Map<Integer, ResultModel>> resultsByAthleteExerciseMapEntry : resultsByAthleteExercise.entrySet()) {
+            Map<Integer, ResultModel> athleteResult = resultsByAthleteExerciseMapEntry.getValue();
+            for(ExerciseModel ex : exercises){
+                Integer exerciseId = Integer.parseInt(ex.get(Exercise.ID).toString());
+
+                Double result = athleteResult.get(exerciseId) != null
+                        ? Double.parseDouble(athleteResult.get(exerciseId).get(Result.RESULT).toString())
+                        : 0.0;
+
+                if(!exerciseNums.containsKey(exerciseId)){
+                    exerciseNums.put(exerciseId, new ArrayList<>());
+                }
+                exerciseNums.get(exerciseId).add(result);
+            }
+        }
+
+        HashMap<Integer, PointCalculator> pointCalcPerExercise = new HashMap<>();
+        for (Map.Entry<Integer, ArrayList<Double>> exerciseMapEntry : exerciseNums.entrySet()) {
+            ArrayList<Double> numbers = exerciseMapEntry.getValue();
+
+            PointCalculator pointCalc = new PointCalculator(numbers);
+            pointCalcPerExercise.put(exerciseMapEntry.getKey(), pointCalc);
+        }
+
+        Map<Integer, Map<Integer, Double>> returnMap = new HashMap<>();
+        for (Map.Entry<Integer, Map<Integer, ResultModel>> resultsByAthleteExerciseMapEntry : resultsByAthleteExercise.entrySet()) {
+            Map<Integer, ResultModel> athleteResult = resultsByAthleteExerciseMapEntry.getValue();
+            int athleteId = resultsByAthleteExerciseMapEntry.getKey();
+            returnMap.put(athleteId, new HashMap<>());
+
+            double totalPoints = 0;
+            for (ExerciseModel ex : exercises) {
+                int exerciseId = Integer.parseInt(ex.get(Exercise.ID).toString());
+
+                PointCalculator pointCalc = pointCalcPerExercise.get(exerciseId);
+
+                double result = 0.0;
+                if(athleteResult.get(exerciseId) != null){
+                    result = Double.parseDouble(athleteResult.get(exerciseId).get(Result.RESULT).toString());
+                }
+                totalPoints += pointCalc.getPoints(result, Integer.parseInt(ex.get(Exercise.WEIGHT).toString()));
+
+                returnMap.get(athleteId).put(exerciseId, result);
+            }
+
+            returnMap.get(athleteId).put(-1, totalPoints*10+80);
+        }
+
+        return returnMap;
+    }
+
 
     /**
      * Query for all results

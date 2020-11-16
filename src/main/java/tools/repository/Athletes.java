@@ -5,7 +5,6 @@ import java.sql.Date;
 import java.util.*;
 
 import enums.Athlete;
-import enums.User;
 import models.AthleteModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -68,7 +67,7 @@ public class Athletes {
         return getAthlete(needle, new Date(Calendar.getInstance().getTime().getTime()) );
     }
     public static AthleteModel getAthlete(String needle, Date refClassDate) throws SQLException {
-        String queryWhere = "";
+        String queryWhere;
         AthleteModel athlete = null;
 
         String newNeedle;
@@ -84,13 +83,15 @@ public class Athletes {
         }
 
         String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, " +
-                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className" +
+                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className," +
+                "(SELECT GROUP_CONCAT(c.name ORDER BY c.name SEPARATOR ', ') FROM club c INNER JOIN club_reg cr ON c.club_id = cr.club WHERE cr.athlete = a.athlete_id GROUP BY athlete) clubs" +
                 " FROM athlete a WHERE "+queryWhere;
         try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate, newNeedle)){
 
             while(rs.next()){
                 athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
                 athlete.set(Athlete.CLASS, rs.getString("className"));
+                athlete.set(Athlete.CLUBS, rs.getString("clubs"));
             }
 
         } catch(SQLException | NullPointerException e){
