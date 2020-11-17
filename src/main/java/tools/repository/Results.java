@@ -91,6 +91,30 @@ public class Results {
         return toReturn;
     }
 
+
+    public static List<ResultModel> getBestResultsInTestBattery() {
+        List<ResultModel> toReturn = new ArrayList<>();
+
+        try {
+            String query = "SELECT r.athlete, r.exercise, max(r.result) result, r.date_time, r.result_Type\n" +
+                    "FROM result r\n" +
+                    "WHERE r.result_Type = 'NP' AND r.date_time BETWEEN NOW() - INTERVAL 14 DAY AND NOW()\n" +
+                    "GROUP BY athlete, exercise";
+
+            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
+            while (rs.next()) {
+                ResultModel result = new ResultModel(rs.getInt("r.athlete"), rs.getInt("r.exercise"), rs.getDouble("result"), rs.getTimestamp("r.date_time"), rs.getString("result_Type"));
+                toReturn.add(result);
+            }
+
+            rs.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return toReturn;
+    }
+
     /**
      * Query for all results
      *
