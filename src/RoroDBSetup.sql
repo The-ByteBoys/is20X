@@ -166,6 +166,14 @@ INSERT INTO test_set (class, exercise, weight)
         (4, 4, 0), (4, 7, 0), (4, 14, 0), (4, 13, 0), (4, 12, 0);
 
 
+# CREATE VIEW:
+CREATE OR REPLACE VIEW resultData AS
+    SELECT r.athlete, r.exercise, r.date_time, r.`result`, r.result_Type, a.sex,
+      (SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = r.athlete ORDER BY `start` DESC LIMIT 1) className
+        FROM `result` r
+        INNER JOIN athlete a ON r.athlete = a.athlete_id
+        ORDER BY athlete, date_time DESC, exercise;
+
 # DUMMY DATA BELOW:
 INSERT INTO athlete (firstName, lastName, birth, sex)
 VALUES ('Johannes', 'Birkeland', '2000-01-01', 'M'),
