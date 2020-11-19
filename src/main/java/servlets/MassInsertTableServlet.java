@@ -73,14 +73,16 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                         "    width: 150px;\n" +
                         "}\n" +
                         "input[type=text]:invalid, input[type=date]:invalid {\n" +
-                        "    " +
-                        "color: #ff0000;\n" +
-                        "    " +
-                        "font-weight: bold;\n" +
+                        "    color: #ff0000;\n" +
+                        "    font-weight: bold;\n" +
                         "}\n" +
                         "td, th {\n" +
                         "    text-align: center;\n" +
-                        "}\n";
+                        "}\n" +
+                        "\n" +
+                        "[data-theme=\"dark\"] .svgIcon {\n" +
+                        "    filter: invert(80%);\n" +
+                        "}";
 
         out.print("<style>" + cssStyle + "</style><script src='js/parseExcel.js'></script>");
 
@@ -101,8 +103,6 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                 "    " +
                 "<form id='addNewTable' action='#' class='form-group'>\n" +
                 "    " +
-                "<!--" +
-                "    <input type='text' id='tableName' class='form-control'>-->\n" +
                 "        <select class='form-control'>\n" +
                 "            <option value='senior'>Senior</option>\n" +
                 "    " +
@@ -184,7 +184,8 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                     !sheetName.toLowerCase().contains("senior") &&
                     !sheetName.toLowerCase().contains("jun") &&
                     !sheetName.toLowerCase().contains("gutter") &&
-                    !sheetName.toLowerCase().contains("jenter")
+                    !sheetName.toLowerCase().contains("jenter") &&
+                    !sheetName.toLowerCase().contains("KJA")
             ){
                 out.print("<p>Sheet '"+sheetName+"' might be without content</p><hr>\n");
                 continue;
@@ -192,9 +193,9 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             out.print("<h3>Ark: "+sheetName+" [<span style='font-weight: normal; text-decoration: underline;' onclick='$(\"#table"+(i+1)+"\").slideToggle(200);'>Toggle view</span>]</h3>");
             out.print("<div id='table"+(i+1)+"'>");
 
-            htmlTable = new HtmlTableUtil("Fornavn", "Etternavn", "Fødselsår", "Klubb");
+            htmlTable = new HtmlTableUtil("", "Fornavn", "Etternavn", "Fødselsår", "Klubb");
 
-            htmlTable.addEditCell("<img src='add.png' onClick='addNewRow($(this).parent().parent());' style='cursor: pointer;' alt='+' />&nbsp;<img src='remove.png' onClick='deleteRow($(this).parent().parent());' style='cursor: pointer;' alt='-' />");
+            htmlTable.addEditCell("<img src='img/add.svg' onClick='addNewRow($(this).parent().parent());' style='cursor: pointer; height: 21px;' alt='+' class='svgIcon' /><img src='img/remove.svg' onClick='deleteRow($(this).parent().parent());' style='cursor: pointer; height: 21px;' alt='-' class='svgIcon' />");
 
             rowNum = 0;
             while(true) {
@@ -230,6 +231,8 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                     newFirstName = String.join(" ", newNames).replace(" " + newLastName, "");
                 }
 
+                newRow.add("<img src='img/search.svg' style='cursor: pointer; height: 21px;' alt='se' class='searchBtn svgIcon' />");
+
                 newRow.add(insertFormElement("fname", newFirstName, "longInput"));
                 newRow.add(insertFormElement("lname", newLastName, "longInput", "required"));
 
@@ -248,7 +251,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
                 ArrayList<String> currentKeys = er.keyGenerator();
                 for (String key : currentKeys) {
-                    if(!key.equals("navn") && !key.equals("født") && !key.equals("klubb") && !key.equals("rank") && !key.equals("score")){ //  && (!key.equals("3000Total") && mylist.containsKey("3000Tid"))
+                    if(!key.equals("navn") && !key.equals("født") && !key.equals("klubb") && !key.equals("rank") && !key.equals("score") && !key.equals("3000Tid") && !key.equals("3000Min") && !key.equals("3000Sek")){ //  && mylist.containsKey("3000Total"))
                         if(rowNum == 0){
                             htmlTable.addHeader(beautifyTableHeader(key));
                         }
@@ -257,10 +260,11 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                         String timeFormatPattern = "pattern=\"[0-9]+:[0-9]{1,2}(\\.[0-9]*)?\"";
 
                         if(mylist.get(key) != null){
-                            if(key.equals("3000Tid") && mylist.get("3000Total") != null){
+
+                            if(key.equals("3000Total")){
 
                                 try {
-                                    double totalSecs = Double.parseDouble(mylist.get("3000Total").toString());
+                                    double totalSecs = Double.parseDouble(mylist.get(key).toString());
                                     double totalMinutes = totalSecs/60;
                                     int minutes = (int) Math.floor(totalMinutes);
                                     double secounds = ((totalMinutes-minutes)*60);
@@ -273,7 +277,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                                     newRow.add(insertFormElement(key, "math failed", "failed", timeFormatPattern));
                                 }
                             }
-                            else if(key.equals("5000Tid") || key.equals("2000Tid")){
+                            else if(key.equals("5000Tid") || key.equals("2000Tid") || key.equals("3000m")){
 
                                 String timeString = mylist.get(key).toString().trim();
 
@@ -308,7 +312,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
                                 // Calculate time from watts for verification of this value
                                 String checkValueTxt = "";
-                                if(mylist.get( key.replace("Tid", "Watt") ) != null){
+                                if(mylist.get( key.replace("Tid", "Watt") ) != null && !key.equals("3000m")){
                                     checkValueTxt = " "+wattsToTimeStr(key.replace("Tid", ""), mylist.get(key.replace("Tid", "Watt")).toString());
                                 }
 
@@ -413,13 +417,15 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             case "5000Tid":
                 return "5000 Tid";
             case "3000Total":
-                return "3000 Total";
-            case "3000Tid":
-                return "3000 Tid*";
+                return "3000m Tid";
+//            case "3000Tid":
+//            case "3000m":
+//                return "3000 Tid*";
             case "2000Watt":
                 return "2000 Watt";
             case "2000Tid":
                 return "2000 Tid";
+            case "60roergo":
             case "60Watt":
                 return "60 Watt";
             case "liggroProsent":
@@ -435,6 +441,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             case "cmSargeant":
                 return "Sargeant CM";
             case "antBev":
+            case "Beveg":
                 return "Antall Bevegelser";
             default:
                 return input;

@@ -139,7 +139,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                     // Convert time fields to seconds
                     double newValue = 0.00;
 
-                    if (key.matches("[0-9]+Tid")){
+                    if (key.matches("[0-9]+Tid") || key.equals("3000m")){
                         String inputTime = values[i].trim();
                         if(inputTime.matches("[0-9]+:[0-9]{1,2}(\\.[0-9]*)?")){
                             String[] inputTimes = inputTime.split(":");
@@ -238,6 +238,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                 unit = "WATT";
                 break;
             case "3000Tid":
+            case "3000m":
                 name = "3000";
                 unit = "TIME";
                 break;
@@ -249,6 +250,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                 name = "2000";
                 unit = "TIME";
                 break;
+            case "60roergo":
             case "60Watt":
                 name = "60";
                 unit = "WATT";
@@ -278,6 +280,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                 unit = "CM";
                 break;
             case "antBev":
+            case "Beveg":
                 name = "bevegelse";
                 unit = "REPS";
                 break;
