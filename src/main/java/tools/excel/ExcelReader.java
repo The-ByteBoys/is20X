@@ -128,7 +128,7 @@ public class ExcelReader {
         String[] aTest = {"5000Watt", "5000Tid", "2000Watt", "2000Tid", "60Watt", "liggroProsent", "liggroKg", "cmSargeant", "antBev"};
         String[] bTest = {"3000Total", "3000Tid", "2000Watt", "2000Tid", "60Watt", "kroppshev", "cmSargeant", "antBev"};
         String[] bTest2020 = {"3000Total", "3000Min", "3000Sek", "2000Watt", "2000Tid", "60Watt", "kroppshev", "cmSargeant", "antBev"};
-        String[] cTest = {"3000m", "60roergo", "kroppshev", "Beveg"};
+        String[] cTest = {"3000m", "60roergo", "kroppshev", "cmSargeant", "Beveg"};
 
         //Add the first keys that are the same for all the classes except the C classes.
         //The C classes's keys are added in another order.
