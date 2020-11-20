@@ -152,17 +152,19 @@ INSERT INTO exercise (exercise_id, name, description, unit, exerciseType)
         (9, 'ligg.ro', 'Liggende rotak. Testresultatet oppgis i den største belastning den aktive kan gjennomføre øvelsen med en gang.', 'KG', 'ALLEX'),
         (10, 'knebøy', '', 'PERCENT', 'ALLEX'),
         (11, 'knebøy', 'test av maksimal dynamisk styrke. Testresultatet oppgis i den største belastning den aktive kan gjennomføre øvelsen med en gang.', 'KG', 'ALLEX'),
-        (12, 'bevegelse', 'test av leddutslag i ankel og hofte og krumming av ryggsøylen. Tre øvelser', 'REPS', 'ALLEX'),
+        (12, 'kroppshevning', '', 'REPS', 'ALLEX'),
         (13, 'sargeant', 'Det beste av tre forsøk blir gjeldende', 'CM', 'ALLEX'),
-        (14, 'kroppshevning', '', 'REPS', 'ALLEX'),
+        (14, 'bevegelse', 'test av leddutslag i ankel og hofte og krumming av ryggsøylen. Tre øvelser', 'REPS', 'ALLEX'),
+        (15, 'vekt', 'Utøverens vekt på test-tidspunktet', 'KG', 'ALLEX'),
+        (16, 'høyde', 'Utøverens høyde på test-tidspunktet', 'CM', 'ALLEX'),
 
-        (15, '100Sek', 'lengde på 100 sek', 'METER', 'CLUBEX');
+        (17, '100Sek', 'lengde på 100 sek', 'METER', 'CLUBEX');
 
 INSERT INTO test_set (class, exercise, weight)
     VALUES
         (1, 1, 45), (1, 2, 0), (1, 5, 30), (1, 6, 0), (1, 7, 10), (1, 8, 5), (1, 9, 0), (1, 10, 5), (1, 11, 0), (1, 12, 5),
         (2, 1, 45), (2, 2, 0), (2, 5, 30), (2, 6, 0), (2, 7, 10), (2, 8, 5), (2, 9, 0), (2, 13, 5), (2, 12, 5),
-        (3, 3, 40), (3, 4, 0), (3, 5, 40), (3, 6, 0), (3, 7, 5), (3, 14, 5), (3, 13, 5), (3, 12, 5),
+        (3, 4, 40), (3, 5, 40), (3, 6, 0), (3, 7, 5), (3, 14, 5), (3, 13, 5), (3, 12, 5),
         (4, 4, 0), (4, 7, 0), (4, 14, 0), (4, 13, 0), (4, 12, 0);
 
 # CREATE VIEW:
