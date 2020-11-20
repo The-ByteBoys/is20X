@@ -1,9 +1,7 @@
 package tools.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,23 +10,35 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import tools.DbTool;
 import enums.*;
+import tools.ExpiredTokenException;
 
 import javax.naming.NamingException;
 
 public class UserRepository {
+
+    public static final int TIMEOUT = 30;
 
     /**
      * Get UserModel from token provided
      * @param token from cookie
      * @return UserModel if not expired, null if it is
      */
-    public static UserModel getUserFromToken(String token) {
+    public static UserModel getUserFromToken(String token) throws ExpiredTokenException {
         UserModel user = null;
         try {
-            String query = "SELECT user FROM userLogin WHERE loginToken = ?";
+            String query = "SELECT user, created FROM userLogin WHERE loginToken = ?";
             ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, token);
             while (rs.next()) {
-                user = getUserFromId(rs.getInt("user"));
+//                System.out.println("created: "+rs.getTimestamp("created").getTime()+ "\t timestamp: "+(new Timestamp(Calendar.getInstance().getTime().getTime()).getTime()-(TIMEOUT*60*1000))+"\n");
+                if( rs.getTimestamp("created").getTime() <= (new Timestamp(Calendar.getInstance().getTime().getTime()).getTime()-(TIMEOUT*60*1000)) ){
+                    // EXPIRED TOKEN
+                    deleteToken(token);
+
+                    throw new ExpiredTokenException("expiredToken");
+                }
+                else {
+                    user = getUserFromId(rs.getInt("user"));
+                }
             }
             rs.close();
         } catch (SQLException throwables) {
@@ -36,6 +46,11 @@ public class UserRepository {
         }
 
         return user;
+    }
+
+    public static void deleteToken(String token){
+        String query = "DELETE FROM userLogin WHERE loginToken = ?";
+        try(ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, token)){ } catch (Exception ignored){ }
     }
 
     /**
@@ -55,13 +70,14 @@ public class UserRepository {
             while(rs.next()){
                 String userType = rs.getString("userType");
                 user = new UserModel(userid, rs.getString("email"), userType, null);
-                if(userType.equals(UserLevel.COACH.toString())){
+                if(userType.equals(UserLevel.COACH.toString()) || userType.equals(UserLevel.ATHLETE.toString())){
 
-                    query = "SELECT cr.club FROM ((club_user cu INNER JOIN athlete a ON cu.athlete = a.athlete_id) INNER JOIN user u ON cu.user = u.user_id) INNER JOIN club_reg cr ON a.athlete_id = cr.athlete WHERE user_id = ? LIMIT 1";
+                    query = "SELECT cr.club, a.athlete_id FROM ((club_user cu INNER JOIN athlete a ON cu.athlete = a.athlete_id) INNER JOIN user u ON cu.user = u.user_id) INNER JOIN club_reg cr ON a.athlete_id = cr.athlete WHERE user_id = ? LIMIT 1";
                     ResultSet rs2 = DbTool.getINSTANCE().selectQueryPrepared(query, userid);
 
                     while(rs2.next()){
                         user.set(User.CLUBID, rs2.getInt("club"));
+                        user.set(User.ATHLETEID, rs2.getInt("athlete_id"));
                     }
                     rs2.close();
 

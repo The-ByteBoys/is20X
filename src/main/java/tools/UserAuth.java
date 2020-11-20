@@ -93,7 +93,16 @@ public class UserAuth {
                 String name = ck.getName();
                 String value = ck.getValue();
                 if (name.equals("auth")) {
-                    return UserRepository.getUserFromToken(value);
+
+                    try {
+                        return UserRepository.getUserFromToken(value);
+                    }
+                    catch (ExpiredTokenException e){
+                        HttpSession session = request.getSession();
+                        session.setAttribute("error", "Session expired. Please log in again");
+                        return null;
+                    }
+
                 }
             }
         }
@@ -104,7 +113,6 @@ public class UserAuth {
     public static UserModel requireLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
         return requireLogin(request, response, UserLevel.ATHLETE);
     }
-
     public static UserModel requireLogin(HttpServletRequest request, HttpServletResponse response, UserLevel level) throws IOException {
         UserModel user = null;
         user = verifyLogin(request);
@@ -125,7 +133,6 @@ public class UserAuth {
     }
 
     public static boolean checkUserPerm(UserModel user, UserLevel level){
-
         return (level.equals(UserLevel.ATHLETE)) ||
                 (level.equals(UserLevel.COACH) && (user.get(User.TYPE).equals(UserLevel.COACH.toString()) || user.get(User.TYPE).equals(UserLevel.ADMIN.toString()))) ||
                 (level.equals(UserLevel.ADMIN) && user.get(User.TYPE).equals(UserLevel.ADMIN.toString()));

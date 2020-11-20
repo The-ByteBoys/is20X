@@ -106,10 +106,9 @@ CREATE TABLE test_set (
     exercise INT NOT NULL,
     weight INT NOT NULL,
 
-
+    CONSTRAINT test_set_PK PRIMARY KEY (class, exercise),
     CONSTRAINT test_set_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
     CONSTRAINT test_set_Class_FK FOREIGN KEY (class) REFERENCES class(class_id)
-    /*CONSTRAINT test_set_PK PRIMARY KEY (exercise, testClass)*/
 );
 
 
@@ -141,30 +140,39 @@ INSERT INTO user (user_id, email, password, userType)
 
 INSERT INTO exercise (exercise_id, name, description, unit, exerciseType)
     VALUES
-        (1, '5000', '', 'WATT', 'ALLEX'),
+        (1, '5000', '5000 meter roing', 'WATT', 'ALLEX'),
         (2, '5000', '', 'TIME', 'ALLEX'),
-        (3, '3000', '', 'WATT', 'ALLEX'),
+        (3, '3000', '3000 meter løp', 'WATT', 'ALLEX'),
         (4, '3000', '', 'TIME', 'ALLEX'),
-        (5, '2000', '', 'WATT', 'ALLEX'),
+        (5, '2000', '2000 meter roing', 'WATT', 'ALLEX'),
         (6, '2000', '', 'TIME', 'ALLEX'),
-        (7, '60', 'WATT produsert på 60 sek', 'WATT', 'ALLEX'),
+        (7, '60', 'WATT produsert på 60 sek på det tyngste gearet', 'WATT', 'ALLEX'),
         (8, 'ligg.ro', '', 'PERCENT', 'ALLEX'),
-        (9, 'ligg.ro', '', 'KG', 'ALLEX'),
+        (9, 'ligg.ro', 'Liggende rotak. Testresultatet oppgis i den største belastning den aktive kan gjennomføre øvelsen med en gang.', 'KG', 'ALLEX'),
         (10, 'knebøy', '', 'PERCENT', 'ALLEX'),
-        (11, 'knebøy', '', 'KG', 'ALLEX'),
-        (12, 'bevegelse', '', 'REPS', 'ALLEX'),
-        (13, 'sargeant', '', 'CM', 'ALLEX'),
-        (14, 'kroppshevning', '', 'REPS', 'ALLEX'),
+        (11, 'knebøy', 'test av maksimal dynamisk styrke. Testresultatet oppgis i den største belastning den aktive kan gjennomføre øvelsen med en gang.', 'KG', 'ALLEX'),
+        (12, 'kroppshevning', '', 'REPS', 'ALLEX'),
+        (13, 'sargeant', 'Det beste av tre forsøk blir gjeldende', 'CM', 'ALLEX'),
+        (14, 'bevegelse', 'test av leddutslag i ankel og hofte og krumming av ryggsøylen. Tre øvelser', 'REPS', 'ALLEX'),
+        (15, 'vekt', 'Utøverens vekt på test-tidspunktet', 'KG', 'ALLEX'),
+        (16, 'høyde', 'Utøverens høyde på test-tidspunktet', 'CM', 'ALLEX'),
 
-        (15, '100Sek', 'lengde på 100 sek', 'METER', 'CLUBEX');
+        (17, '100Sek', 'lengde på 100 sek', 'METER', 'CLUBEX');
 
 INSERT INTO test_set (class, exercise, weight)
     VALUES
-        (1, 1, 45), (1, 2, 0), (1, 5, 30), (1, 6, 0), (1, 7, 10), (1, 8, 5), (1, 9, 0), (1, 10, 5), (1, 11, 0), (1, 12, 5),
-        (2, 1, 45), (2, 2, 0), (2, 5, 30), (2, 6, 0), (2, 7, 10), (2, 8, 5), (2, 9, 0), (2, 13, 5), (2, 12, 5),
-        (3, 3, 40), (3, 4, 0), (3, 5, 40), (3, 6, 0), (3, 7, 5), (3, 14, 5), (3, 13, 5), (3, 12, 5),
-        (4, 4, 0), (4, 7, 0), (4, 14, 0), (4, 13, 0), (4, 12, 0);
+        (1, 1, 45), (1, 2, 0), (1, 5, 30), (1, 6, 0), (1, 7, 10), (1, 8, 5), (1, 9, 0), (1, 10, 5), (1, 11, 0), (1, 14, 5),
+        (2, 1, 45), (2, 2, 0), (2, 5, 30), (2, 6, 0), (2, 7, 10), (2, 8, 5), (2, 9, 0), (2, 13, 5), (2, 14, 5),
+        (3, 4, 40), (3, 5, 40), (3, 6, 0), (3, 7, 5), (3, 12, 5), (3, 13, 5), (3, 14, 5),
+        (4, 4, 0), (4, 7, 0), (4, 12, 0), (4, 13, 0), (4, 14, 0);
 
+# CREATE VIEW:
+CREATE OR REPLACE VIEW resultData AS
+    SELECT r.athlete, r.exercise, r.date_time, r.`result`, r.result_Type, a.sex,
+      (SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = r.athlete ORDER BY `start` DESC LIMIT 1) className
+        FROM `result` r
+        INNER JOIN athlete a ON r.athlete = a.athlete_id
+        ORDER BY athlete, date_time DESC, exercise;
 
 # DUMMY DATA BELOW:
 INSERT INTO athlete (firstName, lastName, birth, sex)
