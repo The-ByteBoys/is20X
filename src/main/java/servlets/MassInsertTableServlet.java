@@ -140,11 +140,12 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             try {
                 ExcelReader er = new ExcelReader();
                 er.chooseDocument("/opt/payara/excel/tempfile");
+                er.setFileName(item.getName());
 
-                out.print("<h2>Reading from file: "+item.getName()+"</h2>\n" +
+                out.print("<h2>Leser fra fil: "+item.getName()+"</h2>\n" +
                         "<p>\n" +
-                        "    <label>År: <input onchange='$(\".yearPicker\").val( this.value );' type='number' name='year' min='1980' max='2100' value='"+ Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px; display: initial;' class='form-control' /></label>\n" +
-                        "    <select onchange='$(\".weekPicker\").val( this.value );' name='week' style='width: initial; display: initial;' class='form-control'>\n" +
+                        "    <label>År: <input onchange='$(\".yearPicker\").val( this.value ).parent().hide();' type='number' name='year' min='1980' max='2100' value='"+ Calendar.getInstance().get(Calendar.YEAR)+"' style='width: 70px; display: initial;' class='form-control' /></label>\n" +
+                        "    <select onchange='$(\".weekPicker\").val( this.value ).hide();' name='week' style='width: initial; display: initial;' class='form-control'>\n" +
                         "        <option>Velg uke</option>\n" +
                         "        <option>2</option>\n" +
                         "        <option>11</option>\n" +
@@ -185,12 +186,12 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                     !sheetName.toLowerCase().contains("jun") &&
                     !sheetName.toLowerCase().contains("gutter") &&
                     !sheetName.toLowerCase().contains("jenter") &&
-                    !sheetName.toLowerCase().contains("KJA")
+                    !sheetName.toLowerCase().matches("[h|d]j[a-c]")
             ){
-                out.print("<p>Sheet '"+sheetName+"' might be without content</p><hr>\n");
+                out.print("<p>Arket '"+sheetName+"' kan være tomt, eller støtte mangler.</p><hr>\n");
                 continue;
             }
-            out.print("<h3>Ark: "+sheetName+" [<span style='font-weight: normal; text-decoration: underline;' onclick='$(\"#table"+(i+1)+"\").slideToggle(200);'>Toggle view</span>]</h3>");
+            out.print("<h3>Ark: "+sheetName+" [<span style='font-weight: normal; text-decoration: underline;' onclick='$(\"#table"+(i+1)+"\").slideToggle(200);'>Skjul / vis</span>]</h3>");
             out.print("<div id='table"+(i+1)+"'>");
 
             htmlTable = new HtmlTableUtil("", "Fornavn", "Etternavn", "Fødselsår", "Klubb");
@@ -198,6 +199,9 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             htmlTable.addEditCell("<img src='img/add.svg' onClick='addNewRow($(this).parent().parent());' style='cursor: pointer; height: 21px;' alt='+' class='svgIcon' /><img src='img/remove.svg' onClick='deleteRow($(this).parent().parent());' style='cursor: pointer; height: 21px;' alt='-' class='svgIcon' />");
 
             rowNum = 0;
+            if(sheetName.toLowerCase().contains("jun c") || sheetName.toLowerCase().matches("[h|d]jc")){
+                rowNum = -1;
+            }
             while(true) {
                 HashMap<String, Object> mylist;
                 try {
@@ -251,7 +255,7 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
                 ArrayList<String> currentKeys = er.keyGenerator();
                 for (String key : currentKeys) {
-                    if(!key.equals("navn") && !key.equals("født") && !key.equals("klubb") && !key.equals("rank") && !key.equals("score") && !key.equals("3000Tid") && !key.equals("3000Min") && !key.equals("3000Sek")){ //  && mylist.containsKey("3000Total"))
+                    if(!key.equals("navn") && !key.equals("født") && !key.equals("klubb") && !key.equals("rank") && !key.equals("score") && !key.equals("3000Tid") && !(mylist.containsKey("3000Total") && key.equals("3000Min")) && !key.equals("3000Sek")){
                         if(rowNum == 0){
                             htmlTable.addHeader(beautifyTableHeader(key));
                         }
@@ -261,68 +265,74 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
                         if(mylist.get(key) != null){
 
-                            if(key.equals("3000Total")){
+                            switch (key) {
+                                case "3000Min":
+                                    // CASE OF REPORT 2020, week 44
+                                    newRow.add(insertFormElement("3000Total", (int) Double.parseDouble(mylist.get("3000Min").toString()) + ":" + mylist.get("3000Sek"), "", timeFormatPattern));
+                                    break;
 
-                                try {
-                                    double totalSecs = Double.parseDouble(mylist.get(key).toString());
-                                    double totalMinutes = totalSecs/60;
-                                    int minutes = (int) Math.floor(totalMinutes);
-                                    double secounds = ((totalMinutes-minutes)*60);
+                                case "3000Total":
+                                    try {
+                                        double totalSecs = Double.parseDouble(mylist.get(key).toString());
+                                        double totalMinutes = totalSecs / 60;
+                                        int minutes = (int) Math.floor(totalMinutes);
+                                        double secounds = ((totalMinutes - minutes) * 60);
 
-                                    DecimalFormat df = new DecimalFormat("00.##");
-                                    String timeString = minutes+":"+df.format(secounds);
-                                    newRow.add(insertFormElement(key, timeString, "", timeFormatPattern));
-                                }
-                                catch (NumberFormatException e){
-                                    newRow.add(insertFormElement(key, "math failed", "failed", timeFormatPattern));
-                                }
-                            }
-                            else if(key.equals("5000Tid") || key.equals("2000Tid") || key.equals("3000m")){
-
-                                String timeString = mylist.get(key).toString().trim();
-
-                                if(timeString.matches("[0-9]+:[0-9]{1,2}(\\.[0-9]*)?")){
-                                    // Perfect
-                                }
-                                else if(timeString.matches("[0-9]+[.,:;]+[0-9]{1,2}([.,;:]+[0-9]*)?")){
-                                    timeString = timeString.replaceFirst("[.,:;]+","F");
-                                    timeString = timeString.replaceFirst("[.,:;]+","S");
-                                    timeString = timeString.replace("F",":");
-                                    timeString = timeString.replace("S",".");
-                                }
-                                else if(timeString.matches("[0-9]+.[0-9]+")){
-                                    double newTime = Double.parseDouble(timeString);
-                                    double newMinutes;
-
-                                    if(newTime >= 0.1){
-                                        // newMinutes is calculated as newHours.
-                                        newMinutes = newTime*24; // (hours)
+                                        DecimalFormat df = new DecimalFormat("00.##");
+                                        String timeString = minutes + ":" + df.format(secounds);
+                                        newRow.add(insertFormElement(key, timeString, "", timeFormatPattern));
+                                    } catch (NumberFormatException e) {
+                                        newRow.add(insertFormElement(key, "math failed", "failed", timeFormatPattern));
                                     }
-                                    else {
-                                        // Converts the time from days to minutes (e.g: 0.01255787037)
-                                        newMinutes = newTime*24*60;
+                                    break;
+
+                                case "5000Tid":
+                                case "2000Tid":
+                                case "3000m":
+                                    String timeString = mylist.get(key).toString().trim();
+
+                                    if (timeString.matches("[0-9]+:[0-9]{1,2}(\\.[0-9]*)?")) {
+                                        // Perfect
+                                    } else if (timeString.matches("[0-9]+[.,:;]+[0-9]{1,2}([.,;:]+[0-9]*)?")) {
+                                        timeString = timeString.replaceFirst("[.,:;]+", "F");
+                                        timeString = timeString.replaceFirst("[.,:;]+", "S");
+                                        timeString = timeString.replace("F", ":");
+                                        timeString = timeString.replace("S", ".");
+                                    } else if (timeString.matches("[0-9]+.[0-9]+")) {
+                                        double newTime = Double.parseDouble(timeString);
+                                        double newMinutes;
+
+                                        if (newTime >= 0.1) {
+                                            // newMinutes is calculated as newHours.
+                                            newMinutes = newTime * 24; // (hours)
+                                        } else {
+                                            // Converts the time from days to minutes (e.g: 0.01255787037)
+                                            newMinutes = newTime * 24 * 60;
+                                        }
+
+                                        double newSeconds = (newMinutes - Math.floor(newMinutes)) * 60;
+
+                                        DecimalFormat df = new DecimalFormat("00.##");
+                                        timeString = (int) Math.floor(newMinutes) + ":" + df.format(newSeconds);
                                     }
 
-                                    double newSeconds = (newMinutes-Math.floor(newMinutes))*60;
 
-                                    DecimalFormat df = new DecimalFormat("00.##");
-                                    timeString = (int) Math.floor(newMinutes)+":"+df.format(newSeconds);
-                                }
+                                    // Calculate time from watts for verification of this value
+                                    String checkValueTxt = "";
+                                    if (mylist.get(key.replace("Tid", "Watt")) != null && !key.equals("3000m")) {
+                                        checkValueTxt = " " + wattsToTimeStr(key.replace("Tid", ""), mylist.get(key.replace("Tid", "Watt")).toString());
+                                    }
 
+                                    newRow.add(insertFormElement(key, timeString, "", timeFormatPattern) + checkValueTxt);
+                                    break;
 
-                                // Calculate time from watts for verification of this value
-                                String checkValueTxt = "";
-                                if(mylist.get( key.replace("Tid", "Watt") ) != null && !key.equals("3000m")){
-                                    checkValueTxt = " "+wattsToTimeStr(key.replace("Tid", ""), mylist.get(key.replace("Tid", "Watt")).toString());
-                                }
-
-                                newRow.add(insertFormElement(key, timeString, "", timeFormatPattern)+checkValueTxt);
-                            }
-                            else {
-                                newRow.add(insertFormElement(key, mylist.get(key).toString().replace(",", "."), "", numberFormatPattern));
+                                default:
+                                    newRow.add(insertFormElement(key, mylist.get(key).toString().replace(",", "."), "", numberFormatPattern));
+                                    break;
                             }
                         }
                         else {
+                            key = key.replace("3000Min", "3000Total");
                             newRow.add(insertFormElement(key, "", "", numberFormatPattern));
                         }
                     }
@@ -335,8 +345,21 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
             out.print("<form method='post' id='tableForm"+(i+1)+"' action='postExcel' target='_blank'>");
             out.print("<div class=\"\">");
-            out.print("<input type='hidden' name='class' value='"+(sheetName.contains("Senior")?"senior": (sheetName.contains("Jun A")?"junA": (sheetName.contains("Jun B")?"junB": (sheetName.contains("Jun C")?"junC":""))))+"'>");
-//            out.print("<input type='hidden' name='class2' value='"+(sheetName.replace(" ","").replace("menn", "").replace("kvinner", "").replace("gutter", "").replace("jenter", ""))+"'>");
+            String classValue = "";
+            if(sheetName.contains("Senior")){
+                classValue = "senior";
+            }
+            else if(sheetName.contains("Jun A") || sheetName.toLowerCase().matches("[h|d]ja")){
+                classValue = "junA";
+            }
+            else if(sheetName.contains("Jun B") || sheetName.toLowerCase().matches("[h|d]jb")){
+                classValue = "junB";
+            }
+            else if(sheetName.contains("Jun C") || sheetName.toLowerCase().matches("[h|d]jc")){
+                classValue = "junC";
+            }
+
+            out.print("<input type='hidden' name='class' value='"+classValue+"'>");
 
             out.print(htmlTable);
             out.print("<select class='sexPicker form-control' name=\"sex\" style='width: initial; display: initial;'> " +
@@ -356,7 +379,8 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             out.print("</div>");
             out.print("</form>");
 //            out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
-            out.print("<p>* 3000 Tid er regnet ut fra 3000 Total i excel.</p></div><hr>");
+//            out.print("<p>* 3000 Tid er regnet ut fra 3000 Total i excel.</p>");
+            out.print("</div><hr>");
             out.print("<script>\n" +
                     "    " +
                     "validateTable(\"table"+(i+1)+"\");\n" +
@@ -418,9 +442,6 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                 return "5000 Tid";
             case "3000Total":
                 return "3000m Tid";
-//            case "3000Tid":
-//            case "3000m":
-//                return "3000 Tid*";
             case "2000Watt":
                 return "2000 Watt";
             case "2000Tid":
@@ -429,20 +450,20 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             case "60Watt":
                 return "60 Watt";
             case "liggroProsent":
-                return "Liggende rotak %";
+                return "Liggende rotak i %";
             case "liggroKg":
-                return "Liggende rotak KG";
+                return "Liggende rotak i KG";
             case "kroppshev":
                 return "Kroppshevinger";
             case "knebProsent":
-                return "Knebøy %";
+                return "Knebøy i %";
             case "knebKg":
-                return "Knebøy KG";
+                return "Knebøy i KG";
             case "cmSargeant":
-                return "Sargeant CM";
+                return "Sargeant (CM)";
             case "antBev":
             case "Beveg":
-                return "Antall Bevegelser";
+                return "Antall bevegelser";
             default:
                 return input;
         }

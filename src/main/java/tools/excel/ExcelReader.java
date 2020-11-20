@@ -39,6 +39,14 @@ public class ExcelReader {
     }
 
     /**
+     * Set the filename of the excel-file in case the provided paths name is not the actual name
+     * @param newFileName New filename for the ExcelReader which is later used to identify key-sets
+     */
+    public void setFileName(String newFileName){
+        fileName = newFileName;
+    }
+
+    /**
      * getSheet() sets sheet to be a sheet in the wb file
      * @param sheetIndex index of the sheet. 0 - 7
      * @throws NullPointerException if wb is not set.
@@ -118,8 +126,9 @@ public class ExcelReader {
         boolean senior = athleteClass.contains("senior");
         boolean a = athleteClass.contains("A");
         boolean b = athleteClass.contains("B"); //For the reports before 2020
-        boolean b2020 = athleteClass.contains("B") && fileName.contains("2020") && fileName.contains("11"); //For the 2020 uke 11 reports.
+        boolean b2020 = athleteClass.contains("B") && ((fileName.contains("2020") && fileName.contains("11")) || fileName.contains("20-44")); //For the 2020 week 11 and 44 reports.
         boolean c = athleteClass.contains("C");
+        boolean c2020 = athleteClass.contains("C") && fileName.contains("20-44"); //For the 2020 week 44 report
         boolean allClasses_C_Excluded = senior || a || b || b2020;
 
 
@@ -129,12 +138,17 @@ public class ExcelReader {
         String[] bTest = {"3000Total", "3000Tid", "2000Watt", "2000Tid", "60Watt", "kroppshev", "cmSargeant", "antBev"};
         String[] bTest2020 = {"3000Total", "3000Min", "3000Sek", "2000Watt", "2000Tid", "60Watt", "kroppshev", "cmSargeant", "antBev"};
         String[] cTest = {"3000m", "60roergo", "kroppshev", "cmSargeant", "Beveg"};
+        String[] cTest2020 = {"3000Min", "3000Sek", "60roergo", "kroppshev", "cmSargeant", "Beveg"};
 
         //Add the first keys that are the same for all the classes except the C classes.
         //The C classes's keys are added in another order.
         if (allClasses_C_Excluded) {
             keys.add("rank");
             keys.add("score");
+            keys.add("født");
+            keys.add("navn");
+            keys.add("klubb");
+        } else if (c2020) {
             keys.add("født");
             keys.add("navn");
             keys.add("klubb");
@@ -153,6 +167,8 @@ public class ExcelReader {
             keys.addAll(Arrays.asList(bTest2020));
         } else if (b) {
             keys.addAll(Arrays.asList(bTest));
+        } else if (c2020) {
+            keys.addAll(Arrays.asList(cTest2020));
         } else if (c) {
             keys.addAll(Arrays.asList(cTest));
         }

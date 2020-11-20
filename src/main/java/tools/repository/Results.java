@@ -52,7 +52,7 @@ public class Results {
 
         Map<Integer, Map<Integer, ResultModel>> resultsByAthleteExercise = new HashMap<>();
 
-        String query = "SELECT * FROM resultData WHERE DATE_FORMAT(date_time, '%Y-%m-%d') > ? AND DATE_FORMAT(date_time, '%Y-%m-%d') < ? AND sex = ? AND className = ?";
+        String query = "SELECT * FROM resultData WHERE DATE_FORMAT(date_time, '%Y-%m-%d') > ? AND DATE_FORMAT(date_time, '%Y-%m-%d') < ? AND sex = ? AND className = ? AND result_Type = 'IP'";
         try(ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, afterDate, beforeDate, classSex, className)) {
 
             if (rs == null) {

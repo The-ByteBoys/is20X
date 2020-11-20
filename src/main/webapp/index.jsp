@@ -124,9 +124,16 @@
 
     Map<Integer, Map<Integer, Double>> resultsByAthleteExercisePoints = Results.calculateScores(resultsByAthleteExercise, exercises);
 
-    HtmlTableUtil htmlTable = new HtmlTableUtil("Poeng", "Fullt navn", "Klubb");
+    HtmlTableUtil htmlTable = new HtmlTableUtil();
     htmlTable.setTableCaption("Testresultater for "+className+" "+classSex.replace("F", "Kvinner").replace("M", "Menn").replace("O", "Andre")+", "+year+" uke "+week);
     htmlTable.setTableID("exTable");
+
+    if(!className.equals("C")) {
+        htmlTable.addHeader("Poeng");
+    }
+    htmlTable.addHeader("Fødselsår");
+    htmlTable.addHeader("Fullt navn");
+    htmlTable.addHeader("Klubb(er)");
 
     for (Map.Entry<Integer, Map<Integer, Double>> resultsMapEntry : resultsByAthleteExercisePoints.entrySet()) {
         Integer athleteId = resultsMapEntry.getKey();
@@ -141,8 +148,11 @@
             return;
         }
 
-        // PLACEHOLDER FOR POINT-COL
-        htmlTable.addCell(df.format(athleteResult.get(-1)));
+        if(!className.equals("C")){
+            htmlTable.addCell(df.format(athleteResult.get(-1)));
+        }
+
+        htmlTable.addCell(athlete.get(Athlete.BIRTH).toString().substring(0,4));
 
         String fullName = athlete.get(Athlete.FNAME)+" "+athlete.get(Athlete.LNAME);
         htmlTable.addCell("<a href='athlete/"+fullName.replace(" ","%20")+"' class='text-secondary'>"+fullName+"</a>");

@@ -54,7 +54,7 @@ public class PostExcelServlet extends AbstractAppServlet {
         String atClass = req.getParameter("class");
 
         // CHECK sex FIELD
-        if(!sex.equals("M") && !sex.equals("F") && !sex.equals("O")){
+        if(!sex.matches("[MFO]")){
             out.print("Please go back and select a gender!");
             return;
         }
@@ -124,7 +124,7 @@ public class PostExcelServlet extends AbstractAppServlet {
             for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
                 String key = entry.getKey();
 
-                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week") && !key.equals("class") && !key.equals("3000Total")) {
+                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week") && !key.equals("class")) {
                     String[] values = entry.getValue();
                     if(values[i].equals("")){
                         continue;
@@ -139,7 +139,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                     // Convert time fields to seconds
                     double newValue = 0.00;
 
-                    if (key.matches("[0-9]+Tid") || key.equals("3000m")){
+                    if (key.matches("[0-9]+Tid") || key.equals("3000m") || key.equals("3000Total")){
                         String inputTime = values[i].trim();
                         if(inputTime.matches("[0-9]+:[0-9]{1,2}(\\.[0-9]*)?")){
                             String[] inputTimes = inputTime.split(":");
@@ -237,6 +237,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                 name = "3000";
                 unit = "WATT";
                 break;
+            case "3000Total":
             case "3000Tid":
             case "3000m":
                 name = "3000";

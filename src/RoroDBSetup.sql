@@ -106,10 +106,9 @@ CREATE TABLE test_set (
     exercise INT NOT NULL,
     weight INT NOT NULL,
 
-
+    CONSTRAINT test_set_PK PRIMARY KEY (class, exercise),
     CONSTRAINT test_set_exercise_FK FOREIGN KEY (exercise) REFERENCES exercise(exercise_id),
     CONSTRAINT test_set_Class_FK FOREIGN KEY (class) REFERENCES class(class_id)
-    /*CONSTRAINT test_set_PK PRIMARY KEY (exercise, testClass)*/
 );
 
 
@@ -162,10 +161,10 @@ INSERT INTO exercise (exercise_id, name, description, unit, exerciseType)
 
 INSERT INTO test_set (class, exercise, weight)
     VALUES
-        (1, 1, 45), (1, 2, 0), (1, 5, 30), (1, 6, 0), (1, 7, 10), (1, 8, 5), (1, 9, 0), (1, 10, 5), (1, 11, 0), (1, 12, 5),
-        (2, 1, 45), (2, 2, 0), (2, 5, 30), (2, 6, 0), (2, 7, 10), (2, 8, 5), (2, 9, 0), (2, 13, 5), (2, 12, 5),
-        (3, 4, 40), (3, 5, 40), (3, 6, 0), (3, 7, 5), (3, 14, 5), (3, 13, 5), (3, 12, 5),
-        (4, 4, 0), (4, 7, 0), (4, 14, 0), (4, 13, 0), (4, 12, 0);
+        (1, 1, 45), (1, 2, 0), (1, 5, 30), (1, 6, 0), (1, 7, 10), (1, 8, 5), (1, 9, 0), (1, 10, 5), (1, 11, 0), (1, 14, 5),
+        (2, 1, 45), (2, 2, 0), (2, 5, 30), (2, 6, 0), (2, 7, 10), (2, 8, 5), (2, 9, 0), (2, 13, 5), (2, 14, 5),
+        (3, 4, 40), (3, 5, 40), (3, 6, 0), (3, 7, 5), (3, 12, 5), (3, 13, 5), (3, 14, 5),
+        (4, 4, 0), (4, 7, 0), (4, 12, 0), (4, 13, 0), (4, 14, 0);
 
 # CREATE VIEW:
 CREATE OR REPLACE VIEW resultData AS
