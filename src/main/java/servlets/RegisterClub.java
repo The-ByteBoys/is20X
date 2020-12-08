@@ -21,7 +21,7 @@ import java.sql.SQLException;
 public class RegisterClub extends AbstractAppServlet {
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
+        UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.ADMIN);
 
         if( currentUser != null ){
             writeResponseHeadless(request, response, currentUser);
@@ -39,13 +39,11 @@ public class RegisterClub extends AbstractAppServlet {
         int newClubId = 0;
         try {
             newClubId = Clubs.addClub(name);
-        } catch (SQLException throwables) {
+            out.print("Club with name ´" + name + "´ (id: "+newClubId+") registered!");
+        } catch (SQLException | NamingException throwables) {
             throwables.printStackTrace();
-        } catch (NamingException e) {
-            e.printStackTrace();
+            out.print("Noe galt skjedde...");
         }
-
-        out.print("Club ("+newClubId+") with name ´" + name + "´ registered!");
     }
 
     @Override

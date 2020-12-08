@@ -20,6 +20,17 @@ $(function(){
         if($("#loginInfo").length > 0){
             $("#navLogin").html( $("#loginInfo").html() );
         }
+
+        // Set active page
+        let path = window.location.pathname;
+        if(path === "/roingwebapp/index.jsp"){ path = "/roingwebapp/"}
+        $(".nav-item.nav-link").each(function (){
+            if(path === $(this).attr("href")){
+                $(this)
+                    .addClass("active")
+                    .append(" <span class=\"sr-only\">(nåværende)</span>");
+            }
+        });
     });
 });
 

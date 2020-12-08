@@ -25,7 +25,7 @@
 
     <% if(currentUser.get(User.TYPE).equals("COACH") || currentUser.get(User.TYPE).equals("ADMIN")){ %>
     <br>
-    <p>Trener funksjoner</p>
+    <p>Trener-funksjoner</p>
     <p><a href="register.jsp">Registrer ny utøver-bruker</a></p>
     <p><a href="massinsert">Sett inn masse data</a></p>
     <p><a href="uploadExcel.jsp">Last opp excel-fil</a></p>

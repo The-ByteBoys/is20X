@@ -51,9 +51,10 @@ public class PostExcelServlet extends AbstractAppServlet {
         String sex = req.getParameter("sex");
         String year = req.getParameter("year");
         String week = req.getParameter("week");
+        String atClass = req.getParameter("class");
 
         // CHECK sex FIELD
-        if(!sex.equals("M") && !sex.equals("F") && !sex.equals("O")){
+        if(!sex.matches("[MFO]")){
             out.print("Please go back and select a gender!");
             return;
         }
@@ -71,19 +72,33 @@ public class PostExcelServlet extends AbstractAppServlet {
             return;
         }
 
+        // Format testTime
+        Calendar cal = Calendar.getInstance();
+        cal.setWeekDate(Integer.parseInt(year), Integer.parseInt(week), Calendar.MONDAY);
+
+        Timestamp testTime = new Timestamp(cal.getTimeInMillis());
+        Date testTimeDate = new Date(cal.getTimeInMillis());
+
+
         for (int i = 0; i < lastNames.length; i++) {
 
             // GET ATHLETE, and add if doesnt exist
             int newAthleteId = 0;
-//            int birth = 0;
             Date birth;
+
             try {
-
-                 birth = Date.valueOf(births[i]);
-
+                if(!births[i].equals("")){
+                    birth = Date.valueOf(births[i]);
+                }
+                else {
+                    birth = Date.valueOf("0001-01-01");
+                }
 
                 // ADD ATHLETE
                 newAthleteId = addAthlete(firstNames[i], lastNames[i], birth, sex);
+
+                // Add athlete to class
+                Athletes.addAthleteToClass(newAthleteId, atClass, testTimeDate);
 
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -109,7 +124,7 @@ public class PostExcelServlet extends AbstractAppServlet {
             for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
                 String key = entry.getKey();
 
-                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week") && !key.equals("3000Total")) {
+                if (!key.equals("fname") && !key.equals("lname") && !key.equals("birth") && !key.equals("clubs") && !key.equals("sex") && !key.equals("year") && !key.equals("week") && !key.equals("class")) {
                     String[] values = entry.getValue();
                     if(values[i].equals("")){
                         continue;
@@ -121,17 +136,10 @@ public class PostExcelServlet extends AbstractAppServlet {
                         continue;
                     }
 
-
-                    // Format testTime
-                    Calendar cal = Calendar.getInstance();
-                    cal.setWeekDate(Integer.parseInt(year), Integer.parseInt(week), Calendar.MONDAY);
-
-                    Timestamp newTime = new Timestamp(cal.getTimeInMillis());
-
-                    // Fix time-fields
+                    // Convert time fields to seconds
                     double newValue = 0.00;
 
-                    if (key.matches("[0-9]+Tid")){
+                    if (key.matches("[0-9]+Tid") || key.equals("3000m") || key.equals("3000Total")){
                         String inputTime = values[i].trim();
                         if(inputTime.matches("[0-9]+:[0-9]{1,2}(\\.[0-9]*)?")){
                             String[] inputTimes = inputTime.split(":");
@@ -163,7 +171,7 @@ public class PostExcelServlet extends AbstractAppServlet {
 
 
                     try {
-                        ResultModel newResult = new ResultModel(newAthleteId, exerciseId, newValue, newTime, "IP");
+                        ResultModel newResult = new ResultModel(newAthleteId, exerciseId, newValue, testTime, "IP");
 
                         Results.addResult(newResult);
                     } catch (Exception e) {
@@ -229,7 +237,9 @@ public class PostExcelServlet extends AbstractAppServlet {
                 name = "3000";
                 unit = "WATT";
                 break;
+            case "3000Total":
             case "3000Tid":
+            case "3000m":
                 name = "3000";
                 unit = "TIME";
                 break;
@@ -241,6 +251,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                 name = "2000";
                 unit = "TIME";
                 break;
+            case "60roergo":
             case "60Watt":
                 name = "60";
                 unit = "WATT";
@@ -270,6 +281,7 @@ public class PostExcelServlet extends AbstractAppServlet {
                 unit = "CM";
                 break;
             case "antBev":
+            case "Beveg":
                 name = "bevegelse";
                 unit = "REPS";
                 break;

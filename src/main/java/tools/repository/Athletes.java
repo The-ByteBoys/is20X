@@ -1,13 +1,10 @@
 package tools.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 
 import enums.Athlete;
-import enums.User;
 import models.AthleteModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -28,20 +25,20 @@ public class Athletes {
     }
 
     public static List<AthleteModel> getAthletes() throws SQLException {
-        return getAthletes(0, Calendar.getInstance().get(Calendar.YEAR));
+        return getAthletes(0, new Date(Calendar.getInstance().getTime().getTime()));
     }
     public static List<AthleteModel> getAthletes(int clubId) throws SQLException {
-        return getAthletes(clubId, Calendar.getInstance().get(Calendar.YEAR));
+        return getAthletes(clubId, new Date(Calendar.getInstance().getTime().getTime()));
     }
 
     /**
      * Get athletes.
      * @param clubId         Club id, if any, to limit to club. Default: 0
-     * @param classCheckYear Year to calculate class from. Default: 2020
+     * @param refClassDate   Year to calculate class from. Default: 2020
      * @return  List of AthleteModel
      * @throws SQLException if SQL fails
      */
-    public static List<AthleteModel> getAthletes(int clubId, int classCheckYear) throws SQLException {
+    public static List<AthleteModel> getAthletes(int clubId, Date refClassDate) throws SQLException {
         List<AthleteModel> toReturn = new ArrayList<>();
         String queryWhere = "";
 
@@ -49,18 +46,15 @@ public class Athletes {
             queryWhere = " INNER JOIN club_reg cr ON a.athlete_id = cr.athlete WHERE cr.club = "+clubId;
         }
 
-        try {
-            String query = "SELECT a.athlete_id , a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c WHERE ageFrom <= ("+classCheckYear+"-a.birth) ORDER BY ageFrom DESC LIMIT 1) class FROM athlete a"+queryWhere;
-
-            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
+        String query = "SELECT a.athlete_id , a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className FROM athlete a"+queryWhere;
+        try(ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate)){
 
             while (rs.next()) {
                 AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
-                athlete.setAthleteClass(rs.getString("class"));
+                athlete.setAthleteClass(rs.getString("className"));
                 toReturn.add(athlete);
             }
 
-            rs.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             throw throwables;
@@ -70,38 +64,74 @@ public class Athletes {
     }
 
     public static AthleteModel getAthlete(String needle) throws SQLException {
-        return getAthlete(needle, Calendar.getInstance().get(Calendar.YEAR));
+        return getAthlete(needle, new Date(Calendar.getInstance().getTime().getTime()) );
     }
-    public static AthleteModel getAthlete(String needle, int classCheckYear) throws SQLException {
-        String queryWhere = "";
+    public static AthleteModel getAthlete(String needle, Date refClassDate) throws SQLException {
+        String queryWhere;
         AthleteModel athlete = null;
 
+        String newNeedle;
         // Check if input is a number, else assume its a name
         try{
-            int newNeedle = Integer.parseInt(needle);
-            queryWhere = "a.athlete_id = "+newNeedle;
+            int checkNeedle = Integer.parseInt(needle);
+            newNeedle = Integer.toString(checkNeedle);
+            queryWhere = "a.athlete_id = ?";
         }
         catch( Exception e){
-            queryWhere = "CONCAT(a.firstName, ' ', a.lastName) = '"+needle+"'";
+            newNeedle = "%"+needle.replace(" ","%")+"%";
+            queryWhere = "LOWER(CONCAT(a.firstName, \" \", a.lastName)) LIKE ?";
         }
 
-        try {
-            String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, (SELECT c.name FROM class c WHERE ageFrom <= ("+classCheckYear+"-a.birth) ORDER BY ageFrom DESC LIMIT 1) class FROM athlete a WHERE "+queryWhere;
-
-            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
+        String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, " +
+                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className," +
+                "(SELECT GROUP_CONCAT(c.name ORDER BY c.name SEPARATOR ', ') FROM club c INNER JOIN club_reg cr ON c.club_id = cr.club WHERE cr.athlete = a.athlete_id GROUP BY athlete) clubs" +
+                " FROM athlete a WHERE "+queryWhere;
+        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate, newNeedle)){
 
             while(rs.next()){
                 athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
-                athlete.setAthleteClass(rs.getString("class"));
+                athlete.set(Athlete.CLASS, rs.getString("className"));
+                athlete.set(Athlete.CLUBS, rs.getString("clubs"));
             }
 
-            rs.close();
         } catch(SQLException | NullPointerException e){
             e.printStackTrace();
             throw e;
         }
 
         return athlete;
+    }
+
+    /**
+     * Search for athletes
+     * @param name Search-string for an athletes name
+     * @return List of Athletes matching search
+     * @throws SQLException if SQL fails
+     */
+    public static List<AthleteModel> findAthletes(String name) throws SQLException {
+        List<AthleteModel> athleteList = new ArrayList<>();
+        Date refClassDate = new Date(Calendar.getInstance().getTime().getTime());
+
+        String needle = "%"+name.toLowerCase().replace(" ", "%")+"%";
+
+        String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, " +
+                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className " +
+                "FROM athlete a WHERE LOWER(CONCAT(a.firstName, \" \", a.lastName)) LIKE ?";
+
+        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate, needle)){
+
+            while(rs.next()){
+                AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
+                athlete.set(Athlete.CLASS, rs.getString("className"));
+                athleteList.add(athlete);
+            }
+
+        } catch(SQLException | NullPointerException e){
+            e.printStackTrace();
+            throw e;
+        }
+
+        return athleteList;
     }
 
     /**
@@ -136,20 +166,69 @@ public class Athletes {
     /**
      * Add a clubID to an AthleteID for the DataSource
      *
-     * @param AthleteID
+     * @param athleteID
      * @param clubID
      * @throws NamingException
      */
-    public static void addAthleteToClub(int AthleteID, int clubID) throws NamingException {
+    public static void addAthleteToClub(int athleteID, int clubID) throws NamingException {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("athlete", AthleteID);
+        parameters.put("athlete", athleteID);
         parameters.put("club", clubID);
 
-        Context ctx = new InitialContext();
-        JdbcTemplate jdbcTemplate = new JdbcTemplate((DataSource) ctx.lookup("roingdb"));
-
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("club_reg");
         insert.execute(parameters);
+    }
+
+    /**
+     * Add a class to an AthleteID for the DataSource
+     *
+     * @param athleteID int
+     * @param atClass   String
+     * @param testDate  java.sql.Date
+     */
+    public static void addAthleteToClass(Integer athleteID, String atClass, Date testDate) throws SQLException {
+        int classId;
+        String className;
+        switch(atClass){
+            case "senior":
+                classId = 1;
+                className = "SENIOR";
+                break;
+            case "junA":
+                classId = 2;
+                className = "A";
+                break;
+            case "junB":
+                classId = 3;
+                className = "B";
+                break;
+            case "junC":
+                classId = 4;
+                className = "C";
+                break;
+            default:
+                return;
+        }
+
+        AthleteModel checkAthlete = getAthlete(athleteID.toString(), testDate);
+        if(checkAthlete != null && checkAthlete.get(Athlete.CLASS) != null && checkAthlete.get(Athlete.CLASS).toString().equals(className)){
+            // Athlete already in right class
+            return;
+        }
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("athlete", athleteID);
+        parameters.put("class", classId);
+        parameters.put("start", testDate);
+
+        try {
+
+            JdbcTemplate jdbcTemplate = new JdbcTemplate(DbTool.getINSTANCE().getDataSource());
+            SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("class_period");
+            insert.execute(parameters);
+        }
+        catch (NamingException ignore){}
     }
 
 }
