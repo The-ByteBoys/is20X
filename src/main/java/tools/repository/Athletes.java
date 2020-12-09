@@ -5,7 +5,6 @@ import java.sql.Date;
 import java.util.*;
 
 import enums.Athlete;
-import enums.User;
 import models.AthleteModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -68,26 +67,31 @@ public class Athletes {
         return getAthlete(needle, new Date(Calendar.getInstance().getTime().getTime()) );
     }
     public static AthleteModel getAthlete(String needle, Date refClassDate) throws SQLException {
-        String queryWhere = "";
+        String queryWhere;
         AthleteModel athlete = null;
 
+        String newNeedle;
         // Check if input is a number, else assume its a name
         try{
-            int newNeedle = Integer.parseInt(needle);
-            queryWhere = "a.athlete_id = "+newNeedle;
+            int checkNeedle = Integer.parseInt(needle);
+            newNeedle = Integer.toString(checkNeedle);
+            queryWhere = "a.athlete_id = ?";
         }
         catch( Exception e){
-            queryWhere = "CONCAT(a.firstName, ' ', a.lastName) = '"+needle+"'";
+            newNeedle = "%"+needle.replace(" ","%")+"%";
+            queryWhere = "LOWER(CONCAT(a.firstName, \" \", a.lastName)) LIKE ?";
         }
 
         String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, " +
-                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className" +
+                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className," +
+                "(SELECT GROUP_CONCAT(c.name ORDER BY c.name SEPARATOR ', ') FROM club c INNER JOIN club_reg cr ON c.club_id = cr.club WHERE cr.athlete = a.athlete_id GROUP BY athlete) clubs" +
                 " FROM athlete a WHERE "+queryWhere;
-        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate)){
+        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate, newNeedle)){
 
             while(rs.next()){
                 athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
                 athlete.set(Athlete.CLASS, rs.getString("className"));
+                athlete.set(Athlete.CLUBS, rs.getString("clubs"));
             }
 
         } catch(SQLException | NullPointerException e){
@@ -96,6 +100,38 @@ public class Athletes {
         }
 
         return athlete;
+    }
+
+    /**
+     * Search for athletes
+     * @param name Search-string for an athletes name
+     * @return List of Athletes matching search
+     * @throws SQLException if SQL fails
+     */
+    public static List<AthleteModel> findAthletes(String name) throws SQLException {
+        List<AthleteModel> athleteList = new ArrayList<>();
+        Date refClassDate = new Date(Calendar.getInstance().getTime().getTime());
+
+        String needle = "%"+name.toLowerCase().replace(" ", "%")+"%";
+
+        String query = "SELECT a.athlete_id, a.firstName, a.lastName, a.birth, a.sex, " +
+                "(SELECT c.name FROM class c INNER JOIN class_period cp ON cp.class = c.class_id WHERE cp.athlete = a.athlete_id AND cp.`start` <= ? ORDER BY `start` DESC LIMIT 1) className " +
+                "FROM athlete a WHERE LOWER(CONCAT(a.firstName, \" \", a.lastName)) LIKE ?";
+
+        try (ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, refClassDate, needle)){
+
+            while(rs.next()){
+                AthleteModel athlete = new AthleteModel(rs.getInt("a.athlete_id"), rs.getString("a.firstName"), rs.getString("a.lastName"), rs.getDate("a.birth"), rs.getString("a.sex"));
+                athlete.set(Athlete.CLASS, rs.getString("className"));
+                athleteList.add(athlete);
+            }
+
+        } catch(SQLException | NullPointerException e){
+            e.printStackTrace();
+            throw e;
+        }
+
+        return athleteList;
     }
 
     /**

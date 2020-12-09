@@ -49,7 +49,7 @@ public class HtmlConstants {
         html.append("</head>\n");
         html.append("<body style=\"text-align: center;\">\n");
         html.append("\n");
-        html.append("<div id=\"nav-placeholder\"></div>\n");
+        html.append("<div id=\"nav-placeholder\" style=\"min-height: 70px;\"></div>\n");
         html.append(UserAuth.navBarLogin(currUser));
         html.append("<script src=\"").append(ROOTPATH).append("/js/menu.js\"></script>\n");
 

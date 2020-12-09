@@ -41,7 +41,7 @@ public class Exercises {
     public static List<ExerciseModel> getExercisesForClass(String exClass, int clubId) throws SQLException {
         List<ExerciseModel> toReturn = new ArrayList<>();
 
-        String query = "SELECT e.exercise_id, e.name, e.description, e.unit, e.exerciseType FROM exercise e" +
+        String query = "SELECT e.exercise_id, e.name, e.description, e.unit, e.exerciseType, ts.weight FROM exercise e" +
                 " LEFT OUTER JOIN test_set ts ON e.exercise_id = ts.exercise" +
                 " LEFT OUTER JOIN class c ON c.class_id = ts.class" +
                 " LEFT OUTER JOIN club_exercise ce ON e.exercise_id = ce.exercise" +
@@ -50,6 +50,8 @@ public class Exercises {
         ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, exClass, clubId);
         while (rs.next()) {
             ExerciseModel exercise = new ExerciseModel(rs.getInt("e.exercise_id"), rs.getString("e.name"), rs.getString("e.description"), rs.getString("e.unit"), rs.getString("e.exerciseType"));
+            exercise.set(Exercise.WEIGHT, rs.getInt("weight"));
+
             toReturn.add(exercise);
         }
 
