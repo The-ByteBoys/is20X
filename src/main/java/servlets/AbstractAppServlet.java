@@ -45,7 +45,7 @@ public abstract class AbstractAppServlet extends HttpServlet {
         }
     }
 
-    protected void writeResponseJson(HttpServletRequest request, HttpServletResponse response, String title) throws IOException {
+    protected void writeResponseJson(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             writeBody(request, out);

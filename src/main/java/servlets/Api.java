@@ -26,7 +26,7 @@ public class Api extends AbstractAppServlet {
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
-        writeResponseJson(request, response, "Roing Webapp API");
+        writeResponseJson(request, response);
     }
 
     @Override
@@ -79,21 +79,33 @@ public class Api extends AbstractAppServlet {
         } else if( req.getRequestURI().substring(baseURI.length()).matches("/ut(.*)ver($|/)(.*)") ){ // True for "api/utover/" and "api/ut%C3%B8ver/" but not "api/utovere/" etc.
             /** %C3%B8 = ø */
 
-            String[] uriparts = req.getRequestURI().split("/");
+            String[] uriparts = req.getRequestURI().substring(baseURI.length()).split("/");
             String lastPart = uriparts[ uriparts.length-1 ];
 
             lastPart = lastPart.replace("%20", " ");
 
-            try{
-                AthleteModel athlete = Athletes.getAthlete( lastPart );
+            String search = req.getParameter("search");
+            if(uriparts.length <= 2 && search != null){
+                lastPart = search;
+            }
 
-                if(athlete != null){
+            try{
+//                AthleteModel athlete = Athletes.getAthlete( lastPart );
+
+                List<AthleteModel> atheles = Athletes.findAthletes(lastPart);
+                ArrayList<String> output = new ArrayList<>();
+
+                for( AthleteModel a : atheles ){
+                    output.add( "\n"+a.toString() );
+                }
+
+                if(!output.isEmpty()){
                     out.print("{ \"data\": [");
-                    out.print( athlete.toString() );
+                    out.print( output.toString() );
                     out.print("]}");
                 }
                 else {
-                    out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"Athlete not found!\" } }" );
+                    out.print( "{ \"status\": { \"error\": \"Failed\", \"errorMsg\": \"No athlete was found.\" } }" );
                 }
             }
             catch( SQLException e ){

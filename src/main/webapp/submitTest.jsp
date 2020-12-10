@@ -1,16 +1,23 @@
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Iterator" %>
-<%@ page import="tools.htmltools.HtmlConstants" %>
-<%@ page import="models.UserModel" %>
-<%@ page import="enums.UserLevel" %>
-<%@ page import="tools.UserAuth" %>
-<%@ page import="java.io.IOException" %>
-<%@ page import="java.io.PrintWriter" %>
-<%@ page contentType="text/html;charset=UTF-8"%>
-<%
+<%@ page
+        import="java.util.List"
+        import="java.util.Iterator"
+        import="tools.htmltools.HtmlConstants"
+        import="models.UserModel"
+        import="enums.UserLevel"
+        import="tools.UserAuth"
+        contentType="text/html;charset=UTF-8"
+%>
+<%@ page import="java.util.Arrays" %><%
     UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
     if(currentUser == null){ return; }
-%>
+
+    List<String> athletes = Arrays.asList(request.getParameterValues("athletes"));
+
+    if(athletes.isEmpty()) {
+        response.sendRedirect("chooseAthlete.jsp");
+    }
+
+%><!DOCTYPE html>
 <html>
 <head>
     <title>Registrer test</title>
@@ -27,9 +34,12 @@
     <%=HtmlConstants.getHtmlHeaders()%>
 </head>
 <body>
-    <div id="nav-placeholder"></div>
-    <%=UserAuth.navBarLogin(currentUser)%>
-    <script src="js/menu.js"></script>
+
+<div id="nav-placeholder"></div>
+<%=UserAuth.navBarLogin(currentUser)%>
+<script src="js/menu.js"></script>
+
+<div class="container" style="text-align: center;">
 
     <form action="submit-tests" method="post">
         <%
@@ -38,7 +48,7 @@
 
                 try {
                 boolean classHasMembers = true;
-                List<String> athletes = (List<String>) request.getAttribute("athletes");
+//                List<String> athletes = (List<String>) request.getAttribute("athletes");
                 Iterator<String> it = athletes.iterator();
                 while (it.hasNext() && classHasMembers) {
                     String athlete_it = it.next();
@@ -54,7 +64,7 @@
                         String exerciseUnit = exerciseValues[2];
                         String exercise_id = exerciseValues[0];
         %>
-                        <table>
+                        <table style="margin: auto;">
                             <tr>
                                 <th colspan="3"><%=athlete_cl + " (" + exerciseName + " " + exerciseUnit + ")"%></th>
                             </tr>
@@ -102,9 +112,9 @@
         %>
         <%
                 } catch (Exception e) {
-                    PrintWriter writer = response.getWriter();
-                    writer.println(":( you can't access here now");
-                    writer.close();
+//                    PrintWriter writer = response.getWriter();
+                    out.println(":( you can't access here now");
+//                    writer.close();
 
                     //TODO: Make this error feedback better
                 }
@@ -112,5 +122,8 @@
         %>
         <input type="submit" value="Registrer tester">
     </form>
+
+</div>
+
 </body>
 </html>
