@@ -13,7 +13,9 @@
     import="tools.repository.Exercises"
     import="enums.Exercise"
     contentType="text/html;charset=UTF-8"
-%><%
+%>
+<%@ page import="java.util.ArrayList" %>
+<%
     UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
     if(currentUser == null){ return; }
 %><%--
@@ -53,33 +55,39 @@
     <form action="submitTest.jsp" method="post">
         <div class="card-deck">
     <%
-        String[] classes = {"SENIOR", "A", "B", "C"};
-        for (String cl : classes) {
-    %>
+        List<AthleteModel> athletes = null;
+        int clubId = 0;
+        if (currentUser.get(User.CLUBID) != null) {
+            try {
+                clubId = (int) currentUser.get(User.CLUBID);
+                athletes = Athletes.getAthletes(clubId);
+            } catch (SQLException e) {
+                out.print(e);
+                e.printStackTrace();
+            }
+        }
 
+        if (athletes != null && clubId != 0) {
+            String[] classes = {"SENIOR", "A", "B", "C"};
+            for (String cl : classes) {
+                    %>
             <div class="card">
                 <div class="card-header"><%=cl%></div>
                 <div class="card-body">
-                <%
-                try {
-                    if (currentUser.get(User.CLUBID) != null) {
-                    int clubId = (int) currentUser.get(User.CLUBID);
-                    List<AthleteModel> athletes = Athletes.getAthletes(clubId);
-                    for (AthleteModel a : athletes) {
-                        if (a.get(Athlete.CLASS).toString().equals(cl)) {
-                            String firstName = a.get(Athlete.FNAME).toString();
-                            String lastName = a.get(Athlete.LNAME).toString();
-                            int athlete_id = Integer.parseInt(a.get(Athlete.ID).toString());
-
-
-            %>
-                    <label>
-                        <input type="checkbox" name="athletes" value="<%=cl+"-"+firstName + " " + lastName +"-"+ athlete_id%>">
-                        <%=firstName + " " +  lastName%>
-                    </label><br>
-                <%
+                    <%
+                        for (AthleteModel a : athletes) {
+                            if ((a.get(Athlete.CLASS) != null) && a.get(Athlete.CLASS).toString().equals(cl)) {
+                                String firstName = a.get(Athlete.FNAME).toString();
+                                String lastName = a.get(Athlete.LNAME).toString();
+                                int athlete_id = Integer.parseInt(a.get(Athlete.ID).toString());
+                    %>
+                        <label>
+                            <input type="checkbox" name="athletes" value="<%=cl + "-" + firstName + " " + lastName + "-" + athlete_id%>">
+                            <%=firstName + " " + lastName%>
+                        </label><br>
+                    <%
+                            }
                         }
-                    }
                     %>
                 </div>
                 <div class="card-footer">
@@ -87,28 +95,28 @@
                         <select name="<%=cl%>-exercises">
                             <option disabled selected>Velg test</option>
                             <%
-                                List<ExerciseModel> exercises = Exercises.getExercisesForClass(cl, clubId);
-                                for (ExerciseModel ex : exercises) {
-                                    String exercise_name = ex.get(Exercise.NAME).toString();
-                                    String exercise_unit = ex.get(Exercise.UNIT).toString();
-                                    int exercise_id = (int) ex.get(Exercise.ID);
-                            %>
-                                <option value="<%=exercise_id + "-" + exercise_name + "-" + exercise_unit%>"><%=exercise_name + " " + exercise_unit%></option>
-                            <%
-                            }
+                                try {
+                                    List<ExerciseModel> exercises = Exercises.getExercisesForClass(cl, clubId);
+                                    for (ExerciseModel ex : exercises) {
+                                        String exercise_name = ex.get(Exercise.NAME).toString();
+                                        String exercise_unit = ex.get(Exercise.UNIT).toString();
+                                        int exercise_id = (int) ex.get(Exercise.ID);
+                            %><option value="<%=exercise_id + "-" + exercise_name + "-" + exercise_unit%>"><%=exercise_name + " " + exercise_unit%></option><%
+                                    }
                             %>
                         </select>
                     </label>
-            <%
-                    }
-                } catch (SQLException throwables) {
-                throwables.printStackTrace();
-                }
-            %>
+                <%
+                                } catch (Exception e) {
+                                    out.print(e);
+                                    e.printStackTrace();
+                                }
+                    %>
+                </div>
             </div>
-        </div>
-        <br>
-    <%
+            <br>
+        <%
+            }
         }
     %>
         </div>
@@ -119,3 +127,4 @@
 
 </body>
 </html>
+
