@@ -17,7 +17,7 @@ public class LogginServlet extends AbstractAppServlet {
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
-        // Never used
+        // Never used. Abstract Class demands writeBody exists.
     }
 
     @Override
