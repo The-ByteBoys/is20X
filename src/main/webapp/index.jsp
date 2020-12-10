@@ -14,7 +14,7 @@
          import="java.sql.SQLException"
          import="java.text.DecimalFormat"
 %><%
-    UserModel currentUser = UserAuth.verifyLogin(request);
+   UserModel currentUser = UserAuth.verifyLogin(request);
 %><!DOCTYPE html>
 <html lang="no">
 <head>

@@ -184,15 +184,21 @@ VALUES ('Johannes', 'Birkeland', '2000-01-01', 'M'),
 
 INSERT INTO club_user (user, athlete) VALUES (2, 1);
 
-INSERT INTO club (name) VALUES ('BRK');
+INSERT INTO club (name) VALUES ('BRK'), ('NTNUI');
 
-INSERT INTO club_reg (athlete, club) VALUES (1, 1);
+INSERT INTO club_reg (athlete, club) VALUES (1, 2);
+
+INSERT INTO club_reg (athlete, club) VALUES (2, 2), (3, 2), (4, 2), (5, 2);
 
 INSERT INTO club_exercise (exercise, club) VALUES (3, 1);
 
 INSERT INTO class_period (start, athlete, class)
     VALUES
-        ('2019-11-19', 1, 1);
+        ('2019-11-19', 1, 1),
+        ('2019-11-19', 2, 1),
+        ('2019-11-19', 3, 2),
+        ('2019-11-19', 4, 3),
+        ('2019-11-19', 5, 4);
 
 INSERT INTO result (athlete, exercise, result, date_time, result_Type)
     VALUES

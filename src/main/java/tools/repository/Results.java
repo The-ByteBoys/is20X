@@ -110,6 +110,7 @@ public class Results {
             pointCalcPerExercise.put(exerciseMapEntry.getKey(), pointCalc);
         }
 
+
         Map<Integer, Map<Integer, Double>> returnMap = new HashMap<>();
         for (Map.Entry<Integer, Map<Integer, ResultModel>> resultsByAthleteExerciseMapEntry : resultsByAthleteExercise.entrySet()) {
             Map<Integer, ResultModel> athleteResult = resultsByAthleteExerciseMapEntry.getValue();
