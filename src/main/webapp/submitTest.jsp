@@ -41,6 +41,7 @@
 
 <div class="container" style="text-align: center;">
 
+    <!--Makes a table for a class if theres a athlete with that class chosen-->
     <form action="submit-tests" method="post">
         <%
             String[] classes = {"SENIOR", "A", "B", "C"};
@@ -48,7 +49,6 @@
 
                 try {
                 boolean classHasMembers = true;
-//                List<String> athletes = (List<String>) request.getAttribute("athletes");
                 Iterator<String> it = athletes.iterator();
                 while (it.hasNext() && classHasMembers) {
                     String athlete_it = it.next();
@@ -82,7 +82,8 @@
                                     if (athlete_cl.equals(cl)){
 
                             %>
-
+                                    <!--Input fields have certain rules to minimize wrong values.
+                                    If the exercise unit is time, then the inputs will have other rules-->
                                     <tr>
                                         <td style="width:200px; text-align:center"><%=athlete_name%></td>
                                         <td>
@@ -112,9 +113,7 @@
         %>
         <%
                 } catch (Exception e) {
-//                    PrintWriter writer = response.getWriter();
                     out.println(":( you can't access here now");
-//                    writer.close();
 
                     //TODO: Make this error feedback better
                 }
