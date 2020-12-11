@@ -5,6 +5,7 @@ import models.UserModel;
 import tools.DbTool;
 import tools.UserAuth;
 import tools.htmltools.HtmlConstants;
+import tools.repository.Results;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
+/**
+ * SubmitTestServlets takes its parameters from submitTest.jsp and
+ * "uploads" them to the database
+ *
+ * @author Johannes Birkeland
+ */
 @WebServlet(name= "SubmitTestServlet", urlPatterns = {"/submit-tests"})
 public class SubmitTestServlet extends AbstractAppServlet {
     @Override
@@ -41,16 +48,11 @@ public class SubmitTestServlet extends AbstractAppServlet {
         String[] ids = req.getParameterValues("ids");
         ArrayList<String> idsList = new ArrayList<>(Arrays.asList(ids));
 
-
-        //TODO: GJØR SOM EIRIK SIER - koble til database via models og repository.
-        try {
-            Connection db = DbTool.getINSTANCE().dbLoggIn();
-            String query = "INSERT INTO result (athlete, exercise, result, date_time, result_Type)\n" +
-                    "VALUES (?, ?, ?, ?, 'NP')";
-            PreparedStatement pstm = db.prepareStatement(query);
+        ArrayList<ArrayList<Object>> listOfAttributes = new ArrayList<>();
 
 
         for (String id : idsList) {
+            ArrayList<Object> attributes = new ArrayList<>();
             String[] idArray = id.split("-");
             int ex_id = Integer.parseInt(idArray[0]);
             int at_id = Integer.parseInt(idArray[1]);
@@ -61,25 +63,26 @@ public class SubmitTestServlet extends AbstractAppServlet {
                 double minutes = Double.parseDouble(req.getParameter(at_id + "resultMin")) * 60;
                 double seconds = Double.parseDouble(req.getParameter(at_id + "resultSec"));
                 result = minutes + seconds;
-
             } else {
                 result = Double.parseDouble(req.getParameter(at_id + "result"));
             }
 
-            pstm.setInt(1, at_id);
-            pstm.setInt(2, ex_id);
-            pstm.setDouble(3, result);
-            pstm.setString(4, DATE);
-            pstm.executeUpdate();
-        }
-        db.close();
+            attributes.add(at_id);
+            attributes.add(ex_id);
+            attributes.add(result);
+            attributes.add(DATE);
 
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            listOfAttributes.add(attributes);
         }
+
+        Results.addResultBatch(listOfAttributes);
 
         out.println("<p>Resultater registrert!</p>");
+
+        for (ArrayList<Object> i : listOfAttributes) {
+            out.println(i);
+            out.println("<br>");
+        }
 
 
     }
