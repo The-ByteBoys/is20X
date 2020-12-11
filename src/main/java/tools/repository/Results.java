@@ -235,6 +235,7 @@ public class Results {
         return toReturn;
     }
 
+
     /**
      * Query for all results
      *
@@ -264,6 +265,7 @@ public class Results {
 
         return toReturn;
     }
+
 
     /**
      * Query for a single exercise
@@ -311,6 +313,7 @@ public class Results {
 //        return toReturn;
 //    }
 
+
     /**
      * Method to add exercise to the datasource, if it doesn't already exist
      *
@@ -342,6 +345,7 @@ public class Results {
 //        }
     }
 
+    
     /**
      * Inserts a batch of results
      * @param listOfAttributes contains lists with attributes

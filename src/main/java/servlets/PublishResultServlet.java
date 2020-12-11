@@ -14,11 +14,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.List;
 
+/**
+ * PublishResultServlet publishes the best results from the recent test-period.
+ * @author Johannes Birkeland
+ */
 @WebServlet(name = "PublishResult", urlPatterns = {"/publishResults"})
 public class PublishResultServlet extends AbstractAppServlet{
+
+
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
@@ -31,7 +36,7 @@ public class PublishResultServlet extends AbstractAppServlet{
         out.print(HtmlConstants.getHtmlHead("Test registrert - Roing Webapp", currentUser));
 
         String publish = req.getParameter("publish");
-        List<String> bestResults = Arrays.asList(req.getParameterValues("bestResults"));
+        String[] bestResults = req.getParameterValues("bestResults");
 
         out.println("<form action='publishResults' method='post'>");
 
@@ -44,7 +49,8 @@ public class PublishResultServlet extends AbstractAppServlet{
                 String testDate = rm.get(Result.DATETIME).toString().substring(0, 19);
 
                 out.println("<label>" +
-                            "<input type='checkbox' name='bestResults' checked> " + athleteId + " " + exerciseId + " " + result + " " + testDate +
+                            "<input type='checkbox' name='bestResults' value='" + athleteId + "  " + exerciseId + "  " + testDate +"' checked> " +
+                            athleteId + " " + exerciseId + " " + result + " " + testDate +
                             "</label>" +
                             "<br>");
             }
@@ -56,6 +62,23 @@ public class PublishResultServlet extends AbstractAppServlet{
         out.println("</form>");
 
         if (publish != null) {
+            /**
+             *
+            try {
+                for (String bestResult : bestResults) {
+                    String[] attributes = bestResult.split("/\\s\\s/");
+                    Results.publishResult(Integer.parseInt(attributes[0]), Integer.parseInt(attributes[1]), attributes[2]);
+                    out.println(bestResult);
+                }
+                out.println("Resultatene er publisert!");
+                out.println(Arrays.toString(bestResults));
+            } catch (Exception e) {
+                out.println("Noe gikk galt!");
+            }
+             **/
+
+
+
 
         }
     }
