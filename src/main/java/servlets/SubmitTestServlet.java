@@ -29,11 +29,13 @@ import java.util.TimeZone;
  */
 @WebServlet(name= "SubmitTestServlet", urlPatterns = {"/submit-tests"})
 public class SubmitTestServlet extends AbstractAppServlet {
+
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
         writeResponseHeadless(request, response, currentUser);
     }
+
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out, UserModel currentUser) {
@@ -49,8 +51,7 @@ public class SubmitTestServlet extends AbstractAppServlet {
         ArrayList<String> idsList = new ArrayList<>(Arrays.asList(ids));
 
         ArrayList<ArrayList<Object>> listOfAttributes = new ArrayList<>();
-
-
+        
         for (String id : idsList) {
             ArrayList<Object> attributes = new ArrayList<>();
             String[] idArray = id.split("-");
@@ -78,15 +79,7 @@ public class SubmitTestServlet extends AbstractAppServlet {
         Results.addResultBatch(listOfAttributes);
 
         out.println("<p>Resultater registrert!</p>");
-
-        for (ArrayList<Object> i : listOfAttributes) {
-            out.println(i);
-            out.println("<br>");
-        }
-
-
     }
-
 
 
     @Override
