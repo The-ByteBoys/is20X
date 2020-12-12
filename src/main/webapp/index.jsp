@@ -4,24 +4,37 @@
          import="enums.*"
          import="models.*"
          import="tools.UserAuth"
-         import="tools.PointCalculator"
          import="tools.htmltools.HtmlConstants"
          import="tools.htmltools.HtmlTableUtil"
          import="tools.repository.Athletes"
          import="tools.repository.Exercises"
+         import="tools.repository.Results"
 
          import="java.util.*"
          import="java.sql.SQLException"
-%>
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="tools.repository.Results" %>
-<%
-    UserModel currentUser = UserAuth.verifyLogin(request);
+         import="java.text.DecimalFormat"
+%><%
+   UserModel currentUser = UserAuth.verifyLogin(request);
 %><!DOCTYPE html>
 <html lang="no">
 <head>
     <title>Roing Webapp</title>
     <%=HtmlConstants.getHtmlHeaders()%>
+    <style>
+        #exTable {
+            margin: auto;
+            /*width: initial;*/
+        }
+
+        #exTable a {
+            color: inherit !important;
+            text-decoration: underline;
+        }
+        #exTable a:hover {
+            color: #f4511e !important;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body style="text-align: center;">
 
@@ -82,7 +95,8 @@
                         <option value="C"<%=className.equals("C")?" selected":""%>>Junior C</option>
                     </select>
                 </label>
-            </div><div class="col">
+            </div>
+            <div class="col">
                 <label>
                     <select name="sex" class="form-control" onchange="this.form.submit();">
                         <option value="M"<%=classSex.equals("M")?" selected":""%>>Menn</option>
@@ -95,6 +109,7 @@
     </form>
 </div>
 
+<div class="container-fluid" style="max-width: 1350px; text-align: left;">
 <%
     DecimalFormat df = new DecimalFormat("00.##");
 
@@ -190,6 +205,7 @@
     out.print(htmlTable);
 
 %>
+</div>
 
 <script>
     $(document).ready(function () {

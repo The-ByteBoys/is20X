@@ -1,13 +1,14 @@
 <%@ page
+        import="java.util.Arrays"
         import="java.util.List"
         import="java.util.Iterator"
         import="tools.htmltools.HtmlConstants"
         import="models.UserModel"
         import="enums.UserLevel"
         import="tools.UserAuth"
+
         contentType="text/html;charset=UTF-8"
-%>
-<%@ page import="java.util.Arrays" %><%
+%><%
     UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
     if(currentUser == null){ return; }
 
