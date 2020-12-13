@@ -95,7 +95,8 @@
                         <option value="C"<%=className.equals("C")?" selected":""%>>Junior C</option>
                     </select>
                 </label>
-            </div><div class="col">
+            </div>
+            <div class="col">
                 <label>
                     <select name="sex" class="form-control" onchange="this.form.submit();">
                         <option value="M"<%=classSex.equals("M")?" selected":""%>>Menn</option>

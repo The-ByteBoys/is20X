@@ -1,21 +1,24 @@
 <%@ page
     import="java.sql.SQLException"
-    import="tools.htmltools.HtmlConstants"
-    import="enums.UserLevel"
-    import="tools.UserAuth"
-    import="models.UserModel"
-    import="enums.User"
-    import="models.AthleteModel"
     import="java.util.List"
-    import="tools.repository.Athletes"
+    import="java.util.ArrayList"
+
     import="enums.Athlete"
-    import="models.ExerciseModel"
-    import="tools.repository.Exercises"
     import="enums.Exercise"
+    import="enums.User"
+    import="enums.UserLevel"
+
+    import="models.AthleteModel"
+    import="models.ExerciseModel"
+    import="models.UserModel"
+
+    import="tools.htmltools.HtmlConstants"
+    import="tools.repository.Athletes"
+    import="tools.repository.Exercises"
+    import="tools.UserAuth"
+
     contentType="text/html;charset=UTF-8"
-%>
-<%@ page import="java.util.ArrayList" %>
-<%
+%><%
     UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
     if(currentUser == null){ return; }
 %><%--
@@ -23,8 +26,7 @@
   User: johan
   Date: 26.10.2020
   Time: 12:54
---%>
-<!DOCTYPE html>
+--%><!DOCTYPE html>
 <html lang="no">
 <head>
     <title>Velg utøvere</title>
@@ -55,6 +57,8 @@
     <form action="submitTest.jsp" method="post">
         <div class="card-deck">
     <%
+        //Printing a table or "card"(bootstrap) for each of the classes.
+        //If the user logged in has a club then list all the athletes in the club in the class they belong in.
         List<AthleteModel> athletes = null;
         int clubId = 0;
         if (currentUser.get(User.CLUBID) != null) {
@@ -75,11 +79,11 @@
                 <div class="card-header"><%=cl%></div>
                 <div class="card-body">
                     <%
-                        for (AthleteModel a : athletes) {
-                            if ((a.get(Athlete.CLASS) != null) && a.get(Athlete.CLASS).toString().equals(cl)) {
-                                String firstName = a.get(Athlete.FNAME).toString();
-                                String lastName = a.get(Athlete.LNAME).toString();
-                                int athlete_id = Integer.parseInt(a.get(Athlete.ID).toString());
+                        for (AthleteModel athlete : athletes) {
+                            if ((athlete.get(Athlete.CLASS) != null) && athlete.get(Athlete.CLASS).toString().equals(cl)) {
+                                String firstName = athlete.get(Athlete.FNAME).toString();
+                                String lastName = athlete.get(Athlete.LNAME).toString();
+                                int athlete_id = Integer.parseInt(athlete.get(Athlete.ID).toString());
                     %>
                         <label>
                             <input type="checkbox" name="athletes" value="<%=cl + "-" + firstName + " " + lastName + "-" + athlete_id%>">
@@ -92,7 +96,7 @@
                 </div>
                 <div class="card-footer">
                     <label>
-                        <select name="<%=cl%>-exercises">
+                        <select name="<%=cl%>-exercises"><!--Used later in submitTest.jsp for validation-->
                             <option disabled selected>Velg test</option>
                             <%
                                 try {
@@ -121,10 +125,9 @@
     %>
         </div>
         <br>
-        <input type="submit" value=">">
+        <input type="submit" value="Velg utøvere">
     </form>
 </div>
 
 </body>
 </html>
-

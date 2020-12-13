@@ -23,6 +23,7 @@ public final class DbTool {
     static Connection connection;
     private DataSource dataSource;
 
+
     /**
      * initiates the class as a singleton.
      *
@@ -95,6 +96,7 @@ public final class DbTool {
         return null;
     }
 
+
     public ResultSet selectQueryPrepared(String query, Object... args) throws SQLException {
         PreparedStatement statement = null;
 
@@ -117,6 +119,7 @@ public final class DbTool {
 
         return null;
     }
+
 
     public DataSource getDataSource() throws NamingException {
         if(dataSource == null){

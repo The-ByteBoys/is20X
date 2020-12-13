@@ -13,10 +13,9 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DecimalFormat;
+import java.sql.*;
 import java.util.*;
+import java.text.DecimalFormat;
 
 /**
  * @author Eirik Svagård
@@ -161,6 +160,79 @@ public class Results {
     }
 
     /**
+     * Query for all results in a club
+     * @return List<ResultModel>
+     * @throws SQLException if query fails
+     */
+    public static List<ResultModel> getResultsFromClub(int ClubId) throws SQLException {
+        List<ResultModel> toReturn = new ArrayList<>();
+
+        try {
+            String query = "SELECT r.athlete, exercise, CONCAT(a.firstName, ' ', a.lastName) athleteName, e.name, e.unit, result, date_time, result_Type\n" +
+                    "FROM result r\n" +
+                    "INNER JOIN club_reg cr on r.athlete = cr.athlete\n" +
+                    "INNER JOIN exercise e on r.exercise = e.exercise_id\n" +
+                    "INNER JOIN athlete a on cr.athlete = a.athlete_id\n" +
+                    "WHERE cr.club = ? ORDER BY DATE_FORMAT(date_time, '%Y-%m-%d %H %i %s') DESC";
+
+            ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, ClubId);
+
+            while (rs.next()) {
+                ResultModel result = new ResultModel(rs.getInt("r.athlete"), rs.getInt("exercise"), rs.getDouble("result"), rs.getTimestamp("date_time"), rs.getString("result_Type"));
+                result.set(Result.ATHLETENAME, rs.getString("athleteName"));
+                result.set(Result.EXERCISENAME, rs.getString("e.name"));
+                result.set(Result.EXERCISEUNIT, rs.getString("e.unit"));
+                toReturn.add(result);
+            }
+
+            rs.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throw throwables;
+        }
+
+        return toReturn;
+    }
+
+
+    public static void publishResult(int athlete, int exercise, String date_time) {
+        try {
+            String query = "UPDATE result r\n" +
+                    "SET result_Type = 'IP'\n" +
+                    "WHERE (athlete, exercise, date_time) = (?, ?, ?)";
+            ResultSet rs = DbTool.getINSTANCE().selectQueryPrepared(query, athlete, exercise, date_time);
+            rs.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static List<ResultModel> getBestResultsInTestBattery() {
+        List<ResultModel> toReturn = new ArrayList<>();
+
+        try {
+            String query = "SELECT r.athlete, r.exercise, max(r.result) result, max(r.date_time) dateTime, r.result_Type\n" +
+                    "FROM result r\n" +
+                    "WHERE r.result_Type = 'NP' AND r.date_time BETWEEN NOW() - INTERVAL 14 DAY AND NOW()\n" +
+                    "GROUP BY athlete, exercise";
+
+            ResultSet rs = DbTool.getINSTANCE().selectQuery(query);
+            while (rs.next()) {
+                ResultModel result = new ResultModel(rs.getInt("r.athlete"), rs.getInt("r.exercise"), rs.getDouble("result"), rs.getTimestamp("dateTime"), rs.getString("result_Type"));
+                toReturn.add(result);
+            }
+
+            rs.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return toReturn;
+    }
+
+
+    /**
      * Query for all results
      * @return List<ResultModel>
      * @throws SQLException if query fails
@@ -201,5 +273,36 @@ public class Results {
 
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("result");
         insert.execute(parameters);
+    }
+
+
+    /**
+     * Inserts a batch of results
+     * @param listOfAttributes contains lists with attributes
+     */
+    public static void addResultBatch(ArrayList<ArrayList<Object>> listOfAttributes) {
+
+        String query = "INSERT INTO result (athlete, exercise, result, date_time, result_Type)\n" +
+                "VALUES (?, ?, ?, ?, 'NP')";
+        try {
+            Connection db = DbTool.getINSTANCE().dbLoggIn();
+            PreparedStatement pstm = db.prepareStatement(query);
+
+            for (ArrayList<Object> attributes : listOfAttributes) {
+                pstm.setInt(1, (int) attributes.get(0));
+                pstm.setInt(2, (int) attributes.get(1));
+                pstm.setDouble(3, (double) attributes.get(2));
+                pstm.setString(4, attributes.get(3).toString());
+
+                pstm.addBatch();
+            }
+
+            pstm.executeBatch();
+
+            pstm.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

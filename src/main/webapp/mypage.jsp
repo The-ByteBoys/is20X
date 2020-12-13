@@ -37,6 +37,7 @@
     <br>
     <p>Superbruker-funksjoner</p>
     <p><a href="clubregister.jsp">Registrer ny klubb</a></p>
+    <p><a href="publishResults">Publiser resultater</a></p>
     <% } %>
 
     <br>

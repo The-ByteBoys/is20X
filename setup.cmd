@@ -12,7 +12,7 @@ SET databaseNavn=roro
 
 
 :: Start database
-docker run --rm --name mariadb -p %port%:3306/tcp -v "%cd%\database":/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%mysqlRootPassword% -d mariadb:10.5.5
+docker run --rm --env "TZ=Europe/Oslo" --name mariadb -p %port%:3306/tcp -v "%cd%\database":/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%mysqlRootPassword% -d mariadb:10.5.5
 
 :: Start maven-cache
 docker volume create --name maven-repo

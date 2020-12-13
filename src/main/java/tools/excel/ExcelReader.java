@@ -13,7 +13,7 @@ import java.util.*;
 
 
 /**
- *  The ExcelReader class, reads from the excel-documents located in src/main/java/tools/excel/excelDocuments.
+ *  The ExcelReader class, reads from the excel-documents.
  * @author Johannes Birkeland
  */
 public class ExcelReader {
@@ -28,6 +28,7 @@ public class ExcelReader {
 
     /**
      * This chooseDocument() takes a path the path of an excelDocument, construct a File object from it, and then sets the wb field to hold a new XSSFWorkbook based on that file.
+     * This class is made to fit the format of documents "Roklubben" is using.
      * @param path path to an excelFile
      * @throws IOException If the path leads to nowhere
      * @throws InvalidFormatException If the file is not of the type xlsx.
@@ -37,6 +38,7 @@ public class ExcelReader {
         wb = new XSSFWorkbook(file);
         fileName = path;
     }
+
 
     /**
      * Set the filename of the excel-file in case the provided paths name is not the actual name
@@ -55,15 +57,19 @@ public class ExcelReader {
         sheet = wb.getSheetAt(sheetIndex);
     }
 
+
     public int getNumberOfSheets(){
         return wb.getNumberOfSheets();
     }
+
 
     public String getSheetName(int sheetIndex){
         return wb.getSheetName(sheetIndex);
     }
 
-
+    /**
+     * Close workbook. Is necessary to prevent memory-leaks.
+     */
     public void closeWb() {
         try {
             wb.close();
@@ -74,7 +80,6 @@ public class ExcelReader {
         }
     }
    
-
 
     /**
      * getRowValues() gets all the values from one row in the excel sheet.
@@ -89,15 +94,15 @@ public class ExcelReader {
 
         // While loop for iterating through the cells of a row.
         int i = 0;
-        while (cell.hasNext() && i < keys.size()) { //While it the row have cells left and i is less than the amount of keys/values.
+        while (cell.hasNext() && i < keys.size()) {
             Cell c = cell.next();
             switch (c.getCellType()) {
 
-                case NUMERIC: //If the value is a number its gonna get the numeric value and map it with a key.
+                case NUMERIC:
                     rowValues.put(keys.get(i), c.getNumericCellValue());
                     break;
 
-                case STRING: //If the value is a string its gonna get the string value and map it with a key.
+                case STRING:
                     rowValues.put(keys.get(i), c.getStringCellValue());
                     break;
 
@@ -111,23 +116,23 @@ public class ExcelReader {
     }
 
 
-
     /**
      * keyGenerator() is used for generating the keys for the getRowValues(). The tests have many classes and different types of tests.
      * And because of that you need to auto generate different keys for the different classes.
-     * @return ArrayList the ArrayList you will use in getRowValues().
+     * @return ArrayList with keys.
      */
     public ArrayList<String> keyGenerator(){
         Row row = sheet.getRow(0);
         String athleteClass = row.getCell(0).getStringCellValue(); //The first cell (AI) of the sheet contains the athlete class.
         ArrayList<String> keys = new ArrayList<>();
 
-        //Boolean variables that check if the A1 contains something that can ID the athlete class.
+        //Boolean variables that check if the A1 cell contains the class name.
+        //There is a bit of hardcoding to fit the anomalies in some of the excelDocuments.
         boolean senior = athleteClass.contains("senior");
         boolean a = athleteClass.contains("A");
         boolean b = athleteClass.contains("B"); //For the reports before 2020
-        boolean b2020 = athleteClass.contains("B") && ((fileName.contains("2020") && fileName.contains("11")) || fileName.contains("20-44")); //For the 2020 week 11 and 44 reports.
         boolean c = athleteClass.contains("C");
+        boolean b2020 = athleteClass.contains("B") && ((fileName.contains("2020") && fileName.contains("11")) || fileName.contains("20-44")); //For the 2020 week 11 and 44 reports.
         boolean c2020 = athleteClass.contains("C") && fileName.contains("20-44"); //For the 2020 week 44 report
         boolean allClasses_C_Excluded = senior || a || b || b2020;
 

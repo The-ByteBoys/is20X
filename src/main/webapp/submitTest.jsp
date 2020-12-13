@@ -1,13 +1,14 @@
 <%@ page
+        import="java.util.Arrays"
         import="java.util.List"
         import="java.util.Iterator"
         import="tools.htmltools.HtmlConstants"
         import="models.UserModel"
         import="enums.UserLevel"
         import="tools.UserAuth"
+
         contentType="text/html;charset=UTF-8"
-%>
-<%@ page import="java.util.Arrays" %><%
+%><%
     UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
     if(currentUser == null){ return; }
 
@@ -41,6 +42,7 @@
 
 <div class="container" style="text-align: center;">
 
+    <!--Makes a table for a class if theres a athlete with that class chosen-->
     <form action="submit-tests" method="post">
         <%
             String[] classes = {"SENIOR", "A", "B", "C"};
@@ -48,7 +50,6 @@
 
                 try {
                 boolean classHasMembers = true;
-//                List<String> athletes = (List<String>) request.getAttribute("athletes");
                 Iterator<String> it = athletes.iterator();
                 while (it.hasNext() && classHasMembers) {
                     String athlete_it = it.next();
@@ -82,16 +83,17 @@
                                     if (athlete_cl.equals(cl)){
 
                             %>
-
+                                    <!--Input fields have certain rules to minimize wrong values.
+                                    If the exercise unit is time, then the inputs will have other rules-->
                                     <tr>
                                         <td style="width:200px; text-align:center"><%=athlete_name%></td>
                                         <td>
                                             <label>
                                                 <%if (exerciseUnit.contains("TIME")) {%>
                                                     <input type="number" name="<%=athlete_id%>resultMin" min="0" max="60" required="required" placeholder="Minutes">
-                                                    <input type="number" name="<%=athlete_id%>resultSec" min="0" max="59.999" required="required" placeholder="Seconds">
+                                                    <input type="number" name="<%=athlete_id%>resultSec" min="0" max="59" step=".001" required="required" placeholder="Seconds">
                                                 <%} else {   %>
-                                                    <input type="number" name="<%=athlete_id%>result" min="0" max="99999.999" required="required" placeholder="<%=exerciseUnit%>">
+                                                    <input type="number" name="<%=athlete_id%>result" min="0" max="99999.999" step=".001" required="required" placeholder="<%=exerciseUnit%>">
                                                 <%} %>
                                                 <input type="hidden" name="ids" value="<%=exercise_id + "-" + athlete_id + "-" + exerciseUnit%>">
                                             </label>
@@ -112,9 +114,7 @@
         %>
         <%
                 } catch (Exception e) {
-//                    PrintWriter writer = response.getWriter();
                     out.println(":( you can't access here now");
-//                    writer.close();
 
                     //TODO: Make this error feedback better
                 }
