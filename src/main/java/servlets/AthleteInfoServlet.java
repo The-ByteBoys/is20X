@@ -27,17 +27,16 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
-// import models.AthleteModel;
-// import tools.repository.Athletes;
-
 @WebServlet(name= "AthleteInfo", urlPatterns = {"/athlete/*"})
 public class AthleteInfoServlet extends AbstractAppServlet {
+
+
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         UserModel currentUser = UserAuth.verifyLogin(request);
-
         writeResponseHeadless(request, response, currentUser);
     }
+
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out, UserModel currentUser) {
@@ -55,16 +54,15 @@ public class AthleteInfoServlet extends AbstractAppServlet {
 
         if( requestArg.length() > 1 ){
             String searchName = requestArg.substring(1);
-            out.print("Search for name: "+ searchName+"<br>");
             try {
                 AthleteModel foundAthlete = Athletes.getAthlete(searchName);
 
                 if(foundAthlete == null){
-                    out.print("Did not find athlete "+searchName);
+                    out.print("Athlete not found!");
                     return;
                 }
+
                 int athleteId = Integer.parseInt(foundAthlete.get(Athlete.ID).toString());
-                out.print("Athlete found.<br>");
                 out.print("<div class='container'>");
                 out.print("<h1>"+foundAthlete.get(Athlete.FNAME)+" "+foundAthlete.get(Athlete.LNAME)+"</h1>");
 
@@ -104,21 +102,20 @@ public class AthleteInfoServlet extends AbstractAppServlet {
             catch (SQLException e){
                 e.printStackTrace();
                 out.print("Something went wrong.");
-//                out.print("Did not find athlete "+searchName);
             }
 
         }
         else {
-            out.print("Please enter an athletes name. "+requestArg);
+            out.print("Please enter an athletes name.");
         }
     }
 
+
     /**
      * Returns a short description of the servlet.
-     *
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Athlete Info page";
     }
 }

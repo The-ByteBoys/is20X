@@ -1,4 +1,4 @@
-<%@ page import ="tools.UserAuth" import="models.UserModel" import="enums.User" import="tools.htmltools.HtmlConstants" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%
+<%@ page import ="tools.UserAuth" import="models.UserModel" import="tools.htmltools.HtmlConstants" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%
     UserModel currentUser = UserAuth.verifyLogin(request);
 
     // IF ALREADY LOGGED IN, GO TO "Min side"

@@ -26,10 +26,13 @@ import java.util.Map;
  */
 @WebServlet(name= "PostExcelServlet", urlPatterns = {"/postExcel"})
 public class PostExcelServlet extends AbstractAppServlet {
+
+
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         writeResponse(request, response, "Import Excel - Roing Webapp");
     }
+
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {
@@ -46,26 +49,24 @@ public class PostExcelServlet extends AbstractAppServlet {
         String[] births = req.getParameterValues("birth");
         String[] clubs = req.getParameterValues("clubs");
 
-        Map<String, String[]> parameters = req.getParameterMap();
-
         String sex = req.getParameter("sex");
         String year = req.getParameter("year");
         String week = req.getParameter("week");
         String atClass = req.getParameter("class");
 
-        // CHECK sex FIELD
+        Map<String, String[]> parameters = req.getParameterMap();
+
+
         if(!sex.matches("[MFO]")){
             out.print("Please go back and select a gender!");
             return;
         }
 
-        // CHECK year AND week FIELDS
         if(year == null || week == null){
             out.print("Missing year and week fields!");
             return;
         }
 
-        // CHECK input LENGTHS
         int inputLength = lastNames.length;
         if(firstNames.length != inputLength && births.length != inputLength && clubs.length != inputLength){
             out.print("Something wrong happened. List-lengths differ!");
@@ -79,10 +80,9 @@ public class PostExcelServlet extends AbstractAppServlet {
         Timestamp testTime = new Timestamp(cal.getTimeInMillis());
         Date testTimeDate = new Date(cal.getTimeInMillis());
 
-
         for (int i = 0; i < lastNames.length; i++) {
 
-            // GET ATHLETE, and add if doesnt exist
+            // GET ATHLETE, and add if athlete doesn't exist
             int newAthleteId = 0;
             Date birth;
 
@@ -119,7 +119,6 @@ public class PostExcelServlet extends AbstractAppServlet {
             // CLUBS
             String[] newClubs = clubs[i].trim().split("\\s*/\\s*");
             out.print( addToClubs(newAthleteId, newClubs));
-
 
             for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
                 String key = entry.getKey();
@@ -164,7 +163,6 @@ public class PostExcelServlet extends AbstractAppServlet {
                             newValue = Double.parseDouble(values[i]);
                         }
                         catch (Exception e){
-                            // e.printStackTrace();
                             out.print(" - <b onclick='this.nextElementSibling.style.display = \"initial\";'>Didn't understand input field (key: "+key+"): "+values[i]+"</b><span style='display: none'><br>"+e+"<br></span>\n");
                         }
                     }
@@ -185,20 +183,31 @@ public class PostExcelServlet extends AbstractAppServlet {
         }
 
         out.println("<br><strong>Success!</strong>");
-
-//        try {
-//            Results.addResults(results);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
     }
 
+
+    /**
+     * Add athlete from fields, and return their athleteID
+     * @param fName first name
+     * @param lName last name
+     * @param birth birth-date
+     * @param sex   male/female/other
+     * @return athleteID
+     * @throws SQLException if SQL failed
+     * @throws NamingException if DataSource isn't found
+     */
     private int addAthlete(String fName, String lName, Date birth, String sex) throws SQLException, NamingException {
         AthleteModel newAthlete = new AthleteModel(null, fName, lName, birth, sex);
         return Athletes.addAthlete(newAthlete);
     }
 
+
+    /**
+     * Add an Athlete to a club (if it isn't already in the club)
+     * @param athleteId athletes ID
+     * @param newClubs  array of clubs names
+     * @return result of operation in text
+     */
     private String addToClubs(int athleteId, String[] newClubs){
         StringBuilder toReturn = new StringBuilder();
         for (String c : newClubs){
@@ -220,6 +229,12 @@ public class PostExcelServlet extends AbstractAppServlet {
         return toReturn.toString();
     }
 
+
+    /**
+     * Returns the exerciseID for an input-key
+     * @param key input-key from form
+     * @return exerciseID from database
+     */
     private int getExerciseIdFromKey(String key){
         String name;
         String unit;
@@ -292,12 +307,12 @@ public class PostExcelServlet extends AbstractAppServlet {
         return Exercises.getExerciseId(name, unit);
     }
 
+
     /**
      * Returns a short description of the servlet.
-     *
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Handler for mass-insert form";
     }
 }

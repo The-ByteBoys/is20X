@@ -1,6 +1,5 @@
 package servlets;
 
-import tools.UserAuth;
 import tools.repository.UserRepository;
 
 import javax.servlet.ServletException;
@@ -11,10 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 
 @WebServlet(name= "Logout Servlet", urlPatterns = {"/logout"})
 public class LogoutServlet extends AbstractAppServlet {
+
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -40,6 +39,7 @@ public class LogoutServlet extends AbstractAppServlet {
         session.setAttribute("msg", "Logout successfull!");
         response.sendRedirect("login.jsp");
     }
+
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out) {

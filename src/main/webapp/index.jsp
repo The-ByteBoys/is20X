@@ -101,7 +101,7 @@
                     <select name="sex" class="form-control" onchange="this.form.submit();">
                         <option value="M"<%=classSex.equals("M")?" selected":""%>>Menn</option>
                         <option value="F"<%=classSex.equals("F")?" selected":""%>>Kvinner</option>
-                        <option value="O"<%=classSex.equals("O")?" selected":""%>>Andre</option>
+                        <!--<option value="O"<%=classSex.equals("O")?" selected":""%>>Andre</option>-->
                     </select>
                 </label>
             </div>
@@ -172,14 +172,17 @@
         String fullName = athlete.get(Athlete.FNAME)+" "+athlete.get(Athlete.LNAME);
         htmlTable.addCell("<a href='athlete/"+fullName.replace(" ","%20")+"' class='text-secondary'>"+fullName+"</a>");
 
-        htmlTable.addCell(athlete.get(Athlete.CLUBS).toString());
+        String clubNames = athlete.get(Athlete.CLUBS).toString();
+        StringBuilder clubCellHtml = new StringBuilder();
+        for(String clubName : clubNames.split(",")){
+            clubCellHtml.append("<a href='club/").append(clubName).append("' class='text-secondary'>").append(clubName).append("</a><br>");
+        }
 
-//        double totalPoints = 0.0;
+        htmlTable.addCell(clubCellHtml.toString());
 
         for(ExerciseModel ex : exercises){
             Integer exerciseId = Integer.parseInt(ex.get(Exercise.ID).toString());
             htmlTable.addHeader(ex.get(Exercise.NAME)+" "+ex.get(Exercise.UNIT));
-//            PointCalculator pointCalc = pointCalcPerExercise.get(exerciseId);
 
             double result = athleteResult.get(exerciseId) != null ? athleteResult.get(exerciseId) : 0.0;
 
@@ -189,16 +192,9 @@
                 htmlTable.addCell(result>0?newMinutes+":"+df.format(newSecs):"");
             }
             else {
-//                double newPoints = pointCalc.getPoints(result, Integer.parseInt(ex.get(Exercise.WEIGHT).toString()));
-//                totalPoints += newPoints;
-
                 htmlTable.addCell((result > 0? Double.toString(result) :""));
             }
         }
-
-//        totalPoints = totalPoints*10+80;
-//
-//        htmlTable.setCell(1, df.format(totalPoints));
         htmlTable.newRow();
     }
 
