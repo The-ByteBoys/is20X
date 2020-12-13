@@ -16,36 +16,34 @@
 
 <div class="container">
 
+    <h1>Roing webapp</h1>
+    <h2>Register</h2>
+    <%=UserAuth.getSessionNotes(session)%>
 
-<h1>Roing webapp</h1>
-<h2>Register</h2>
-<%=UserAuth.getSessionNotes(session)%>
-<p>
     <form method="POST" action="userregistration" class="form-group">
-        Email: <input name="userEmail" type="email" placeholder="Email" class="form-control" required>
-        Password: <input name="userPass" type="password" placeholder="Password" class="form-control" required>
-        Type: <select name="userType" class="form-control" id="userTypeSelect">
+        <label>Email: <input name="userEmail" type="email" placeholder="Email" class="form-control" required></label>
+        <label>Password: <input name="userPass" type="password" placeholder="Password" class="form-control" required></label>
+        <label>Type: <select name="userType" class="form-control" id="userTypeSelect">
             <option value="ATHLETE">Athlete</option>
             <option value="COACH">Coach</option>
             <% if(currentUser.get(User.TYPE).equals(UserLevel.ADMIN.toString())){
             %><option value="ADMIN">Admin</option><% } %>
-        </select>
+        </select></label>
         <br>
         <div id="userClubDiv">
-            Fornavn: <input type="text" name="userFname" class="form-control">
-            Etternavn: <input type="text" name="userLname" class="form-control">
-            Fødselsår: <input type="date" name="userBirth" class="form-control">
-            Klubb: <input type="text" name="userClub" class="form-control" >
-            Kjønn: <select class='sexPicker form-control' name="userSex" style='width: initial; display: initial;' required>
+            <label>Fornavn: <input type="text" name="userFname" class="form-control"></label>
+            <label>Etternavn: <input type="text" name="userLname" class="form-control"></label>
+            <label>Fødselsår: <input type="date" name="userBirth" class="form-control"></label>
+            <label>Klubb: <input type="text" name="userClub" class="form-control" ></label>
+            <label>Kjønn: <select class='sexPicker form-control' name="userSex" style='width: initial; display: initial;' required>
                 <option>Velg kjønn</option>
                 <option value='M'>Mann</option>
                 <option value='F'>Kvinne</option>
                 <option value='O'>Annet</option>
-            </select>
+            </select></label>
         </div>
         <input name="submit" type="submit" value="Register" class="form-control">
     </form>
-</p>
 </div>
 
 <script>

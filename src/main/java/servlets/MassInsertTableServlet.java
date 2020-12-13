@@ -33,12 +33,14 @@ import java.util.List;
 @WebServlet(name= "MassInsert", urlPatterns = {"/massinsert"})
 public class MassInsertTableServlet extends AbstractAppServlet {
 
+
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         UserModel currentUser = UserAuth.requireLogin(request, response, UserLevel.COACH);
 
         writeResponseHeadless(request, response, currentUser);
     }
+
 
     @Override
     protected void writeBody(HttpServletRequest req, PrintWriter out, UserModel currentUser) {
@@ -119,17 +121,20 @@ public class MassInsertTableServlet extends AbstractAppServlet {
                 "</div>");
     }
 
+
+    /**
+     * Process uploaded file
+     * @param item item from uploaded POST file
+     * @param out  HTML output for errors
+     */
     private void processUploadedFile(FileItem item, PrintWriter out){
 
         if(item.getName().contains(".xlsx")){
             try {
-                // Initiate download location
                 File uploadedFile = new File("/opt/payara/excel/tempfile");
 
-                // Delete file if it exists
                 if(uploadedFile.exists()){ uploadedFile.delete(); }
 
-                // Write to the file
                 item.write(uploadedFile);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -166,6 +171,12 @@ public class MassInsertTableServlet extends AbstractAppServlet {
 
     }
 
+
+    /**
+     * Parse excel-file
+     * @param er  object for the excel-files reader
+     * @param out servlet out for HTML
+     */
     private void parseExcel(ExcelReader er, PrintWriter out){
 
         int numSheets = er.getNumberOfSheets();
@@ -378,8 +389,6 @@ public class MassInsertTableServlet extends AbstractAppServlet {
             out.print("<input type='submit' value='Submit all' class='form-control' style='width: initial; display: initial;' onclick='if($(\"#tableForm"+(i+1)+" input:invalid\").length == 0){ $(\"#table"+(i+1)+"\").slideUp(); }'>");
             out.print("</div>");
             out.print("</form>");
-//            out.print("<p>* Tids-feltene er kalkulert ut fra watt-feltet.</p>");
-//            out.print("<p>* 3000 Tid er regnet ut fra 3000 Total i excel.</p>");
             out.print("</div><hr>");
             out.print("<script>\n" +
                     "    " +
@@ -393,6 +402,13 @@ public class MassInsertTableServlet extends AbstractAppServlet {
         }
     }
 
+
+    /**
+     * Calculates time from watts
+     * @param distanceStr distance the watts was made for (in string)
+     * @param value       input watts value
+     * @return string with the time it took in format MM:ss
+     */
     private String wattsToTimeStr(String distanceStr, String value){
         try {
             int distance = Integer.parseInt(distanceStr);
@@ -419,6 +435,15 @@ public class MassInsertTableServlet extends AbstractAppServlet {
         return insertFormElement(fieldName, value, cssClass, "");
     }
 
+
+    /**
+     * Generate HTML for the different input-fields used here
+     * @param fieldName exercise key
+     * @param value     value
+     * @param cssClass  css-class (optional)
+     * @param extra     extra fields to go in the input, e.g: "disabled" or "pattern='[a-z]'" (optional)
+     * @return HTML for said input
+     */
     public String insertFormElement(String fieldName, String value, String cssClass, String extra){
         String toReturn = "<input type='text' name='"+fieldName+"' value='"+value+"' class='form-control";
         if(!cssClass.isEmpty()){
@@ -434,6 +459,12 @@ public class MassInsertTableServlet extends AbstractAppServlet {
         return toReturn;
     }
 
+
+    /**
+     * Return nicer text for the given key
+     * @param input key
+     * @return nicer text for the key
+     */
     private String beautifyTableHeader(String input){
         switch (input) {
             case "5000Watt":
@@ -469,12 +500,13 @@ public class MassInsertTableServlet extends AbstractAppServlet {
         }
     }
 
+
     /**
      * Returns a short description of the servlet.
      *
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Mass insert form(s)";
     }
 }
